@@ -375,3 +375,10 @@ class CapellaAPI(CommonCapellaAPI):
               .format(self.internal_url, tenant_id, project_id, database_id, app_service_id)
         resp = self.do_internal_request(url, method="GET", params='')
         return resp
+
+    def scale_sgw_cluster(self, subcluster_id, config):
+        url = '{}/internal/support/serverless-app-services-subcluster/{}/scale' \
+              .format(self.internal_url, subcluster_id)
+        resp = self.do_internal_request(url, method="POST",
+                                        params=json.dumps(config))
+        return resp
