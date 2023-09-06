@@ -957,19 +957,27 @@ class CapellaAPI(CommonCapellaAPI):
         resp = self.do_internal_request(url, method="POST")
         return resp
 
-    def create_sgw_logstreaming_config(self, tenant_id, project_id, cluster_id, backend_id, config):
-        "Create log streaming configuration"
+    def create_or_override_log_streaming_config(self, tenant_id, project_id, cluster_id, backend_id, config):
+        "Create or override log streaming config"
         url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/logstreaming/config' \
               .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id)
         resp = self.do_internal_request(url, method="POST",
                                         params=json.dumps(config))
         return resp
 
-    def get_sgw_logstreaming_config(self, tenant_id, project_id, cluster_id, backend_id):
-        "Get log streaming configuration"
+    def delete_log_streaming_config(self, tenant_id, project_id, cluster_id, backend_id):
+        "Delete log streaming config"
         url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/logstreaming/config' \
               .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id)
-        resp = self.do_internal_request(url, method="GET", params='')
+        resp = self.do_internal_request(url, method="DELETE")
+        return resp
+
+    def create_and_enable_log_streaming(self, tenant_id, project_id, cluster_id, backend_id, config):
+        "Enable and set config for log streaming"
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/logstreaming/config-and-enable' \
+              .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id)
+        resp = self.do_internal_request(url, method="POST",
+                                        params=json.dumps(config))
         return resp
 
     def get_sgw_logstreaming_collector_options(self, tenant_id, project_id, cluster_id, backend_id):
