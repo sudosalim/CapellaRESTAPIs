@@ -31,6 +31,8 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
                                    "}/scopes/{}/collections"
         self.backups_endpoint = organization_endpoint + \
                                 "/{}/projects/{}/clusters/{}/backups"
+        self.org_appservice_api = organization_endpoint + "/{}/appservices"
+        self.cluster_appservice_api = self.cluster_endpoint +"/{}/appservices"
 
     """
     Method to restore the backup with backupId under cluster, project and organization mentioned.
@@ -2888,4 +2890,140 @@ class CapellaAPI(CommonCapellaAPI):
         payload = "{\"turnOnAppService\":true}"
         resp = self.do_internal_request(
             url, method="POST", params=json.dumps(payload))
+        return resp
+
+    def list_appservices(self, tenant_id, page=None, perPage=None, sortBy=None, sortDirection=None, projectId=None, headers=None, **kwargs):
+        """
+        Lists all the clusters under the organization.
+        In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+        -Organization Owner
+        -Project Owner
+        -Project Manager
+        -Project Viewer
+        -Database Data Reader/Writer
+        -Database Data Reader
+        :param tenant_id: Organization id
+        :param page (int) Sets what page you would like to view
+        :param perPage (int) Sets how many results you would like to have on each page
+        :param sortBy ([string]) Sets order of how you would like to sort results and also the key you would like to order by
+                             Example: sortBy=name
+        :param sortDirection (str) The order on which the items will be sorted. Accepted Values - asc / desc
+        :param projectId (str) The GUID4 ID of the project.
+        """
+        url = self.org_appservice_api.format(tenant_id)
+        params = {}
+        if page:
+            params["page"] = page
+        if perPage:
+            params["perPage"] = perPage
+        if perPage:
+            params["sortBy"] = sortBy
+        if perPage:
+            params["sortDirection"] = sortDirection
+        if projectId:
+            params["projectId"] = projectId
+        for k, v in kwargs.items():
+            params[k] = v
+        resp = self.capella_api_get(url, params=params, headers=headers)
+        return resp
+
+    def create_appservice(self, tenant_id, project_id, cluster_id,
+                          appservice_name, description, nodes, cpu, ram, version, headers=None, **kwargs):
+        """ 
+        Creates a new App Service.
+        In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+        -Organization Owner
+        -Project Owner
+        :param tenant_id:
+        :param project_id:
+        :param cluster_id:
+        :param appservice_name: Name of the appservice
+        :param description: Description of the appservice
+        :param nodes: Number of nodes in appservices
+        :param cpu: Number of cpus in appservices
+        :param ram: Size of ram
+        :param version: Version of appservice to deploy
+        """
+        url = self.cluster_appservice_api.format(tenant_id, project_id, cluster_id)
+        params = {
+            "name": appservice_name,
+            "description": description,
+            "nodes": nodes,
+            "compute": {
+                "cpu": cpu,
+                "ram": ram
+            },
+            "version": version
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+        resp = self.capella_api_post(url, params, headers)
+        return resp
+
+    def delete_appservice(self, tenant_id, project_id, cluster_id, appservice_id, headers=None, **kwargs):
+        """
+        Deletes an existing App Service.
+        In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+        -Organization Owner
+        -Project Owner
+        -Project Manager
+        :param tenant_id:
+        :param project_id:
+        :param cluster_id:
+        :param appservice_id:
+        """
+        url =  (self.cluster_appservice_api + "/{}").format(tenant_id, project_id, cluster_id, appservice_id)
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.capella_api_del(url, params=params, headers=headers)
+        return resp
+
+    def get_appservice(self, tenant_id, project_id, cluster_id, appservice_id, headers=None, **kwargs):
+        """
+        Fetches the details of the given App Service.
+        In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+        -Organization Owner
+        -Project Owner
+        -Project Manager
+        -Project Viewer
+        -Database Data Reader/Writer
+        -Database Data Reader
+        """
+        url = (self.cluster_appservice_api + "/{}").format(tenant_id, project_id, cluster_id, appservice_id)
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.capella_api_get(url, params=params, headers=headers)
+        return resp
+
+    def update_appservices(self, tenant_id, project_id, cluster_id, appservice_id, nodes, cpu, ram, headers=None, **kwargs):
+        """
+        Updates an existing App Service.
+        In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+        -Organization Owner
+        -Project Owner
+        -Project Manager
+        :param tenant_id:
+        :param project_id:
+        :param cluster_id:
+        :param appservice_name: Name of the appservice
+        :param nodes: Number of nodes in appservices
+        :param cpu: Number of cpus in appservices
+        :param ram: Size of ram 
+        :param If-Match: A precondition header that specifies the entity tag of a resource.
+        """
+        url = (self.cluster_appservice_api + "/{}").format(tenant_id, project_id, cluster_id, appservice_id)
+        params = {
+            "nodes": nodes,
+            "compute": {
+                "cpu": cpu,
+                "ram": ram
+            }
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+        resp = self.capella_api_put(url, params, headers=headers)
         return resp
