@@ -1808,12 +1808,12 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         :param cluster_id:
         :param appservice_id:
         """
-        url =  (self.cluster_appservice_api + "/{}").format(tenant_id, project_id, cluster_id, appservice_id)
+        url = (self.cluster_appservice_api + "/{}").format(tenant_id, project_id, cluster_id, appservice_id)
         if kwargs:
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_del(url, params=params, headers=headers)
+        resp = self.capella_api_del(url, request_body=params, headers=headers)
         return resp
 
     def get_appservice(self, tenant_id, project_id, cluster_id, appservice_id, headers=None, **kwargs):
