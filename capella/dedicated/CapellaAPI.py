@@ -663,28 +663,31 @@ class CapellaAPI(CommonCapellaAPI):
         return resp
 
     def invite_new_user(self, tenant_id, email, bypass_token=None):
-        "Invite a new user to the tenant"
+        """
+        Invite a new user to the tenant
+
+        Example use:
+
+        ```
+        token = "secret-token"
+        resp = client.invite_user(tenant_id, user, token)
+        verify_token = resp.headers["Vnd-project-Avengers-com-e2e-token"]
+        user_id = resp.json()["userId"]
+        ```
+        """
         headers = {}
         if bypass_token:
             headers["Vnd-project-Avengers-com-e2e"] = bypass_token
-        config = {
+        url = "{}/invitations".format(self.internal_url)
+        body = {
+            "tenantId": tenant_id,
             "email": email,
             "name": email,
-            "role": ["organizationOwner"]
+            "actions": ["READ", "WRITE", "MANAGE"]
         }
-        url = "{}/v2/organizations/{}/users" \
-            .format(self.internal_url, tenant_id)
         resp = self.do_internal_request(url, method="POST",
-                                        params=json.dumps(config),
-                                        headers=headers)
-        return resp
-
-    def invite_new_user_with_config(self, tenant_id, config):
-        "Invite a new user to the tenant, with the config already provided"
-        url = "{}/v2/organizations/{}/users" \
-            .format(self.internal_url, tenant_id)
-        resp = self.do_internal_request(url, method="POST",
-                                        params=json.dumps(config))
+                                    params=json.dumps(body),
+                                    headers=headers)
         return resp
 
     def verify_email(self, token):
