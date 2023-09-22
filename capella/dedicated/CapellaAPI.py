@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 # Generic/Built-in
 import base64
-import logging
-
 import json
 
 from ..common.CapellaAPI import CommonCapellaAPI
@@ -943,6 +941,12 @@ class CapellaAPI(CommonCapellaAPI):
         resp = self.do_internal_request(url, method="GET", params='')
         return resp
 
+    def get_sgw_logstreaming_config(self, tenant_id, project_id, cluster_id, backend_id):
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/logstreaming' \
+              .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
     def enable_sgw_logstreaming(self, tenant_id, project_id, cluster_id, backend_id):
         "Enable log streaming for the sgw"
         url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/logstreaming/enable' \
@@ -961,7 +965,7 @@ class CapellaAPI(CommonCapellaAPI):
         "Create or override log streaming config"
         url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/logstreaming/config' \
               .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id)
-        resp = self.do_internal_request(url, method="POST",
+        resp = self.do_internal_request(url, method="PUT",
                                         params=json.dumps(config))
         return resp
 
@@ -970,14 +974,6 @@ class CapellaAPI(CommonCapellaAPI):
         url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/logstreaming/config' \
               .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id)
         resp = self.do_internal_request(url, method="DELETE")
-        return resp
-
-    def create_and_enable_log_streaming(self, tenant_id, project_id, cluster_id, backend_id, config):
-        "Enable and set config for log streaming"
-        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/logstreaming/config-and-enable' \
-              .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id)
-        resp = self.do_internal_request(url, method="POST",
-                                        params=json.dumps(config))
         return resp
 
     def get_sgw_logstreaming_collector_options(self, tenant_id, project_id, cluster_id, backend_id):
