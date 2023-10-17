@@ -244,3 +244,30 @@ class CommonCapellaAPI(CapellaAPIRequests):
             .format(self.internal_url, database_id, database_id, fts_index_name)
         resp = self.do_internal_request(url, method="PUT", params=json.dumps(payload))
         return resp
+
+    """
+    This method will create new user for capella bypassing email
+    verification.
+    For this to work, feature flag to bypass email verification should
+    be enabled.
+    Refer : https://couchbasecloud.atlassian.net/browse/AV-62504
+    :param org_id ID of the organisation under which the user has to be
+    created.
+    :param name Name of the User to be created.
+    :param email Email ID of the user to be created.
+    :param password Password for the created user.
+    :param roles Roles associated with the user.
+    """
+    def create_user(self, org_id, name, email, password,
+                    roles=["organizationOwner"]):
+        url = "{}/v2/organizations/{}/users".format(
+            self.internal_url, org_id)
+        payload = {
+            "name": name,
+            "email": email,
+            "roles": roles,
+            "password": password
+        }
+        resp = self.do_internal_request(
+            url, method="POST", params=json.dumps(payload))
+        return resp
