@@ -260,6 +260,14 @@ class CapellaAPI(CommonCapellaAPI):
                                     params=json.dumps(param))
         return resp
 
+    def upgrade_dp_agent(self, cluster_id, version_hash):
+        url = "{}/internal/support/clusters/{}/agent-versions/activate'"\
+              .format(self.internal_url, cluster_id)
+        param = {'hash': version_hash}
+        resp = self.do_internal_request(url, method="POST",
+                                        params=json.dumps(param))
+        return resp
+
     def create_cluster_CPUI(self, tenant_id, config):
         '''
         #Sample Config
