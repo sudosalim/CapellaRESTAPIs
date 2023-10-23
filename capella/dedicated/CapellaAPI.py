@@ -261,7 +261,7 @@ class CapellaAPI(CommonCapellaAPI):
         return resp
 
     def upgrade_dp_agent(self, cluster_id, version_hash):
-        url = "{}/internal/support/clusters/{}/agent-versions/activate'"\
+        url = "{}/internal/support/clusters/{}/agent-versions/activate"\
               .format(self.internal_url, cluster_id)
         param = {'hash': version_hash}
         resp = self.do_internal_request(url, method="POST",
