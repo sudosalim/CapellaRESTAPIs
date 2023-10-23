@@ -264,8 +264,9 @@ class CapellaAPI(CommonCapellaAPI):
         url = "{}/internal/support/clusters/{}/agent-versions/activate"\
               .format(self.internal_url, cluster_id)
         param = {'hash': version_hash}
-        resp = self.do_internal_request(url, method="POST",
-                                        params=json.dumps(param))
+        resp = self._urllib_request(url, method="POST",
+                                    params=json.dumps(param),
+                                    headers=self.cbc_api_request_headers)
         return resp
 
     def create_cluster_CPUI(self, tenant_id, config):
