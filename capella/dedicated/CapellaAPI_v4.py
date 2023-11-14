@@ -1835,6 +1835,25 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         resp = self.capella_api_get(url, params=params, headers=headers)
         return resp
 
+    def get_cluster(self, tenant_id, project_id, cluster_id, headers=None, **kwargs):
+        """
+        Fetches the details of the given Cluster.
+        In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+        -Organization Owner
+        -Project Owner
+        -Project Manager
+        -Project Viewer
+        -Database Data Reader/Writer
+        -Database Data Reader
+        """
+        url = (self.cluster_endpoint + "/{}").format(tenant_id, project_id, cluster_id)
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.capella_api_get(url, params=params, headers=headers)
+        return resp
+
     def update_appservices(self, tenant_id, project_id, cluster_id, appservice_id, nodes, cpu, ram, headers=None, **kwargs):
         """
         Updates an existing App Service.
