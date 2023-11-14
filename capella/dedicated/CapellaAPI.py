@@ -711,7 +711,7 @@ class CapellaAPI(CommonCapellaAPI):
         """
         Remove a user from the tenant
         """
-        url = "{}/tenants/{}/users/{}".format(self.internal_url, tenant_id, user_id)
+        url = "{}/v2/organizations/{}/users/{}".format(self.internal_url, tenant_id, user_id)
         resp = self.do_internal_request(url, method="DELETE")
         return resp
 
