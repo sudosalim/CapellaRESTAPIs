@@ -17,22 +17,23 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         self.cluster_ops_API_log = logging.getLogger(__name__)
         organization_endpoint = "/v4/organizations"
         self.cluster_endpoint = organization_endpoint + \
-                                "/{}/projects/{}/clusters"
+            "/{}/projects/{}/clusters"
         self.allowedCIDR_endpoint = organization_endpoint + \
-                                    "/{}/projects/{}/clusters/{}/allowedcidrs"
+            "/{}/projects/{}/clusters/{}/allowedcidrs"
         self.db_user_endpoint = organization_endpoint + \
-                                "/{}/projects/{}/clusters/{}/users"
+            "/{}/projects/{}/clusters/{}/users"
         self.bucket_endpoint = organization_endpoint + \
-                               "/{}/projects/{}/clusters/{}/buckets"
+            "/{}/projects/{}/clusters/{}/buckets"
         self.scope_endpoint = organization_endpoint + \
-                              "/{}/projects/{}/clusters/{}/buckets/{}/scopes"
+            "/{}/projects/{}/clusters/{}/buckets/{}/scopes"
         self.collection_endpoint = organization_endpoint + \
-                                   "/{}/projects/{}/clusters/{}/buckets/{" \
-                                   "}/scopes/{}/collections"
+            "/{}/projects/{}/clusters/{}/buckets/{}/scopes/{}/collections"
         self.backups_endpoint = organization_endpoint + \
-                                "/{}/projects/{}/clusters/{}/backups"
+            "/{}/projects/{}/clusters/{}/backups"
+        self.sample_bucket_endpoint = self.cluster_endpoint + \
+            "/{}/sampleBuckets"
         self.org_appservice_api = organization_endpoint + "/{}/appservices"
-        self.cluster_appservice_api = self.cluster_endpoint +"/{}/appservices"
+        self.cluster_appservice_api = self.cluster_endpoint + "/{}/appservices"
 
     """
     Method to restore the backup with backupId under cluster, project and organization mentioned.
@@ -975,6 +976,164 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
                 userId),
             params,
             headers)
+        return resp
+
+    """
+    Method enables clients to load predefined sample data into a cluster by selecting from three available options:
+        - travel-sample
+        - gamesim-sample
+        - beer-sample
+    Upon a successful request, a new bucket will be created within the cluster, and it will be populated with the chosen sample data.
+
+    In order to access this endpoint, the provided API key must have at least one of the following roles:
+        - Organization Owner
+        - Project Owner
+        - Project Manager
+    :param organizationId (str) Organization ID under which the cluster is present.
+    :param projectId (str) Project ID under which the cluster is present.
+    :param clusterId (str) Cluster ID of the cluster which has the sample bucket.
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+    def create_sample_bucket(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            sampleBucket,
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info(
+            "Loading Sample Bucket {} into cluster {} in project {} in "
+            "organization {}".format(
+                sampleBucket, clusterId, projectId, organizationId))
+        params = {
+            "name": sampleBucket,
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.capella_api_post(self.sample_bucket_endpoint.format(
+                organizationId, projectId, clusterId),
+            params, headers)
+        return resp
+
+    """
+    Method Lists configurations of all the sample buckets under a cluster.
+    In order to access this endpoint, the provided API key must have at least one of the following roles:
+        - Organization Owner
+        - Project Owner
+        - Project Manager
+        - Project Viewer
+        - Database Data Reader/Writer
+        - Database Data Reader
+    :param organizationId (str) Organization ID under which the cluster is present.
+    :param projectId (str) Project ID under which the cluster is present.
+    :param clusterId (str) Cluster ID of the cluster which has the sample bucket.
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+    def list_sample_buckets(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info(
+            "Listing all Sample Buckets in cluster {} in project {} in "
+            "organization {}".format(
+                clusterId, projectId, organizationId))
+        params = {}
+        if page:
+            params["page"] = page
+        if perPage:
+            params["perPage"] = perPage
+        if perPage:
+            params["sortBy"] = sortBy
+        if perPage:
+            params["sortDirection"] = sortDirection
+
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.capella_api_get(self.sample_bucket_endpoint.format(
+            organizationId, projectId, clusterId), params, headers)
+        return resp
+
+    """
+    Method Fetches the configuration of the given sample bucket.
+    In order to access this endpoint, the provided API key must have at least one of the following roles:
+        - Organization Owner
+        - Project Owner
+        - Project Manager
+        - Project Viewer
+        - Database Data Reader/Writer
+        - Database Data Reader
+    :param organizationId (str) Organization ID under which the cluster is present.
+    :param projectId (str) Project ID under which the cluster is present.
+    :param clusterId (str) Cluster ID of the cluster which has the sample bucket.
+    :param sampleBucket (str) Name of the Sample Bucket which has to be fetched.
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+    def fetch_sample_bucket(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            sampleBucket,
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info(
+            "Fetching Sample Bucket info for {} from cluster {} in project {} "
+            "in organization {}".format(
+                sampleBucket, clusterId, projectId, organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.capella_api_get("{}/{}".format(
+            self.sample_bucket_endpoint.format(
+                organizationId, projectId, clusterId),
+            sampleBucket), params, headers)
+        return resp
+
+    """
+    Method Deletes an existing bucket which was loaded with sample data.
+    In order to access this endpoint, the provided API key must have at least one of the following roles:
+        - Organization Owner
+        - Project Owner
+        - Project Manager
+    :param organizationId (str) Organization ID under which the cluster is present.
+    :param projectId (str) Project ID under which the cluster is present.
+    :param clusterId (str) Cluster ID of the cluster which has the sample bucket.
+    :param sampleBucket (str) Name of the Sample Bucket which has to be deleted.
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+    def delete_sample_bucket(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            sampleBucket,
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info(
+            "Deleting Sample Bucket {} from cluster {} in project {} "
+            "in organization {}".format(
+                sampleBucket, clusterId, projectId, organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.capella_api_del("{}/{}".format(
+            self.sample_bucket_endpoint.format(
+                organizationId, projectId, clusterId), sampleBucket),
+            params, headers)
         return resp
 
     """
