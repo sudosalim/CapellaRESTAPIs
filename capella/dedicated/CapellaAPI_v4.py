@@ -30,8 +30,8 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             "/{}/projects/{}/clusters/{}/buckets/{}/scopes/{}/collections"
         self.backups_endpoint = organization_endpoint + \
             "/{}/projects/{}/clusters/{}/backups"
-        self.sample_bucket_endpoint = self.cluster_endpoint + \
-            "/{}/sampleBuckets"
+        self.sample_bucket_endpoint = organization_endpoint + \
+            "/{}/projects/{}/clusters/{}/sampleBuckets"
         self.org_appservice_api = organization_endpoint + "/{}/appservices"
         self.cluster_appservice_api = self.cluster_endpoint + "/{}/appservices"
 
@@ -1038,6 +1038,10 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             organizationId,
             projectId,
             clusterId,
+            page=None,
+            perPage=None,
+            sortBy=None,
+            sortDirection=None,
             headers=None,
             **kwargs):
         self.cluster_ops_API_log.info(
@@ -1086,18 +1090,16 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             headers=None,
             **kwargs):
         self.cluster_ops_API_log.info(
-            "Fetching Sample Bucket info for {} from cluster {} in project {} "
-            "in organization {}".format(
-                sampleBucket, clusterId, projectId, organizationId))
+            "Fetching sample bucket info for {} present in cluster {}".format(
+                sampleBucket, clusterId))
         if kwargs:
             params = kwargs
         else:
             params = None
-
         resp = self.capella_api_get("{}/{}".format(
             self.sample_bucket_endpoint.format(
-                organizationId, projectId, clusterId),
-            sampleBucket), params, headers)
+                organizationId, projectId, clusterId), sampleBucket),
+            params, headers)
         return resp
 
     """
