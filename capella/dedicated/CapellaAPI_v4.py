@@ -34,6 +34,8 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             "/{}/projects/{}/clusters/{}/sampleBuckets"
         self.org_appservice_api = organization_endpoint + "/{}/appservices"
         self.cluster_appservice_api = self.cluster_endpoint + "/{}/appservices"
+        self.cluster_on_off_schedule_endpoint = self.cluster_endpoint + \
+            "/{}/onOffSchedule"
 
     """
     Method to restore the backup with backupId under cluster, project and organization mentioned.
@@ -518,6 +520,173 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
                 clusterId),
             params,
             headers)
+        return resp
+
+    """
+    This provides the means to add a new cluster On/Off schedule.
+
+    In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+        Organization Owner
+        Project Owner
+        Project Manager
+
+    :param organizationId (str) Organization ID under which the cluster is present.
+    :param projectId (str) Project ID under which the cluster is present.
+    :param clusterId (str) ID of the cluster which has to be scheduled.
+    :param timezone (str) Timezone for the schedule
+    :param days (list) [
+        :object {
+            :param state (str) The scheduled state for the cluster
+            :param day (str) The scheduled day for that state
+            :param from (object) {
+                :param hour (int)
+                :param minute (int)
+            }
+            :param to (object) {
+                :param hour (int)
+                :param minute (int)
+            }
+        }
+    ]
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+    def create_cluster_on_off_schedule(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            timezone,
+            days,
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info("Adding on/off schedule in cluster {} "
+                                      .format(clusterId))
+        params = {
+            "timezone": timezone,
+            "days": days,
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+        resp = self.capella_api_post(
+            self.cluster_on_off_schedule_endpoint.format(
+                organizationId, projectId, clusterId), params, headers)
+        return resp
+
+    """
+    Fetches the details of the On/Off schedule for the given cluster.
+
+    In order to access this endpoint, the provided API key must have at least one of the following roles:
+        Organization Owner
+        Project Owner
+        Project Manager
+    
+    :param organizationId (str) Organization ID under which the cluster is present.
+    :param projectId (str) Project ID under which the cluster is present.
+    :param clusterId (str) ID of the cluster which has to be scheduled.
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+    def fetch_cluster_on_off_schedule(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info("Fetching on/off schedule in cluster {}"
+                                      .format(clusterId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.capella_api_get(
+            self.cluster_on_off_schedule_endpoint.format(
+                organizationId, projectId, clusterId), params, headers)
+        return resp
+
+    """
+    This provides the means to update an existing cluster On/Off schedule.
+
+    In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+        Organization Owner
+        Project Owner
+        Project Manager
+
+    :param organizationId (str) Organization ID under which the cluster is present.
+    :param projectId (str) Project ID under which the cluster is present.
+    :param clusterId (str) ID of the cluster which has to be scheduled.
+    :param timezone (str) Timezone for the schedule
+    :param days (list) [
+        :object {
+            :param state (str) The scheduled state for the cluster
+            :param day (str) The scheduled day for that state
+            :param from (object) {
+                :param hour (int)
+                :param minute (int)
+            }
+            :param to (object) {
+                :param hour (int)
+                :param minute (int)
+            }
+        }
+    ]
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+    def update_cluster_on_off_schedule(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            timezone,
+            days,
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info("Updating on/off schedule in cluster {}"
+                                      .format(clusterId))
+        params = {
+            "timezone": timezone,
+            "days": days,
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.capella_api_put(
+            self.cluster_on_off_schedule_endpoint.format(
+                organizationId, projectId, clusterId), params, headers)
+        return resp
+
+    """
+    Fetches the details of the On/Off schedule for the given cluster.
+
+    In order to access this endpoint, the provided API key must have at least one of the following roles:
+        Organization Owner
+        Project Owner
+        Project Manager
+    
+    :param organizationId (str) Organization ID under which the cluster is present.
+    :param projectId (str) Project ID under which the cluster is present.
+    :param clusterId (str) ID of the cluster which has to be scheduled.
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+    def delete_cluster_on_off_schedule(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info("Deleting on/off schedule in cluster {}"
+                                      .format(clusterId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.capella_api_del(
+            self.cluster_on_off_schedule_endpoint.format(
+                organizationId, projectId, clusterId), params, headers)
         return resp
 
     """
