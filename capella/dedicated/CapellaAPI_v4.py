@@ -1385,6 +1385,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             replicas,
             flush,
             timeToLiveInSeconds,
+            priority=None,
             evictionPolicy="",
             headers=None,
             **kwargs):
@@ -1400,8 +1401,10 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             "durabilityLevel": durabilityLevel,
             "replicas": replicas,
             "flush": flush,
-            "timeToLiveInSeconds": timeToLiveInSeconds
+            "timeToLiveInSeconds": timeToLiveInSeconds,
         }
+        if priority:
+            params["priority"] = priority
         if evictionPolicy:
             params["evictionPolicy"] = evictionPolicy
         for k, v in kwargs.items():
@@ -1514,6 +1517,9 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
     :param timeToLiveInSeconds (int) Specify the time to live (TTL) value in seconds. This is the maximum time
     to live for items in the bucket. If specified as 0, TTL is disabled.
 
+    :param priority (int) Specifies the ranking of the bucket amongst
+    other buckets, ranges from a value between (0, 1000), both inclusive.
+
     :param ifmatch (bool) Is set to true then it uses a precondition header that specifies the entity tag of a resource.
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
@@ -1531,6 +1537,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             flush,
             timeToLiveInSeconds,
             ifmatch,
+            priority=None,
             headers=None,
             **kwargs):
         self.cluster_ops_API_log.info(
@@ -1541,8 +1548,12 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             "durabilityLevel": durabilityLevel,
             "replicas": replicas,
             "flush": flush,
-            "timeToLiveInSeconds": timeToLiveInSeconds
+            "timeToLiveInSeconds": timeToLiveInSeconds,
+            "priority": priority
         }
+        if priority:
+            params["priority"] = priority
+
         if ifmatch:
             if not headers:
                 headers = {}
@@ -1864,6 +1875,45 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
                 collectionName),
             params,
             headers)
+        return resp
+
+    """
+    This method is used to change the maxTTL for a collection.
+    It requires 'maxTTL' param in its body under the PATCH request since that is the only parameter being mutated.
+     - range = (-1 <= maxTTL <= 2147483647) for CB cluster v7.6 or above,
+     - else: range = (-0 <= maxTTL <= 2147483647)
+    :param organizationId (str) Organization ID under which the cluster is present.
+    :param projectId (str) Project ID under which the cluster is present.
+    :param clusterId (str) Cluster ID of the cluster under which the bucket is present.
+    :param bucketId (str) The ID of the bucket. It is the URL-compatible base64 encoding of the bucket name.
+    :param scopeName (str) The name of the scope under which the collection is present.
+    :param collectionName (str) Name of the collection whose info has to be fetched.
+    :param maxTTL (int) The time limit for the collection to live.
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+    def update_collection(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            bucketId,
+            scopeName,
+            collectionName,
+            maxTTL,
+            headers=None,
+            **kwargs):
+        params = {
+            "maxTTL": maxTTL
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.capella_api_patch(
+            self.collection_endpoint.format(
+                organizationId, projectId, clusterId,
+                bucketId, scopeName, collectionName),
+            params, headers)
         return resp
 
     """
