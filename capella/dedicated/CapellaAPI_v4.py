@@ -36,6 +36,8 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         self.cluster_appservice_api = self.cluster_endpoint + "/{}/appservices"
         self.cluster_on_off_schedule_endpoint = self.cluster_endpoint + \
             "/{}/onOffSchedule"
+        self.switch_cluster_on_endpoint = self.cluster_endpoint + "/{}/on"
+        self.switch_cluster_off_endpoint = self.cluster_endpoint + "/{}/off"
 
     """
     Method to restore the backup with backupId under cluster, project and organization mentioned.
@@ -523,7 +525,65 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         return resp
 
     """
-    This provides the means to add a new cluster On/Off schedule.
+    Switches on the cluster.
+
+    In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+        Organization Owner
+        Project Owner
+        Project Manager
+    :param organizationId (str) Organization ID under which the cluster is present.
+    :param projectId (str) Project ID under which the cluster is present.
+    :param clusterId (str) Cluster ID of the cluster which has to be switched on.
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+    def switch_cluster_on(self, organizationId, projectId, clusterId,
+                          headers=None, **kwargs):
+        self.cluster_ops_API_log.info(
+            "Switching on Cluster {} in project {} in organization {}".format(
+                clusterId, projectId, organizationId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.capella_api_post(
+            self.switch_cluster_on_endpoint.format(
+                organizationId, projectId, clusterId), params, headers)
+        return resp
+
+    """
+    Switches off the cluster.
+    Turning off your database turns off the compute for your cluster but the storage remains.
+    All of the data, schema (buckets, scopes, and collections), and indexes remain, as well as cluster configuration, including users and allow lists.
+
+    In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+        Organization Owner
+        Project Owner
+        Project Manager
+    :param organizationId (str) Organization ID under which the cluster is present.
+    :param projectId (str) Project ID under which the cluster is present.
+    :param clusterId (str) Cluster ID of the cluster which has to be switched off.
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+    def switch_cluster_off(self, organizationId, projectId, clusterId,
+                           headers=None, **kwargs):
+        self.cluster_ops_API_log.info(
+            "Switching off Cluster {} in project {} in organization {}".format(
+                clusterId, projectId, organizationId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.capella_api_post(
+            self.switch_cluster_off_endpoint.format(
+                organizationId, projectId, clusterId), params, headers)
+        return resp
+
+    """
+    This provides the means to add a new cluster On/Off schedule. Based on this the cluster is turned on or off for the whole week based on the specified day
 
     In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
         Organization Owner
