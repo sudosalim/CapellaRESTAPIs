@@ -36,8 +36,8 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         self.cluster_appservice_api = self.cluster_endpoint + "/{}/appservices"
         self.cluster_on_off_schedule_endpoint = self.cluster_endpoint + \
             "/{}/onOffSchedule"
-        self.switch_cluster_on_endpoint = self.cluster_endpoint + "/{}/on"
-        self.switch_cluster_off_endpoint = self.cluster_endpoint + "/{}/off"
+        self.cluster_on_off_endpoint = self.cluster_endpoint + "/{}/activationState"
+        self.appservice_on_off_endpoint = self.cluster_appservice_api + "/{}/activationState"
 
     """
     Method to restore the backup with backupId under cluster, project and organization mentioned.
@@ -548,7 +548,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         else:
             params = None
         resp = self.capella_api_post(
-            self.switch_cluster_on_endpoint.format(
+            self.cluster_on_off_endpoint.format(
                 organizationId, projectId, clusterId), params, headers)
         return resp
 
@@ -577,8 +577,8 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_post(
-            self.switch_cluster_off_endpoint.format(
+        resp = self.capella_api_del(
+            self.cluster_on_off_endpoint.format(
                 organizationId, projectId, clusterId), params, headers)
         return resp
 
@@ -2203,34 +2203,37 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         resp = self.capella_api_get(url, params=params, headers=headers)
         return resp
 
-    def create_appservice(self, tenant_id, project_id, cluster_id,
-                          appservice_name, description, nodes, cpu, ram, version, headers=None, **kwargs):
+    def create_appservice(self, tenant_id, project_id, cluster_id, appservice_name, compute, nodes=None, version=None, description="", headers=None, **kwargs):
         """
         Creates a new App Service.
         In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
         -Organization Owner
         -Project Owner
-        :param tenant_id:
-        :param project_id:
-        :param cluster_id:
-        :param appservice_name: Name of the appservice
-        :param description: Description of the appservice
-        :param nodes: Number of nodes in appservices
-        :param cpu: Number of cpus in appservices
-        :param ram: Size of ram
-        :param version: Version of appservice to deploy
+        :param organizationId (str) Organization ID under which the app service is present.
+        :param projectId (str) Project ID under which the app service is present.
+        :param clusterId (str) ID of the cluster under which the app service is present.
+        :param appservice_name: Name of the appservice.
+        :param compute (obj)
+            :param cpu: Number of cpu CORES in appservices. Accepted values = [2, 4, 8, 16, 26]
+            :param ram: Size of ram (in GBs. Accepted values = [4, 8, 16, 32, 72])
+        :param description: Description of the appservice (optional, can be empty)
+        :param nodes: Number of nodes in appservices (optional, Number of nodes configured for the App Service. The number of nodes can range from 2 to 12.)
+        :param version: Version of appservice to deploy (optional, if not given, defaults to the latest version)
+        :param headers (dict) Headers to be sent with the API call.
+        :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
         """
         url = self.cluster_appservice_api.format(tenant_id, project_id, cluster_id)
         params = {
             "name": appservice_name,
-            "description": description,
-            "nodes": nodes,
-            "compute": {
-                "cpu": cpu,
-                "ram": ram
-            },
-            "version": version
+            "compute": compute
         }
+        if description:
+            params["description"] = description
+        if nodes:
+            params["nodes"] = nodes
+        if version:
+            params["version"] = version
+
         for k, v in kwargs.items():
             params[k] = v
         resp = self.capella_api_post(url, params, headers)
@@ -2243,10 +2246,12 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         -Organization Owner
         -Project Owner
         -Project Manager
-        :param tenant_id:
-        :param project_id:
-        :param cluster_id:
-        :param appservice_id:
+        :param organizationId (str) Organization ID under which the app service is present.
+        :param projectId (str) Project ID under which the app service is present.
+        :param clusterId (str) ID of the cluster under which the app service is present.
+        :param appservice_id: ID of the app service.
+        :param headers (dict) Headers to be sent with the API call.
+        :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
         """
         url = (self.cluster_appservice_api + "/{}").format(tenant_id, project_id, cluster_id, appservice_id)
         if kwargs:
@@ -2321,6 +2326,64 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         for k, v in kwargs.items():
             params[k] = v
         resp = self.capella_api_put(url, params, headers=headers)
+        return resp
+
+    """
+    Switches on the App Service.
+    In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+        Organization Owner
+        Project Owner
+        Project Manager
+    :param organizationId (str) Organization ID under which the cluster is present.
+    :param projectId (str) Project ID under which the cluster is present.
+    :param clusterId (str) Cluster ID of the cluster which has the sample bucket.
+    :param appServiceId (str) Name of the App Service which has to be switched on.
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+    def switch_app_service_on(self, organizationId, projectId, clusterId,
+                              appServiceId, headers=None, **kwargs):
+        self.cluster_ops_API_log.info(
+            "Switching on App Service {} in cluster {} in project {} in "
+            "organization {}".format(appServiceId, clusterId, projectId,
+                                     organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.capella_api_post(
+            self.appservice_on_off_endpoint.format(
+                organizationId, projectId, clusterId, appServiceId),
+            params, headers)
+        return resp
+
+    """
+        Switches off the App Service.
+        In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+            Organization Owner
+            Project Owner
+            Project Manager
+        :param organizationId (str) Organization ID under which the cluster is present.
+        :param projectId (str) Project ID under which the cluster is present.
+        :param clusterId (str) Cluster ID of the cluster which has the sample bucket.
+        :param appServiceId (str) Name of the App Service which has to be switched off.
+        :param headers (dict) Headers to be sent with the API call.
+        :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+        """
+    def switch_app_service_off(self, organizationId, projectId, clusterId,
+                               appServiceId, headers=None, **kwargs):
+        self.cluster_ops_API_log.info(
+            "Switching off App Service {} in cluster {} in project {} in "
+            "organization {}".format(appServiceId, clusterId, projectId,
+                                     organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.capella_api_del(
+            self.appservice_on_off_endpoint.format(
+                organizationId, projectId, clusterId, appServiceId),
+            params, headers)
         return resp
 
 
