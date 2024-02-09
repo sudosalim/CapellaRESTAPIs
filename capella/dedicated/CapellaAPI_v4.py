@@ -534,19 +534,21 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
     :param organizationId (str) Organization ID under which the cluster is present.
     :param projectId (str) Project ID under which the cluster is present.
     :param clusterId (str) Cluster ID of the cluster which has to be switched on.
+    :param turnOnLinkedAppService (bool) To turn on the related App Services inside the cluster as well or not
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
     def switch_cluster_on(self, organizationId, projectId, clusterId,
-                          headers=None, **kwargs):
+                          turnOnLinkedAppService, headers=None, **kwargs):
         self.cluster_ops_API_log.info(
             "Switching on Cluster {} in project {} in organization {}".format(
                 clusterId, projectId, organizationId))
 
-        if kwargs:
-            params = kwargs
-        else:
-            params = None
+        params = {
+            "turnOnLinkedAppService": turnOnLinkedAppService,
+        }
+        for k, v in kwargs.items():
+            params[k] = v
         resp = self.capella_api_post(
             self.cluster_on_off_endpoint.format(
                 organizationId, projectId, clusterId), params, headers)
