@@ -1971,7 +1971,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.capella_api_patch(
+        resp = self.capella_api_put(
             self.collection_endpoint.format(
                 organizationId, projectId, clusterId,
                 bucketId, scopeName, collectionName),
