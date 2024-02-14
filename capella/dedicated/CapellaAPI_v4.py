@@ -1971,11 +1971,10 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.capella_api_put(
+        resp = self.capella_api_put("{}/{}".format(
             self.collection_endpoint.format(
-                organizationId, projectId, clusterId,
-                bucketId, scopeName, collectionName),
-            params, headers)
+                organizationId, projectId, clusterId, bucketId, scopeName),
+            collectionName), params, headers)
         return resp
 
     """
