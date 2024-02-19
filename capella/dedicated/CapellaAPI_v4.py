@@ -1465,7 +1465,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             "flush": flush,
             "timeToLiveInSeconds": timeToLiveInSeconds,
         }
-        if priority:
+        if priority is not None:
             params["priority"] = priority
         if evictionPolicy:
             params["evictionPolicy"] = evictionPolicy
