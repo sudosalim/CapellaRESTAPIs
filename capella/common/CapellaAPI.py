@@ -118,11 +118,12 @@ class CommonCapellaAPI(CapellaAPIRequests):
         resp = self.do_internal_request(url, method="POST")
         return resp
 
-    def activate_resource_container(self, cloud):
+    def activate_resource_container(self, cloud, body):
         url = "{}/internal/support/csp/{}/resource-container".format(
             self.internal_url, cloud.lower())
         resp = self._urllib_request(url, "POST",
-                                    headers=self.cbc_api_request_headers)
+                                    headers=self.cbc_api_request_headers,
+                                    params=json.dumps(body))
         return resp
 
     def list_accessible_tenants(self):
