@@ -38,6 +38,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             "/{}/onOffSchedule"
         self.cluster_on_off_endpoint = self.cluster_endpoint + "/{}/activationState"
         self.appservice_on_off_endpoint = self.cluster_appservice_api + "/{}/activationState"
+        self.alerts_endpoint = organization_endpoint + "/{}/projects/{}/alertIntegrations"
 
     """
     Method to restore the backup with backupId under cluster, project and organization mentioned.
@@ -749,6 +750,216 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         resp = self.capella_api_del(
             self.cluster_on_off_schedule_endpoint.format(
                 organizationId, projectId, clusterId), params, headers)
+        return resp
+
+    """
+    Method creates an alert inside a project.
+    :param organizationId (str) Organization ID under which the alert is present.
+    :param projectId (str) Project ID under which the alert is present.
+    :param kind (str) Type of alert integration, currently only supports the type "webhook".
+    :param name (str) Name to be added by user about the alert integration. [optional]
+    :param config (obj) Configuration details of the alert integration, currently only contains the object webhook.
+        :param method (str) Type of Rest API to be send to the user for the alert notification. (POST or PUT)
+        :param url ($url) The URL of the customer to which the alert notification API call must be sent.
+        :param headers (obj) HTTP headers to be present in the alert API call to the customer. [optional]
+            :param headerValue (str) key value pair of the headers to be present in the API call
+        :param webhook (obj)
+            :param token (str) Authorisation header token to be used in the POST/PUT API alert send to the customer though the webhook integration.
+            :param basicAuth (obj) Authorisation header username and password to be used in the POST/PUT API alert send to the customer though the webhook integration.
+                :param userId (str)
+                :param password (str)
+            :param exclude (obj) Contains 2 arrays named appServices and clusters to list what appServices and clusters to not send alerts about. [Optional]
+                :param appServices (list) The appServices that the alert shall ignore
+                    :param appServiceId (UUID) All the IDs to be excluded by the alert
+                :param clusters (list) The clusters that the alert shall ignore
+                    :param clusterID (UUID) All the IDs to be excluded by the alert
+    :param headers (dict) Headers to be sent with the API call. (NOTE THAT THIS PARAM IS DIFFERENT TO THE HEADER PARAM BEING SENT IN THE BODY OF THE ALERT IN THE CONFIG OBJECT) 
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+
+    NOTES:
+    Either token or basicAuth is required. * Not both! *
+    Headers are optional HTTP headers that can be added (support for up to 20).
+    The method can be one of POST or PUT
+    The url must be HTTPS
+    """
+    def create_alert(
+            self,
+            organizationId,
+            projectId,
+            kind,
+            name,
+            config,
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info("Creating an alert inside the project {} inside the organization {}.".format(projectId, organizationId))
+
+        params = {
+            "kind": kind,
+            "config": config,
+        }
+        if name:
+            params["name"] = name
+        for k, v in kwargs.items():
+            params[k] = v
+        resp = self.capella_api_post(self.alerts_endpoint.format(
+                organizationId, projectId),
+            params, headers)
+        return resp
+
+    """
+    Method fetches an alert's information, configuration and state.
+    :param organizationId (str) Organization ID under which the alert is present.
+    :param projectId (str) Project ID under which the alert is present.
+    :param alertId (str) ID of the alert to be fetched.
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+    def fetch_alert_info(
+            self,
+            organizationId,
+            projectId,
+            alertId,
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info("Fetching the alert {} inside the project {} inside the organization {}.".format(alertId, projectId, organizationId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.capella_api_get("{}/{}".format(self.alerts_endpoint.format(
+                organizationId, projectId), alertId),
+            params, headers)
+        return resp
+
+    """
+    Method lists all alerts inside an organization.
+    :param organizationId (str) Organization ID under which the alert is present.
+    :param projectId (str) Project ID under which the alert is present.
+    :param headers (dict) Headers to be sent with the API call. 
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+    def list_alerts(
+            self,
+            organizationId,
+            projectId,
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info("List alert inside project {} the organization {}.".format(projectId, organizationId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.capella_api_get(self.alerts_endpoint.format(
+                organizationId, projectId),
+            params, headers)
+        return resp
+
+    """
+    Method deletes an alert inside a project.
+    :param organizationId (str) Organization ID under which the cluster is present.
+    :param projectId (str) Project ID under which the alert is present.
+    :param alertId (str) ID of the alert to be deleted.
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+    def delete_alert(
+            self,
+            organizationId,
+            projectId,
+            alertId,
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info("Deleting an alert inside the project {} inside the organization {}.".format(projectId, organizationId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.capella_api_del("{}/{}".format(self.alerts_endpoint.format(
+                organizationId, projectId), alertId),
+            params, headers)
+        return resp
+
+    """
+    Method updates an alert inside a project.
+    :param organizationId (str) Organization ID under which the cluster is present.
+    :param projectId (str) Project ID under which the cluster is present.
+    :param alertId (str) ID of the alert to be updated.
+    :param kind (str) Type of alert integration, currently only supports the type "webhook".
+    :param name (str) Name to be added by user about the alert integration. [optional]
+    :param config (obj) Configuration details of the alert integration, currently only contains the object webhook.
+        :param method (str) Type of Rest API to be send to the user for the alert notification. (POST or PUT)
+        :param url ($url) The URL of the customer to which the alert notification API call must be sent.
+        :param headers (obj) HTTP headers to be present in the alert API call to the customer. [optional]
+            :param headerValue (str) key value pair of the headers to be present in the API call
+        :param webhook (obj)
+            :param token (str) Authorisation header token to be used in the POST/PUT API alert send to the customer though the webhook integration.
+            :param basicAuth (obj) Authorisation header username and password to be used in the POST/PUT API alert send to the customer though the webhook integration.
+                :param userId (str)
+                :param password (str)
+            :param exclude (obj) Contains 2 arrays named appServices and clusters to list what appServices and clusters to not send alerts about. [Optional]
+                :param appServices (list) The appServices that the alert shall ignore
+                    :param appServiceId (UUID) All the IDs to be excluded by the alert
+                :param clusters (list) The clusters that the alert shall ignore
+                    :param clusterID (UUID) All the IDs to be excluded by the alert
+    :param headers (dict) Headers to be sent with the API call. (NOTE THAT THIS PARAM IS DIFFERENT TO THE HEADER PARAM BEING SENT IN THE BODY OF THE ALERT IN THE CONFIG OBJECT)
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+
+    NOTES:
+    Either token or basicAuth is required. * Not both! *
+    Headers are optional HTTP headers that can be added (support for up to 20).
+    The method can be one of POST or PUT
+    The url must be HTTPS
+    """
+    def update_alert(
+            self,
+            organizationId,
+            projectId,
+            alert_id,
+            kind,
+            name,
+            config,
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info("Updating the alert {} inside the project {} inside the organization {}.".format(alert_id, projectId, organizationId))
+
+        params = {
+            "kind": kind,
+            "config": config,
+        }
+        if name:
+            params["name"] = name
+        for k, v in kwargs.items():
+            params[k] = v
+        resp = self.capella_api_put("{}/{}".format(self.alerts_endpoint.format(
+                organizationId, projectId), alert_id),
+            params, headers)
+        return resp
+
+    """
+    Method lists all alerts inside an organization.
+    :param organizationId (str) Organization ID under which the alert is present.
+    :param projectId (str) Project ID under which the alert is present.
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+    def test_alert(
+            self,
+            organizationId,
+            projectId,
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info("Test alert inside project {} the organization {}.".format(projectId, organizationId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.capella_api_get(self.alerts_endpoint + "/test".format(
+                organizationId, projectId),
+            params, headers)
         return resp
 
     """
