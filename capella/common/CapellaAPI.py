@@ -8,7 +8,8 @@ from ..lib.CapellaAPIRequests import CapellaAPIRequests
 
 class CommonCapellaAPI(CapellaAPIRequests):
 
-    def __init__(self, url, secret, access, user, pwd, TOKEN_FOR_INTERNAL_SUPPORT=None):
+    def __init__(self, url, secret, access, user, pwd, TOKEN_FOR_INTERNAL_SUPPORT=None,
+                 TOKEN_FOR_SNAPLOGIC=None):
         super(CommonCapellaAPI, self).__init__(url, secret, access)
         self.user = user
         self.pwd = pwd
@@ -16,6 +17,7 @@ class CommonCapellaAPI(CapellaAPIRequests):
         self._log = logging.getLogger(__name__)
         self.perPage = 100
         self.TOKEN_FOR_INTERNAL_SUPPORT = TOKEN_FOR_INTERNAL_SUPPORT
+        self.TOKEN_FOR_SNAPLOGIC = TOKEN_FOR_SNAPLOGIC
         self.cbc_api_request_headers = {
             'Authorization': 'Bearer %s' % self.TOKEN_FOR_INTERNAL_SUPPORT,
             'Content-Type': 'application/json'
@@ -116,6 +118,17 @@ class CommonCapellaAPI(CapellaAPIRequests):
         """
         url = "{}/emails/verify/{}".format(self.internal_url, token)
         resp = self.do_internal_request(url, method="POST")
+        return resp
+
+    def tenant_activation(self):
+        url = "{}/f/activations/".format(self.internal_url)
+        headers = {
+            'Authorization': 'Bearer %s' % self.TOKEN_FOR_SNAPLOGIC,
+            'Content-Type': 'application/json'
+        }
+        resp = self._urllib_request(url, "GET",
+                                    headers=headers,
+                                    params=json.dumps({}))
         return resp
 
     def activate_resource_container(self, cloud, body):
