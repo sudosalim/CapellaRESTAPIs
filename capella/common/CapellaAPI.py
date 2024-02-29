@@ -72,8 +72,8 @@ class CommonCapellaAPI(CapellaAPIRequests):
 
     def delete_distribution_point(self, id):
         url = self.internal_url + "/internal/support/distribution-points/{}".format(id)
-        resp = self.do_internal_request(url, "DELETE",
-                                        headers=self.cbc_api_request_headers)
+        resp = self._urllib_request(url, "DELETE",
+                                    headers=self.cbc_api_request_headers)
         return resp
 
     def signup_user(self, full_name, email, password, tenant_name, token=None):
@@ -99,9 +99,9 @@ class CommonCapellaAPI(CapellaAPIRequests):
             "name": full_name,
             "password": password
         }
-        resp = self.do_internal_request(url, method="POST",
-                                        params=json.dumps(body),
-                                        headers=headers)
+        resp = self._urllib_request(url, method="POST",
+                                    params=json.dumps(body),
+                                    headers=headers)
         return resp
 
     def verify_email(self, token):
@@ -117,7 +117,7 @@ class CommonCapellaAPI(CapellaAPIRequests):
         ```
         """
         url = "{}/emails/verify/{}".format(self.internal_url, token)
-        resp = self.do_internal_request(url, method="POST")
+        resp = self._urllib_request(url, method="POST")
         return resp
 
     def tenant_activation(self):
