@@ -30,6 +30,8 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             "/{}/projects/{}/clusters/{}/buckets/{}/scopes/{}/collections"
         self.backups_endpoint = organization_endpoint + \
             "/{}/projects/{}/clusters/{}/backups"
+        self.backup_schedule_endpoint = organization_endpoint + \
+            "/{}/projects/{}/clusters/{}/buckets/{}/backup/schedules"
         self.sample_bucket_endpoint = organization_endpoint + \
             "/{}/projects/{}/clusters/{}/sampleBuckets"
         self.org_appservice_api = organization_endpoint + "/{}/appservices"
@@ -643,7 +645,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         Organization Owner
         Project Owner
         Project Manager
-    
+
     :param organizationId (str) Organization ID under which the cluster is present.
     :param projectId (str) Project ID under which the cluster is present.
     :param clusterId (str) ID of the cluster which has to be scheduled.
@@ -727,7 +729,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         Organization Owner
         Project Owner
         Project Manager
-    
+
     :param organizationId (str) Organization ID under which the cluster is present.
     :param projectId (str) Project ID under which the cluster is present.
     :param clusterId (str) ID of the cluster which has to be scheduled.
@@ -773,7 +775,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
                     :param appServiceId (UUID) All the IDs to be excluded by the alert
                 :param clusters (list) The clusters that the alert shall ignore
                     :param clusterID (UUID) All the IDs to be excluded by the alert
-    :param headers (dict) Headers to be sent with the API call. (NOTE THAT THIS PARAM IS DIFFERENT TO THE HEADER PARAM BEING SENT IN THE BODY OF THE ALERT IN THE CONFIG OBJECT) 
+    :param headers (dict) Headers to be sent with the API call. (NOTE THAT THIS PARAM IS DIFFERENT TO THE HEADER PARAM BEING SENT IN THE BODY OF THE ALERT IN THE CONFIG OBJECT)
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
 
     NOTES:
@@ -836,7 +838,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
     Method lists all alerts inside an organization.
     :param organizationId (str) Organization ID under which the alert is present.
     :param projectId (str) Project ID under which the alert is present.
-    :param headers (dict) Headers to be sent with the API call. 
+    :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
     def list_alerts(
