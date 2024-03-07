@@ -41,6 +41,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         self.cluster_on_off_endpoint = self.cluster_endpoint + "/{}/activationState"
         self.appservice_on_off_endpoint = self.cluster_appservice_api + "/{}/activationState"
         self.alerts_endpoint = organization_endpoint + "/{}/projects/{}/alertIntegrations"
+        self.test_alert_endpoint = self.alerts_endpoint[:-1] + "Test"
 
     """
     Method to restore the backup with backupId under cluster, project and organization mentioned.
@@ -941,7 +942,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         return resp
 
     """
-    Method lists all alerts inside an organization.
+    Method tests all alerts inside an organization.
     :param organizationId (str) Organization ID under which the alert is present.
     :param projectId (str) Project ID under which the alert is present.
     :param headers (dict) Headers to be sent with the API call.
@@ -951,15 +952,17 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             self,
             organizationId,
             projectId,
+            config,
             headers=None,
             **kwargs):
         self.cluster_ops_API_log.info("Test alert inside project {} the organization {}.".format(projectId, organizationId))
 
-        if kwargs:
-            params = kwargs
-        else:
-            params = None
-        resp = self.capella_api_get(self.alerts_endpoint + "/test".format(
+        params = {
+            "config": config,
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+        resp = self.capella_api_post(self.test_alert_endpoint.format(
                 organizationId, projectId),
             params, headers)
         return resp
