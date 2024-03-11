@@ -53,6 +53,10 @@ class CapellaAPIRequests(object):
                 resp = self._urllib_request(
                     "{}/sessions".format(self.internal_url), method="POST",
                     headers=header)
+                if resp.status_code != 200:
+                    self._log.error(resp)
+                    self.jwt = None
+                    return None
                 self.jwt = json.loads(resp.content).get("jwt")
             self.lock.release()
         cbc_api_request_headers = {
