@@ -42,6 +42,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         self.appservice_on_off_endpoint = self.cluster_appservice_api + "/{}/activationState"
         self.alerts_endpoint = organization_endpoint + "/{}/projects/{}/alertIntegrations"
         self.test_alert_endpoint = self.alerts_endpoint[:-1] + "Test"
+        self.audit_log_exports_endpoint = self.cluster_endpoint + "/{}/auditLogExports"
 
     """
     Method to restore the backup with backupId under cluster, project and organization mentioned.
@@ -964,6 +965,114 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params[k] = v
         resp = self.capella_api_post(self.test_alert_endpoint.format(
                 organizationId, projectId),
+            params, headers)
+        return resp
+
+    """
+    Creates a new audit log export job.
+    Audit Logs for the last 30 days can be requested, otherwise they are purged. A pre-signed URL to a s3 bucket location is returned, which is used to download these audit logs.
+    In order to access this endpoint, the provided API key must have at least one of the following roles:
+        Organization Owner
+        Project Owner
+        Project Manager
+
+    :param organizationId (str) Organization ID under which the project is present.
+    :param projectId (str) Project ID under which the cluster is present.
+    :param clusterId (str) Cluster ID for which the audit log is being created.
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+    def create_audit_log_export(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            start,
+            end,
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info("Creating Audit Log inside cluster {} inside project {} inside organization {}".format(organizationId, projectId, clusterId))
+
+        params = {
+            "start": start,
+            "end": end
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+        resp = self.capella_api_post(self.audit_log_exports_endpoint.format(
+            organizationId, projectId, clusterId),
+            params, headers)
+        return resp
+
+    """
+    Fetches the status of a single audit log export job.
+    It will show the pre-signed URL if the export was successful, a failure error if it was unsuccessful or a message saying no audit logs available if there were no audit logs found during the given timeframe.
+    In order to access this endpoint, the provided API key must have at least one of the following roles:
+        Organization Owner
+        Project Owner
+        Project Manager
+        Project Viewer
+        Database Data Reader/Writer
+        Database Data Reader
+
+    :param organizationId (str) Organization ID under which the project is present.
+    :param projectId (str) Project ID under which the cluster is present.
+    :param clusterId (str) Cluster ID for which the audit log is requested.
+    :param auditLogId (str) The ID of the audit log which is being fetched.
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+    def fetch_audit_log_export_info(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            auditLogId,
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info("Fetching Audit Log {} inside cluster {} inside project {} inside organization {}".format(organizationId, projectId, clusterId, auditLogId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.capella_api_get("{}/{}".format(self.audit_log_exports_endpoint.format(
+                organizationId, projectId, clusterId), auditLogId),
+            params, headers)
+        return resp
+
+    """
+    Fetches the status of a all audit log export jobs inside a cluster.
+    It will show the pre-signed URL if the export was successful, a failure error if it was unsuccessful or a message saying no audit logs available if there were no audit logs found during the given timeframe.
+    In order to access this endpoint, the provided API key must have at least one of the following roles:
+        Organization Owner
+        Project Owner
+        Project Manager
+        Project Viewer
+        Database Data Reader/Writer
+        Database Data Reader
+
+    :param organizationId (str) Organization ID under which the project is present.
+    :param projectId (str) Project ID under which the cluster is present.
+    :param clusterId (str) Cluster ID for which the audit log is requested.
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+    def list_audit_log_export(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info("Listing Audit Logs inside cluster {} inside project {} inside organization {}".format(organizationId, projectId, clusterId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.capella_api_get(self.audit_log_exports_endpoint.format(
+                organizationId, projectId, clusterId),
             params, headers)
         return resp
 
