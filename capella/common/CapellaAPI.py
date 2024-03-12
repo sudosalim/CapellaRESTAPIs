@@ -23,12 +23,14 @@ class CommonCapellaAPI(CapellaAPIRequests):
             'Content-Type': 'application/json'
         }
 
-    def trigger_log_collection(self, cluster_id, log_id={}):
+    def trigger_log_collection(self, cluster_id, hostname='https://cb-engineering.s3.amazonaws.com/', ticketId="", nodeId=""):
         url = self.internal_url + "/internal/support/logcollections/clusters/{}".format(cluster_id)
-        resp = self._urllib_request(url, "POST", params=json.dumps(log_id),
+        payload = {"hostname": f'{hostname}',
+                   "ticketId": f'{ticketId}',
+                   "nodeId": f'{nodeId}'}
+        resp = self._urllib_request(url, "POST", params=json.dumps(payload),
                                     headers=self.cbc_api_request_headers)
         return resp
-
     def get_observability_system_metric(self, cluster_id, metric_name):
         url = self.internal_url + "/internal/support/clusters/{}/metrics/{}/dp-ingestor/query".format(cluster_id, metric_name)
         resp = self._urllib_request(url, "GET",
