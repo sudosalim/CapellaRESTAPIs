@@ -25,9 +25,11 @@ class CommonCapellaAPI(CapellaAPIRequests):
 
     def trigger_log_collection(self, cluster_id, hostname='https://cb-engineering.s3.amazonaws.com/', ticketId="", nodeId=""):
         url = self.internal_url + "/internal/support/logcollections/clusters/{}".format(cluster_id)
-        payload = {"hostname": f'{hostname}',
-                   "ticketId": f'{ticketId}',
-                   "nodeId": f'{nodeId}'}
+        payload = {
+            "hostname": hostname,
+            "ticketId": ticketId,
+            "nodeId": nodeId
+        }
         resp = self._urllib_request(url, "POST", params=json.dumps(payload),
                                     headers=self.cbc_api_request_headers)
         return resp
