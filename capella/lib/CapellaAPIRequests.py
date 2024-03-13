@@ -54,7 +54,9 @@ class CapellaAPIRequests(object):
                     "{}/sessions".format(self.internal_url), method="POST",
                     headers=header)
                 if resp.status_code != 200:
-                    self._log.error(resp)
+                    self._log.warning("Response Status Code : {}"
+                                      .format(resp.status_code))
+                    self._log.error("Error : {}".format(resp))
                     self.jwt = None
                     return None
                 self.jwt = json.loads(resp.content).get("jwt")
