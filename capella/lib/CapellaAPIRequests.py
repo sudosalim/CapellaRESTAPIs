@@ -57,8 +57,6 @@ class CapellaAPIRequests(object):
                     self._log.warning("Response Status Code : {}"
                                       .format(resp.status_code))
                     self._log.error("Error : {}".format(resp))
-                    self.jwt = None
-                    return None
                 self.jwt = json.loads(resp.content).get("jwt")
             self.lock.release()
         cbc_api_request_headers = {

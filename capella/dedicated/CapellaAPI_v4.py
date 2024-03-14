@@ -44,6 +44,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         self.test_alert_endpoint = self.alerts_endpoint[:-1] + "Test"
         self.audit_log_exports_endpoint = self.cluster_endpoint + "/{}/auditLogExports"
         self.audit_log_endpoint = self.cluster_endpoint + "/{}/auditLog"
+        self.audit_log_events_endpoint = self.cluster_endpoint + "/{}/auditLogEvents"
 
     """
     Method to restore the backup with backupId under cluster, project and organization mentioned.
@@ -792,8 +793,8 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             organizationId,
             projectId,
             kind,
-            name,
             config,
+            name=None,
             headers=None,
             **kwargs):
         self.cluster_ops_API_log.info("Creating an alert inside the project {} inside the organization {}.".format(projectId, organizationId))
@@ -924,8 +925,8 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             projectId,
             alert_id,
             kind,
-            name,
             config,
+            name=None,
             headers=None,
             **kwargs):
         self.cluster_ops_API_log.info("Updating the alert {} inside the project {} inside the organization {}.".format(alert_id, projectId, organizationId))
@@ -981,7 +982,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
     :param clusterId (str) Cluster ID for which the audit log is being created.
     :param auditEnabled (bool)
     :param disabledUsers (list)
-        :param (obj) 
+        :param (obj)
             :param domain (str)
             :param name (str)
     :param enabledEventIDs (list)
@@ -1044,6 +1045,40 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         else:
             params = None
         resp = self.capella_api_get(self.audit_log_endpoint.format(
+                organizationId, projectId, clusterId),
+            params, headers)
+        return resp
+
+    """
+    Retrieves a list of audit event IDs. The list of filterable event IDs can be specified while configuring audit log for cluster.
+    In order to access this endpoint, the provided API key must have at least one of the following roles :
+        Organization Owner
+        Project Owner
+        Project Manager
+        Project Viewer
+        Database Data Reader/Writer
+        Database Data Reader
+
+    :param organizationId (str) Organization ID under which the project is present.
+    :param projectId (str) Project ID under which the cluster is present.
+    :param clusterId (str) Cluster ID for which the audit log events are to be fetched.
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+    def fetch_audit_log_event_info(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info("Fetching Audit Log Events info inside cluster {} inside project {} inside organization {}".format(clusterId, projectId, organizationId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.capella_api_get(self.audit_log_events_endpoint.format(
                 organizationId, projectId, clusterId),
             params, headers)
         return resp
