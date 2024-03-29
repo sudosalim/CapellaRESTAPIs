@@ -296,3 +296,17 @@ class CommonCapellaAPI(CapellaAPIRequests):
         resp = self.do_internal_request(
             url, method="POST", params=json.dumps(payload))
         return resp
+
+    """
+    This method will delete a capella user
+    :param org_id ID of the organisation under which the user has to be
+    created.
+    :param user_id ID of the capella user to be deleted.
+    """
+    def delete_user(self, org_id, user_id):
+        url = "{}/v2/organizations/{}/users/{}".format(
+            self.internal_url, org_id, user_id)
+
+        resp = self.do_internal_request(
+            url, method="DELETE")
+        return resp
