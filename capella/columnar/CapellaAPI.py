@@ -156,6 +156,23 @@ class CapellaAPI(CommonCapellaAPI):
         resp = self.do_internal_request(url, method="POST")
         return resp
 
+    def get_api_keys(self, tenant_id, project_id, instance_id, page=1,
+                     perPage=100):
+        """
+            Create a Columnar apikey
+
+            Parameters:
+                tenant_id (str): The ID of the tenant associated with the project.
+                project_id (str): The ID of the project where the instance is located.
+                instance_id (str): The ID of the Columnar instance to get keys for.
+        """
+        url = "{}/v2/organizations/{}/projects/{}/instance/{}/apikeys?" \
+              "page={}&perPage={}".format(
+              self.internal_url, tenant_id, project_id, instance_id,
+              page, perPage)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
     def delete_api_keys(self, tenant_id, project_id, instance_id, api_key):
         """
             Revoke a Columnar apikey
@@ -168,5 +185,5 @@ class CapellaAPI(CommonCapellaAPI):
         url = "{}/v2/organizations/{}/projects/{}/instance/{}/apikeys/{}".format(
             self.internal_url, tenant_id, project_id, instance_id, api_key)
         resp = self.do_internal_request(
-            url, method="DELETE", headers=self.basic_headers)
+            url, method="DELETE")
         return resp
