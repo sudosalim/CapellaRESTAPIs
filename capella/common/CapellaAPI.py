@@ -33,6 +33,13 @@ class CommonCapellaAPI(CapellaAPIRequests):
         resp = self._urllib_request(url, "POST", params=json.dumps(payload),
                                     headers=self.cbc_api_request_headers)
         return resp
+
+    def get_cluster_info_internal(self, cluster_id):
+        url = self.internal_url + "/internal/support/clusters/{}".format(cluster_id)
+        resp = self._urllib_request(url, "GET",
+                                    headers=self.cbc_api_request_headers)
+        return resp
+
     def get_observability_system_metric(self, cluster_id, metric_name):
         url = self.internal_url + "/internal/support/clusters/{}/metrics/{}/dp-ingestor/query".format(cluster_id, metric_name)
         resp = self._urllib_request(url, "GET",
