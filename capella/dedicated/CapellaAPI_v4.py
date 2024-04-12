@@ -285,10 +285,10 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             projectId,
             name,
             cloudProvider,
-            couchbaseServer,
-            serviceGroups,
-            availability,
-            support,
+            couchbaseServer=None,
+            serviceGroups=None,
+            availability=None,
+            support=None,
             description="",
             headers=None,
             **kwargs):
@@ -297,14 +297,19 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
                 name, projectId, organizationId))
         params = {
             "name": name,
-            "cloudProvider": cloudProvider,
-            "couchbaseServer": couchbaseServer,
-            "serviceGroups": serviceGroups,
-            "availability": availability,
-            "support": support
+            "cloudProvider": cloudProvider
         }
+        if couchbaseServer:
+            params["couchbaseServer"] = couchbaseServer
+        if serviceGroups:
+            params["serviceGroups"] = serviceGroups
+        if availability:
+            params["availability"] = availability
+        if support:
+            params["support"] = support
         if description:
             params["description"] = description
+
         for k, v in kwargs.items():
             params[k] = v
         resp = self.capella_api_post(
