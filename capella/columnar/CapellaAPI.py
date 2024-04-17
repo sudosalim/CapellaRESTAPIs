@@ -176,14 +176,36 @@ class CapellaAPI(CommonCapellaAPI):
     def delete_api_keys(self, tenant_id, project_id, instance_id, api_key):
         """
             Revoke a Columnar apikey
-
-            tenant_id (str): The ID of the tenant associated with the project.
-            project_id (str): The ID of the project where the instance is located.
-            instance_id (str): The ID of the Columnar instance to create keys for.
-            api_key (str): api key id.
+            Parameters:
+                tenant_id (str): The ID of the tenant associated with the project.
+                project_id (str): The ID of the project where the instance is located.
+                instance_id (str): The ID of the Columnar instance to create keys for.
+                api_key (str): api key id.
         """
         url = "{}/v2/organizations/{}/projects/{}/instance/{}/apikeys/{}".format(
             self.internal_url, tenant_id, project_id, instance_id, api_key)
         resp = self.do_internal_request(
             url, method="DELETE")
+        return resp
+
+    def allow_ip(self, tenant_id, project_id, instance_id, cidr, comment="", **kwargs):
+        """
+            Add a CIDR to the columnar CIDR allowed list.
+            Parameters:
+                tenant_id (str): The ID of the tenant associated with the project.
+                project_id (str): The ID of the project where the instance is located.
+                instance_id (str): The ID of the Columnar instance to create keys for.
+                cidr (str): The CIDR that is to be added to the allowed CIDR list
+                comment (str): Comment for the CIDR that is to be added
+                **kwargs: Additional keyword arguments to pass to the API request.
+
+        """
+        url = "{}/v2/organizations/{}/projects/{}/instance/{}/allowlists".format(
+            self.internal_url, tenant_id, project_id, instance_id)
+        body = {"cidr": cidr, "comment": comment}
+        for key, value in kwargs.items():
+            body[key] = value
+
+        resp = self.do_internal_request(url, method="POST",
+                                        params=json.dumps(body))
         return resp
