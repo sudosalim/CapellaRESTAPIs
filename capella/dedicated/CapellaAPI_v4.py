@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 # Generic/Built-in
 import base64
+import json
 import logging
 
-import json
-
-from ..lib.CapellaAPIRequests import CapellaAPIRequests
 from ..common.CapellaAPI_v4 import CommonCapellaAPI
+from ..lib.CapellaAPIRequests import CapellaAPIRequests
 
 
 class ClusterOperationsAPIs(CapellaAPIRequests):
@@ -45,6 +44,9 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         self.audit_log_exports_endpoint = self.cluster_endpoint + "/{}/auditLogExports"
         self.audit_log_endpoint = self.cluster_endpoint + "/{}/auditLog"
         self.audit_log_events_endpoint = self.cluster_endpoint + "/{}/auditLogEvents"
+        self.bucket_storage_migration_endpoint = (
+            self.bucket_endpoint + "/storageMigration"
+        )
 
     """
     Method to restore the backup with backupId under cluster, project and organization mentioned.
@@ -2830,6 +2832,33 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             self.appservice_on_off_endpoint.format(
                 organizationId, projectId, clusterId, appServiceId),
             params, headers)
+        return resp
+
+    def start_online_storage_migration(
+        self,
+        organization_id: str,
+        project_id: str,
+        cluster_id: str,
+        buckets: str | list[str],
+        headers=None,
+    ):
+        """Initiate online migration of bucket storage backend.
+
+        Parameters:
+            - buckets: A bucket name or list of buckets to migrate.
+        """
+        if isinstance(buckets, str):
+            buckets = [buckets]
+
+        params = {"buckets": buckets}
+        resp = self.capella_api_put(
+            self.bucket_storage_migration_endpoint.format(
+                organization_id, project_id, cluster_id
+            ),
+            params,
+            headers,
+        )
+
         return resp
 
 
