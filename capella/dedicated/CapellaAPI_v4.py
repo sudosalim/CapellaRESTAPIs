@@ -45,7 +45,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         self.audit_log_endpoint = self.cluster_endpoint + "/{}/auditLog"
         self.audit_log_events_endpoint = self.cluster_endpoint + "/{}/auditLogEvents"
         self.bucket_storage_migration_endpoint = (
-            self.bucket_endpoint + "/storageMigration"
+            self.cluster_endpoint + "/{}/bucketStorageMigration"
         )
 
     """
