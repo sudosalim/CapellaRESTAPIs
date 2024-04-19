@@ -797,6 +797,18 @@ class CapellaAPI(CommonCapellaAPI):
         resp = self.do_internal_request(url, method="POST")
         return resp
 
+    def configure_autoscaling(self, cluster_id, config):
+        """
+        method to alter compute autoscaling config.
+        :param cluster_id:
+        :return: response object
+        """
+        url = "{}/internal/support/clusters/{}/auto-scaling-config"\
+            .format(self.internal_url, cluster_id)
+        resp = self.do_internal_request(url, method="PUT", params=json.dumps(config))
+        return resp
+
+
     def create_sgw_backend(self, tenant_id, config):
         """
         Create a SyncGateway backend (app services) for a cluster
