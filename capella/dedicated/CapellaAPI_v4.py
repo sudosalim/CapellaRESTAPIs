@@ -2839,7 +2839,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         organization_id: str,
         project_id: str,
         cluster_id: str,
-        buckets: str | list[str],
+        buckets,  # str | list[str],
         headers=None,
     ):
         """Initiate online migration of bucket storage backend.
