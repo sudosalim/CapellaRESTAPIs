@@ -1120,7 +1120,7 @@ class CapellaAPI(CommonCapellaAPI):
         organization_id: str,
         project_id: str,
         cluster_id: str,
-        buckets: str | list[str],
+        buckets,
         headers={},
     ):
         # FIXME Not for merging
