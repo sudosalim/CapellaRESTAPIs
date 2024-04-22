@@ -1124,7 +1124,7 @@ class CapellaAPI(CommonCapellaAPI):
         headers={},
     ):
         # FIXME Not for merging
-        url = f"{self.internal_url}/v4/organizations/{organization_id}/projects/{project_id}/clusters/{cluster_id}/buckets"
+        url = f"{self.internal_url}/v4/organizations/{organization_id}/projects/{project_id}/clusters/{cluster_id}/bucketStorageMigration"
         if isinstance(buckets, str):
             buckets = [buckets]
 
