@@ -593,7 +593,10 @@ class CapellaAPI(CommonCapellaAPI):
         :return: response object
         """
         url = "{}/v2/organizations/{}/projects/{}/clusters/backup-image".format(
-            self.internal_url, tenant_id, project_id, cluster_id)
+            self.internal_url,
+            tenant_id,
+            project_id,
+        )
         payload = {"image": backup_ami}
         resp = self.do_internal_request(url, method="POST", params=json.dumps(payload))
         return resp
@@ -1110,4 +1113,24 @@ class CapellaAPI(CommonCapellaAPI):
         url = '{}/v2/organizations/{}/projects/{}/clusters/{}/specs' \
             .format(self.internal_url, tenant_id, project_id, cluster_id)
         resp = self.do_internal_request(url, method="POST", params=json.dumps(specs))
+        return resp
+
+    def start_online_storage_migration(
+        self,
+        organization_id: str,
+        project_id: str,
+        cluster_id: str,
+        buckets: str | list[str],
+        headers={},
+    ):
+        # FIXME Not for merging
+        url = f"{self.internal_url}/v4/organizations/{organization_id}/projects/{project_id}/clusters/{cluster_id}/buckets"
+        if isinstance(buckets, str):
+            buckets = [buckets]
+
+        params = {"buckets": buckets}
+        resp = self.do_internal_request(
+            url, method="PUT", params=params, headers=headers
+        )
+
         return resp
