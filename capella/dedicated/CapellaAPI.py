@@ -593,7 +593,10 @@ class CapellaAPI(CommonCapellaAPI):
         :return: response object
         """
         url = "{}/v2/organizations/{}/projects/{}/clusters/backup-image".format(
-            self.internal_url, tenant_id, project_id, cluster_id)
+            self.internal_url,
+            tenant_id,
+            project_id,
+        )
         payload = {"image": backup_ami}
         resp = self.do_internal_request(url, method="POST", params=json.dumps(payload))
         return resp
@@ -638,6 +641,40 @@ class CapellaAPI(CommonCapellaAPI):
         """
         url = "{}/v2/organizations/{}/projects/{}/clusters/{}/backups/{}/export" \
             .format(self.internal_url, tenant_id, project_id, cluster_id, backup_id)
+        resp = self.do_internal_request(url, method="POST")
+        return resp
+
+    # Snapshot backups
+    def list_all_cluster_backups(
+        self, tenant_id: str, project_id: str, cluster_id: str
+    ):
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/recovery/backups".format(
+            self.internal_url,
+            tenant_id,
+            project_id,
+            cluster_id,
+        )
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def start_ondemand_cluster_backup(
+        self, tenant_id: str, project_id: str, cluster_id: str
+    ):
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/recovery/backup".format(
+            self.internal_url,
+            tenant_id,
+            project_id,
+            cluster_id,
+        )
+        resp = self.do_internal_request(url, method="POST")
+        return resp
+
+    def restore_cluster_backup(
+        self, tenant_id: str, project_id: str, cluster_id: str, backup_id: str
+    ):
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/recovery/backups/{}/restore".format(
+            self.internal_url, tenant_id, project_id, cluster_id, backup_id
+        )
         resp = self.do_internal_request(url, method="POST")
         return resp
 
