@@ -169,15 +169,6 @@ class CapellaAPI(CommonCapellaAPI):
         resp = self.do_internal_request(url, method="PATCH", params=json.dumps(body))
         return resp
 
-    def create_instance_api_keys(self, tenant_id, project_id, instance_id,
-                                 payload):
-
-        url = "{}/v2/organizations/{}/projects/{}/instance/{}/apikeys".format(
-            self.internal_url, tenant_id, project_id, instance_id)
-        resp = self.do_internal_request(url, method="POST",
-                                        params=json.dumps(payload))
-        return resp
-
     def create_columnar_role(self, tenant_id, project_id, instance_id,
                              payload):
         url = "{}/v2/organizations/{}/projects/{}/instance/{}/roles".format(
@@ -194,7 +185,8 @@ class CapellaAPI(CommonCapellaAPI):
             url, method="DELETE")
         return resp
 
-    def create_api_keys(self, tenant_id, project_id, instance_id):
+    def create_api_keys(self, tenant_id, project_id, instance_id,
+                        payload=None):
         """
             Create a Columnar apikey
 
@@ -205,7 +197,11 @@ class CapellaAPI(CommonCapellaAPI):
         """
         url = "{}/v2/organizations/{}/projects/{}/instance/{}/apikeys".format(
             self.internal_url, tenant_id, project_id, instance_id)
-        resp = self.do_internal_request(url, method="POST")
+        if payload:
+            resp = self.do_internal_request(url, method="POST",
+                                            params=json.dumps(payload))
+        else:
+            resp = self.do_internal_request(url, method="POST")
         return resp
 
     def get_api_keys(self, tenant_id, project_id, instance_id, page=1,
