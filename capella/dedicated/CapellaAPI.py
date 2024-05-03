@@ -877,6 +877,14 @@ class CapellaAPI(CommonCapellaAPI):
         resp = self.do_internal_request(url, method="GET")
         return resp
 
+    def update_sgw_database(self, tenant_id, project_id, cluster_id, backend_id, db_name, config):
+        "Update the sgw database (app endpoint)"
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/databases/{}' \
+              .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id, db_name)
+        resp = self.do_internal_request(url, method="PUT",
+                                        params=json.dumps(config))
+        return resp
+
     def resume_sgw_database(self, tenant_id, project_id, cluster_id, backend_id, db_name):
         "Resume the sgw database (app endpoint)"
         url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/databases/{}/online' \
