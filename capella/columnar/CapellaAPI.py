@@ -234,3 +234,29 @@ class CapellaAPI(CommonCapellaAPI):
         resp = self.do_internal_request(url, method="POST",
                                         params=json.dumps(body))
         return resp
+
+    def turn_off_instance(self, tenant_id, project_id, instance_id):
+        """
+            Turn off a columnar instance
+            Parameters:
+                tenant_id (str): The ID of the tenant associated with the project.
+                project_id (str): The ID of the project where the instance is located.
+                instance_id (str): The ID of the Columnar instance to create keys for.
+        """
+        url = '{}/v2/organizations/{}/projects/{}/instance/{}/off' \
+            .format(self.internal_url, tenant_id, project_id, instance_id)
+        resp = self.do_internal_request(url, method="POST", params='')
+        return resp
+
+    def turn_on_instance(self, tenant_id, project_id, instance_id):
+        """
+            Turn on a columnar instance
+            Parameters:
+                tenant_id (str): The ID of the tenant associated with the project.
+                project_id (str): The ID of the project where the instance is located.
+                instance_id (str): The ID of the Columnar instance to create keys for.
+        """
+        url = '{}/v2/organizations/{}/projects/{}/instance/{}/on' \
+            .format(self.internal_url, tenant_id, project_id, instance_id)
+        resp = self.do_internal_request(url, method="POST", params='')
+        return resp
