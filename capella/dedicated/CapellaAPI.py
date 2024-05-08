@@ -645,14 +645,16 @@ class CapellaAPI(CommonCapellaAPI):
         return resp
 
     # Snapshot backups
-    def list_all_cluster_backups(
-        self, tenant_id: str, project_id: str, cluster_id: str
+    def list_cluster_backups(
+        self,
+        tenant_id: str,
+        project_id: str,
+        cluster_id: str,
+        page: int = 1,
+        per_page: int = 25,
     ):
-        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/cloudsnapshotbackups".format(
-            self.internal_url,
-            tenant_id,
-            project_id,
-            cluster_id,
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/cloudsnapshotbackups?page={}&perPage={}".format(
+            self.internal_url, tenant_id, project_id, cluster_id, page, per_page
         )
         resp = self.do_internal_request(url, method="GET")
         return resp
