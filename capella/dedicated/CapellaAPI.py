@@ -648,7 +648,7 @@ class CapellaAPI(CommonCapellaAPI):
     def list_all_cluster_backups(
         self, tenant_id: str, project_id: str, cluster_id: str
     ):
-        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/recovery/backups".format(
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/cloudsnapshotbackups".format(
             self.internal_url,
             tenant_id,
             project_id,
@@ -658,21 +658,22 @@ class CapellaAPI(CommonCapellaAPI):
         return resp
 
     def start_ondemand_cluster_backup(
-        self, tenant_id: str, project_id: str, cluster_id: str
+        self, tenant_id: str, project_id: str, cluster_id: str, retention: int = 24
     ):
-        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/recovery/backup".format(
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/cloudsnapshotbackups".format(
             self.internal_url,
             tenant_id,
             project_id,
             cluster_id,
         )
-        resp = self.do_internal_request(url, method="POST")
+        payload = {"retention": retention}
+        resp = self.do_internal_request(url, method="POST", params=json.dumps(payload))
         return resp
 
     def restore_cluster_backup(
         self, tenant_id: str, project_id: str, cluster_id: str, backup_id: str
     ):
-        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/recovery/backups/{}/restore".format(
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/cloudsnapshotbackups/{}/restore".format(
             self.internal_url, tenant_id, project_id, cluster_id, backup_id
         )
         resp = self.do_internal_request(url, method="POST")
