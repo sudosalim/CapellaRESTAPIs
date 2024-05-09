@@ -3,10 +3,10 @@
 import logging
 
 import json
-from ..lib.CapellaAPIRequests import CapellaAPIRequests
+from ..lib.APIRequests import APIRequests
 
 
-class CommonCapellaAPI(CapellaAPIRequests):
+class CommonCapellaAPI(APIRequests):
 
     def __init__(self, url, secret, access, user, pwd, TOKEN_FOR_INTERNAL_SUPPORT=None,
                  TOKEN_FOR_SNAPLOGIC=None):

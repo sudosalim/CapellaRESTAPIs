@@ -11,7 +11,7 @@ from requests.auth import AuthBase
 import time
 
 
-class CapellaAPIAuth(AuthBase):
+class APIAuth(AuthBase):
     # Extends requests AuthBase for
     # Couchbase Cloud API Authentication Handler.
 

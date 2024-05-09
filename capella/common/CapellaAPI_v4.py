@@ -3,7 +3,7 @@
 import logging
 
 import json
-from ..lib.CapellaAPIRequests import CapellaAPIRequests
+from ..lib.APIRequests import APIRequests
 
 """
 Import CommonCapellaAPI to get access to all the API functionalities.
@@ -11,7 +11,7 @@ APIs are segregated according to class for better code management.
 """
 
 
-class OrganizationOperationsAPIs(CapellaAPIRequests):
+class OrganizationOperationsAPIs(APIRequests):
 
     def __init__(self, url, secret, access, bearer_token):
         super(OrganizationOperationsAPIs, self).__init__(
@@ -40,7 +40,7 @@ class OrganizationOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get(
+        resp = self.api_get(
             "{}/{}".format(self.organization_endpoint, organizationId), params, headers)
         return resp
 
@@ -60,7 +60,7 @@ class OrganizationOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get(
+        resp = self.api_get(
             self.organization_endpoint, params, headers)
         return resp
 
@@ -117,7 +117,7 @@ class OrganizationOperationsAPIs(CapellaAPIRequests):
         }
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_post(
+        resp = self.api_post(
             self.apikeys_endpoint.format(organizationId), params, headers)
         return resp
 
@@ -160,7 +160,7 @@ class OrganizationOperationsAPIs(CapellaAPIRequests):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.capella_api_get(
+        resp = self.api_get(
             self.apikeys_endpoint.format(organizationId), params, headers)
         return resp
 
@@ -188,7 +188,7 @@ class OrganizationOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get("{}/{}".format(self.apikeys_endpoint.format(
+        resp = self.api_get("{}/{}".format(self.apikeys_endpoint.format(
             organizationId), accessKey), params, headers)
         return resp
 
@@ -216,7 +216,7 @@ class OrganizationOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_del("{}/{}".format(self.apikeys_endpoint.format(
+        resp = self.api_del("{}/{}".format(self.apikeys_endpoint.format(
             organizationId), accessKey), params, headers)
         return resp
 
@@ -240,7 +240,7 @@ class OrganizationOperationsAPIs(CapellaAPIRequests):
         params = {}
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_post(
+        resp = self.api_post(
             "{}/{}/rotate".format(self.apikeys_endpoint.format(
                 organizationId), accessKey), params, headers)
         return resp
@@ -291,7 +291,7 @@ class OrganizationOperationsAPIs(CapellaAPIRequests):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.capella_api_post(
+        resp = self.api_post(
             self.users_endpoint.format(organizationId), params, headers)
         return resp
 
@@ -340,7 +340,7 @@ class OrganizationOperationsAPIs(CapellaAPIRequests):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.capella_api_get(
+        resp = self.api_get(
             self.users_endpoint.format(organizationId), params, headers)
         return resp
 
@@ -365,7 +365,7 @@ class OrganizationOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get("{}/{}".format(self.users_endpoint.format(
+        resp = self.api_get("{}/{}".format(self.users_endpoint.format(
             organizationId), userId), params, headers)
         return resp
 
@@ -438,7 +438,7 @@ class OrganizationOperationsAPIs(CapellaAPIRequests):
 
         if kwargs:
             update_info += kwargs
-        resp = self.capella_api_patch("{}/{}".format(self.users_endpoint.format(
+        resp = self.api_patch("{}/{}".format(self.users_endpoint.format(
             organizationId), userId), update_info, headers)
         return resp
 
@@ -460,7 +460,7 @@ class OrganizationOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_del("{}/{}".format(self.users_endpoint.format(
+        resp = self.api_del("{}/{}".format(self.users_endpoint.format(
             organizationId), userId), params, headers)
         return resp
 
@@ -493,7 +493,7 @@ class OrganizationOperationsAPIs(CapellaAPIRequests):
             params["description"] = description
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_post(
+        resp = self.api_post(
             self.project_endpoint.format(organizationId), params, headers)
         return resp
 
@@ -541,7 +541,7 @@ class OrganizationOperationsAPIs(CapellaAPIRequests):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.capella_api_get(
+        resp = self.api_get(
             self.project_endpoint.format(organizationId), params, headers)
         return resp
 
@@ -572,7 +572,7 @@ class OrganizationOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get("{}/{}".format(self.project_endpoint.format(
+        resp = self.api_get("{}/{}".format(self.project_endpoint.format(
             organizationId), projectId), params, headers)
         return resp
 
@@ -617,7 +617,7 @@ class OrganizationOperationsAPIs(CapellaAPIRequests):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.capella_api_put(
+        resp = self.api_put(
             "{}/{}".format(self.project_endpoint.format(organizationId), projectId), params, headers)
         return resp
 
@@ -645,12 +645,12 @@ class OrganizationOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_del("{}/{}".format(self.project_endpoint.format(
+        resp = self.api_del("{}/{}".format(self.project_endpoint.format(
             organizationId), projectId), params, headers)
         return resp
 
 
-class CommonCapellaAPI(CapellaAPIRequests):
+class CommonCapellaAPI(APIRequests):
 
     def __init__(self, url, secret, access, user, pwd, bearer_token,
                  TOKEN_FOR_INTERNAL_SUPPORT=None):
@@ -831,9 +831,9 @@ class CommonCapellaAPI(CapellaAPIRequests):
         project_details = {"name": name, "tenantId": tenant_id}
 
         url = '{}/v2/organizations/{}/projects'.format(self.internal_url, tenant_id)
-        capella_api_response = self.do_internal_request(url, method="POST",
+        api_response = self.do_internal_request(url, method="POST",
                                                         params=json.dumps(project_details))
-        return capella_api_response
+        return api_response
     """
 
     """
@@ -842,9 +842,9 @@ class CommonCapellaAPI(CapellaAPIRequests):
     def delete_project(self, tenant_id, project_id):
         url = '{}/v2/organizations/{}/projects/{}'.format(self.internal_url, tenant_id,
                                                           project_id)
-        capella_api_response = self.do_internal_request(url, method="DELETE",
+        api_response = self.do_internal_request(url, method="DELETE",
                                                         params='')
-        return capella_api_response
+        return api_response
     """
 
     """
@@ -853,8 +853,8 @@ class CommonCapellaAPI(CapellaAPIRequests):
     def access_project(self, tenant_id, project_id):
         url = "{}/v2/organizations/{}/projects/{}".format(self.internal_url, tenant_id,
                                                           project_id)
-        capella_api_response = self.do_internal_request(url, method="GET", params='')
-        return capella_api_response
+        api_response = self.do_internal_request(url, method="GET", params='')
+        return api_response
     """
 
     def run_query(self, cluster_id, payload):

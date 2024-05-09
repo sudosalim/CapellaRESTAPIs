@@ -1,4 +1,4 @@
-from .lib.CapellaExceptions import (
+from .lib.APIExceptions import (
     MissingAccessKeyError,
     MissingSecretKeyError,
     MissingBaseURLError,
@@ -8,5 +8,5 @@ from .lib.CapellaExceptions import (
     GenericHTTPError,
     CbcAPIError
 )
-from .lib.CapellaAPIRequests import CapellaAPIRequests
-from .lib.CapellaAPIAuth import CapellaAPIAuth
+from .lib.APIRequests import APIRequests
+from .lib.APIAuth import APIAuth

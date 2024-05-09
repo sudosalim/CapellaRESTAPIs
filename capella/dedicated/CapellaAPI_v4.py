@@ -5,11 +5,11 @@ import logging
 
 import json
 
-from ..lib.CapellaAPIRequests import CapellaAPIRequests
+from ..lib.APIRequests import APIRequests
 from ..common.CapellaAPI_v4 import CommonCapellaAPI
 
 
-class ClusterOperationsAPIs(CapellaAPIRequests):
+class ClusterOperationsAPIs(APIRequests):
 
     def __init__(self, url, secret, access, bearer_token):
         super(ClusterOperationsAPIs, self).__init__(
@@ -87,7 +87,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.capella_api_post(
+        resp = self.api_post(
             self.backups_endpoint.format(
                 organizationId, projectId, sourceClusterID) + '/' + backupID + '/restore', params, headers)
         return resp
@@ -119,7 +119,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         params = {}
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_del(
+        resp = self.api_del(
             self.backups_endpoint.format(
                 organizationId, projectId, clusterId) + '/' + backupId, params, headers)
         return resp
@@ -151,7 +151,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         params = {}
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_get(
+        resp = self.api_get(
             self.backups_endpoint.format(
                 organizationId, projectId, clusterId) + '/' + backupId, params, headers)
         return resp
@@ -181,7 +181,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         params = {}
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_get(
+        resp = self.api_get(
             self.backups_endpoint.format(
                 organizationId, projectId, clusterId), params, headers)
         return resp
@@ -213,7 +213,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         params = {}
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_post(
+        resp = self.api_post(
             self.backups_endpoint.format(
                 organizationId, projectId, "{}/buckets/{}".format(clusterId, bucketId)), params, headers)
         return resp
@@ -312,7 +312,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
 
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_post(
+        resp = self.api_post(
             self.cluster_endpoint.format(
                 organizationId, projectId), params, headers)
         return resp
@@ -364,7 +364,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.capella_api_get(
+        resp = self.api_get(
             self.cluster_endpoint.format(
                 organizationId, projectId), params, headers)
         return resp
@@ -399,7 +399,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get(
+        resp = self.api_get(
             "{}/{}".format(
                 self.cluster_endpoint.format(
                     organizationId,
@@ -489,7 +489,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.capella_api_put(
+        resp = self.api_put(
             "{}/{}".format(
                 self.cluster_endpoint.format(
                     organizationId,
@@ -526,7 +526,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_del(
+        resp = self.api_del(
             "{}/{}".format(
                 self.cluster_endpoint.format(
                     organizationId,
@@ -561,7 +561,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         }
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_post(
+        resp = self.api_post(
             self.cluster_on_off_endpoint.format(
                 organizationId, projectId, clusterId), params, headers)
         return resp
@@ -591,7 +591,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_del(
+        resp = self.api_del(
             self.cluster_on_off_endpoint.format(
                 organizationId, projectId, clusterId), params, headers)
         return resp
@@ -642,7 +642,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         }
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_post(
+        resp = self.api_post(
             self.cluster_on_off_schedule_endpoint.format(
                 organizationId, projectId, clusterId), params, headers)
         return resp
@@ -674,7 +674,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get(
+        resp = self.api_get(
             self.cluster_on_off_schedule_endpoint.format(
                 organizationId, projectId, clusterId), params, headers)
         return resp
@@ -726,7 +726,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.capella_api_put(
+        resp = self.api_put(
             self.cluster_on_off_schedule_endpoint.format(
                 organizationId, projectId, clusterId), params, headers)
         return resp
@@ -758,7 +758,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_del(
+        resp = self.api_del(
             self.cluster_on_off_schedule_endpoint.format(
                 organizationId, projectId, clusterId), params, headers)
         return resp
@@ -812,7 +812,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params["name"] = name
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_post(self.alerts_endpoint.format(
+        resp = self.api_post(self.alerts_endpoint.format(
                 organizationId, projectId),
             params, headers)
         return resp
@@ -838,7 +838,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get("{}/{}".format(self.alerts_endpoint.format(
+        resp = self.api_get("{}/{}".format(self.alerts_endpoint.format(
                 organizationId, projectId), alertId),
             params, headers)
         return resp
@@ -862,7 +862,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get(self.alerts_endpoint.format(
+        resp = self.api_get(self.alerts_endpoint.format(
                 organizationId, projectId),
             params, headers)
         return resp
@@ -888,7 +888,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_del("{}/{}".format(self.alerts_endpoint.format(
+        resp = self.api_del("{}/{}".format(self.alerts_endpoint.format(
                 organizationId, projectId), alertId),
             params, headers)
         return resp
@@ -944,7 +944,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params["name"] = name
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_put("{}/{}".format(self.alerts_endpoint.format(
+        resp = self.api_put("{}/{}".format(self.alerts_endpoint.format(
                 organizationId, projectId), alert_id),
             params, headers)
         return resp
@@ -970,7 +970,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         }
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_post(self.test_alert_endpoint.format(
+        resp = self.api_post(self.test_alert_endpoint.format(
                 organizationId, projectId),
             params, headers)
         return resp
@@ -1014,7 +1014,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         }
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_put(self.audit_log_endpoint.format(
+        resp = self.api_put(self.audit_log_endpoint.format(
             organizationId, projectId, clusterId),
             params, headers)
         return resp
@@ -1049,7 +1049,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get(self.audit_log_endpoint.format(
+        resp = self.api_get(self.audit_log_endpoint.format(
                 organizationId, projectId, clusterId),
             params, headers)
         return resp
@@ -1083,7 +1083,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get(self.audit_log_events_endpoint.format(
+        resp = self.api_get(self.audit_log_events_endpoint.format(
                 organizationId, projectId, clusterId),
             params, headers)
         return resp
@@ -1119,7 +1119,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         }
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_post(self.audit_log_exports_endpoint.format(
+        resp = self.api_post(self.audit_log_exports_endpoint.format(
             organizationId, projectId, clusterId),
             params, headers)
         return resp
@@ -1156,7 +1156,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get("{}/{}".format(self.audit_log_exports_endpoint.format(
+        resp = self.api_get("{}/{}".format(self.audit_log_exports_endpoint.format(
                 organizationId, projectId, clusterId), auditLogId),
             params, headers)
         return resp
@@ -1191,7 +1191,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get(self.audit_log_exports_endpoint.format(
+        resp = self.api_get(self.audit_log_exports_endpoint.format(
                 organizationId, projectId, clusterId),
             params, headers)
         return resp
@@ -1223,10 +1223,10 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        capella_api_response = self.capella_api_get('{}/{}/certificates'.format(
+        api_response = self.api_get('{}/{}/certificates'.format(
             self.cluster_endpoint.format(organization_id, project_id), cluster_id),
             params=params, headers=headers)
-        return capella_api_response
+        return api_response
 
     """
     Method adds a CIDR to allowed CIDRs list of the specified cluster.
@@ -1267,7 +1267,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params["expiresAt"] = expiresAt
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_post(self.allowedCIDR_endpoint.format(
+        resp = self.api_post(self.allowedCIDR_endpoint.format(
             organizationId, projectId, clusterId), params, headers)
         return resp
 
@@ -1316,7 +1316,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.capella_api_get(self.allowedCIDR_endpoint.format(
+        resp = self.api_get(self.allowedCIDR_endpoint.format(
             organizationId, projectId, clusterId), params, headers)
         return resp
 
@@ -1350,7 +1350,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get(
+        resp = self.api_get(
             "{}/{}".format(
                 self.allowedCIDR_endpoint.format(
                     organizationId,
@@ -1390,7 +1390,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_del(
+        resp = self.api_del(
             "{}/{}".format(
                 self.allowedCIDR_endpoint.format(
                     organizationId,
@@ -1453,7 +1453,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params["password"] = password
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_post(self.db_user_endpoint.format(
+        resp = self.api_post(self.db_user_endpoint.format(
             organizationId, projectId, clusterId), params, headers)
         return resp
 
@@ -1502,7 +1502,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.capella_api_get(self.db_user_endpoint.format(
+        resp = self.api_get(self.db_user_endpoint.format(
             organizationId, projectId, clusterId), params, headers)
         return resp
 
@@ -1536,7 +1536,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get(
+        resp = self.api_get(
             "{}/{}".format(
                 self.db_user_endpoint.format(
                     organizationId,
@@ -1604,7 +1604,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.capella_api_put(
+        resp = self.api_put(
             "{}/{}".format(
                 self.db_user_endpoint.format(
                     organizationId,
@@ -1643,7 +1643,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_del(
+        resp = self.api_del(
             "{}/{}".format(
                 self.db_user_endpoint.format(
                     organizationId,
@@ -1689,7 +1689,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.capella_api_post(self.sample_bucket_endpoint.format(
+        resp = self.api_post(self.sample_bucket_endpoint.format(
                 organizationId, projectId, clusterId),
             params, headers)
         return resp
@@ -1737,7 +1737,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.capella_api_get(self.sample_bucket_endpoint.format(
+        resp = self.api_get(self.sample_bucket_endpoint.format(
             organizationId, projectId, clusterId), params, headers)
         return resp
 
@@ -1772,7 +1772,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get("{}/{}".format(
+        resp = self.api_get("{}/{}".format(
             self.sample_bucket_endpoint.format(
                 organizationId, projectId, clusterId), sampleBucket),
             params, headers)
@@ -1808,7 +1808,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         else:
             params = None
 
-        resp = self.capella_api_del("{}/{}".format(
+        resp = self.api_del("{}/{}".format(
             self.sample_bucket_endpoint.format(
                 organizationId, projectId, clusterId), sampleBucket),
             params, headers)
@@ -1916,7 +1916,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params["evictionPolicy"] = evictionPolicy
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_post(
+        resp = self.api_post(
             self.bucket_endpoint.format(
                 organizationId,
                 projectId,
@@ -1954,7 +1954,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get(self.bucket_endpoint.format(
+        resp = self.api_get(self.bucket_endpoint.format(
             organizationId, projectId, clusterId), params, headers)
         return resp
 
@@ -1990,7 +1990,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get("{}/{}".format(self.bucket_endpoint.format(
+        resp = self.api_get("{}/{}".format(self.bucket_endpoint.format(
             organizationId, projectId, clusterId), bucketId), params, headers)
         return resp
 
@@ -2072,7 +2072,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.capella_api_put("{}/{}".format(self.bucket_endpoint.format(
+        resp = self.api_put("{}/{}".format(self.bucket_endpoint.format(
             organizationId, projectId, clusterId), bucketId), params, headers)
         return resp
 
@@ -2105,7 +2105,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_del("{}/{}".format(self.bucket_endpoint.format(
+        resp = self.api_del("{}/{}".format(self.bucket_endpoint.format(
             organizationId, projectId, clusterId), bucketId), params, headers)
         return resp
 
@@ -2140,7 +2140,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         }
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_post(self.scope_endpoint.format(
+        resp = self.api_post(self.scope_endpoint.format(
             organizationId, projectId, clusterId, bucketId), params, headers)
         return resp
 
@@ -2172,7 +2172,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get(self.scope_endpoint.format(
+        resp = self.api_get(self.scope_endpoint.format(
             organizationId, projectId, clusterId, bucketId), params, headers)
         return resp
 
@@ -2206,7 +2206,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get(
+        resp = self.api_get(
             "{}/{}".format(
                 self.scope_endpoint.format(
                     organizationId,
@@ -2248,7 +2248,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_del(
+        resp = self.api_del(
             "{}/{}".format(
                 self.scope_endpoint.format(
                     organizationId,
@@ -2287,7 +2287,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params["maxTTL"] = maxTTL
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_post(
+        resp = self.api_post(
             self.collection_endpoint.format(
                 organizationId,
                 projectId,
@@ -2328,7 +2328,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get(
+        resp = self.api_get(
             self.collection_endpoint.format(
                 organizationId,
                 projectId,
@@ -2371,7 +2371,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get(
+        resp = self.api_get(
             "{}/{}".format(
                 self.collection_endpoint.format(
                     organizationId,
@@ -2416,7 +2416,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.capella_api_put("{}/{}".format(
+        resp = self.api_put("{}/{}".format(
             self.collection_endpoint.format(
                 organizationId, projectId, clusterId, bucketId, scopeName),
             collectionName), params, headers)
@@ -2446,7 +2446,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_del(
+        resp = self.api_del(
             "{}/{}".format(
                 self.collection_endpoint.format(
                     organizationId,
@@ -2495,7 +2495,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
 
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_post(
+        resp = self.api_post(
             self.backup_schedule_endpoint.format(
                 organizationId,
                 projectId,
@@ -2525,7 +2525,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         else:
             params = None
 
-        resp = self.capella_api_get(
+        resp = self.api_get(
             self.backup_schedule_endpoint.format(
                 organizationId,
                 projectId,
@@ -2572,7 +2572,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
 
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_put(
+        resp = self.api_put(
             self.backup_schedule_endpoint.format(
                 organizationId,
                 projectId,
@@ -2602,7 +2602,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         else:
             params = None
 
-        resp = self.capella_api_del(
+        resp = self.api_del(
             self.backup_schedule_endpoint.format(
                 organizationId,
                 projectId,
@@ -2646,7 +2646,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params["projectId"] = projectId
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_get(url, params=params, headers=headers)
+        resp = self.api_get(url, params=params, headers=headers)
         return resp
 
     def create_appservice(self, tenant_id, project_id, cluster_id, appservice_name, compute, nodes=None, version=None, description="", headers=None, **kwargs):
@@ -2682,7 +2682,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
 
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_post(url, params, headers)
+        resp = self.api_post(url, params, headers)
         return resp
 
     def delete_appservice(self, tenant_id, project_id, cluster_id, appservice_id, headers=None, **kwargs):
@@ -2704,7 +2704,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_del(url, request_body=params, headers=headers)
+        resp = self.api_del(url, request_body=params, headers=headers)
         return resp
 
     def get_appservice(self, tenant_id, project_id, cluster_id, appservice_id, headers=None, **kwargs):
@@ -2723,7 +2723,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get(url, params=params, headers=headers)
+        resp = self.api_get(url, params=params, headers=headers)
         return resp
 
     def get_cluster(self, tenant_id, project_id, cluster_id, headers=None, **kwargs):
@@ -2742,7 +2742,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_get(url, params=params, headers=headers)
+        resp = self.api_get(url, params=params, headers=headers)
         return resp
 
     def update_appservices(self, tenant_id, project_id, cluster_id, appservice_id, nodes, cpu, ram, headers=None, **kwargs):
@@ -2771,7 +2771,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
         }
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_put(url, params, headers=headers)
+        resp = self.api_put(url, params, headers=headers)
         return resp
 
     """
@@ -2797,7 +2797,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_post(
+        resp = self.api_post(
             self.appservice_on_off_endpoint.format(
                 organizationId, projectId, clusterId, appServiceId),
             params, headers)
@@ -2826,7 +2826,7 @@ class ClusterOperationsAPIs(CapellaAPIRequests):
             params = kwargs
         else:
             params = None
-        resp = self.capella_api_del(
+        resp = self.api_del(
             self.appservice_on_off_endpoint.format(
                 organizationId, projectId, clusterId, appServiceId),
             params, headers)
@@ -2857,8 +2857,8 @@ class CapellaAPI(CommonCapellaAPI):
     New Method - ClusterOperationsAPIs.list_clusters
 
     def get_clusters(self, params=None):
-        capella_api_response = self.capella_api_get('/v3/clusters', params)
-        return (capella_api_response)
+        api_response = self.api_get('/v3/clusters', params)
+        return (api_response)
     """
 
     """
@@ -2866,50 +2866,50 @@ class CapellaAPI(CommonCapellaAPI):
     New Method - ClusterOperationsAPIs.fetch_cluster_info
 
     def get_cluster_info(self, cluster_id):
-        capella_api_response = self.capella_api_get('/v3/clusters/' + cluster_id)
+        api_response = self.api_get('/v3/clusters/' + cluster_id)
 
-        return (capella_api_response)
+        return (api_response)
     """
 
     def get_cluster_status(self, cluster_id):
-        capella_api_response = self.capella_api_get(
+        api_response = self.api_get(
             '/v3/clusters/' + cluster_id + '/status')
 
-        return (capella_api_response)
+        return (api_response)
 
     """
     Method Deprecated.
     New Method - ClusterOperationsAPIs.create_cluster
 
     def create_cluster(self, cluster_configuration):
-        capella_api_response = self.capella_api_post('/v3/clusters', cluster_configuration)
+        api_response = self.api_post('/v3/clusters', cluster_configuration)
 
-        return (capella_api_response)
+        return (api_response)
     """
 
     """
     Method Deprecated.
     New Method - ClusterOperationsAPIs.update_cluster
     def update_cluster_servers(self, cluster_id, new_cluster_server_configuration):
-        capella_api_response = self.capella_api_put('/v3/clusters' + '/' + cluster_id + '/servers',
+        api_response = self.api_put('/v3/clusters' + '/' + cluster_id + '/servers',
                                                     new_cluster_server_configuration)
 
-        return (capella_api_response)
+        return (api_response)
     """
 
     def get_cluster_servers(self, cluster_id):
         response_dict = None
 
-        capella_api_response = self.get_cluster_info(True, cluster_id)
+        api_response = self.get_cluster_info(True, cluster_id)
         # Did we get the info back ?
-        if capella_api_response.status_code == 200:
+        if api_response.status_code == 200:
             # Do we have JSON response ?
-            if capella_api_response.headers['content-type'] == 'application/json':
+            if api_response.headers['content-type'] == 'application/json':
                 # Is there anything in it?
                 # We use response.text as this is a string
                 # response.content is in bytes which we use for json.loads
-                if len(capella_api_response.text) > 0:
-                    response_dict = capella_api_response.json()['place']
+                if len(api_response.text) > 0:
+                    response_dict = api_response.json()['place']
 
         # return just the servers bit
         return (response_dict)
@@ -2918,26 +2918,26 @@ class CapellaAPI(CommonCapellaAPI):
     Method Deprecated.
     New Method - ClusterOperationsAPIs.delete_cluster
     def delete_cluster(self, cluster_id):
-        capella_api_response = self.capella_api_del('/v3/clusters' + '/' + cluster_id)
-        return (capella_api_response)
+        api_response = self.api_del('/v3/clusters' + '/' + cluster_id)
+        return (api_response)
     """
 
     """
     Method Deprecated.
     New Method - ClusterOperationsAPIs.list_database_users
     def get_cluster_users(self, cluster_id):
-        capella_api_response = self.capella_api_get('/v3/clusters' + '/' + cluster_id +
+        api_response = self.api_get('/v3/clusters' + '/' + cluster_id +
                                                     '/users')
-        return (capella_api_response)
+        return (api_response)
     """
 
     """
     Method Deprecated.
     New Method - ClusterOperationsAPIs.delete_database_user
     def delete_cluster_user(self, cluster_id, cluster_user):
-        capella_api_response = self.capella_api_del('/v3/clusters' + '/' + cluster_id +
+        api_response = self.api_del('/v3/clusters' + '/' + cluster_id +
                                                     '/users/' + cluster_user)
-        return (capella_api_response)
+        return (api_response)
     """
 
     """
@@ -2945,9 +2945,9 @@ class CapellaAPI(CommonCapellaAPI):
     Method Deprecated
     New Method - CLusterOperationsAPIs.get_cluster_certificate
     def get_cluster_certificate(self, cluster_id):
-        capella_api_response = self.capella_api_get(
+        api_response = self.api_get(
             '/v3/clusters' + '/' + cluster_id + '/certificate')
-        return (capella_api_response)
+        return (api_response)
     """
 
     # Cluster buckets
@@ -2955,36 +2955,36 @@ class CapellaAPI(CommonCapellaAPI):
     Method Deprecated.
     New Method - ClusterOperationsAPIs.list_buckets
     def get_cluster_buckets(self, cluster_id):
-        capella_api_response = self.capella_api_get('/v2/clusters' + '/' + cluster_id +
+        api_response = self.api_get('/v2/clusters' + '/' + cluster_id +
                                                     '/buckets')
-        return (capella_api_response)
+        return (api_response)
     """
 
     """
     Method Deprecated.
     New Method - ClusterOperationsAPIs.create_bucket
     def create_cluster_bucket(self, cluster_id, bucket_configuration):
-        capella_api_response = self.capella_api_post('/v2/clusters' + '/' + cluster_id +
+        api_response = self.api_post('/v2/clusters' + '/' + cluster_id +
                                                      '/buckets', bucket_configuration)
-        return (capella_api_response)
+        return (api_response)
     """
 
     """
     Method Deprecated.
     New Method - ClusterOperationsAPIs.update_bucket_config
     def update_cluster_bucket(self, cluster_id, bucket_id, new_bucket_configuration):
-        capella_api_response = self.capella_api_put('/v2/clusters' + '/' + cluster_id +
+        api_response = self.api_put('/v2/clusters' + '/' + cluster_id +
                                                     '/buckets/' + bucket_id, new_bucket_configuration)
-        return (capella_api_response)
+        return (api_response)
     """
 
     """
     Method Deprecated.
     New Method - ClusterOperationsAPIs.delete_bucket
     def delete_cluster_bucket(self, cluster_id, bucket_configuration):
-        capella_api_response = self.capella_api_del('/v2/clusters' + '/' + cluster_id +
+        api_response = self.api_del('/v2/clusters' + '/' + cluster_id +
                                                     '/buckets', bucket_configuration)
-        return (capella_api_response)
+        return (api_response)
     """
 
     # Cluster Allow lists
@@ -2992,46 +2992,46 @@ class CapellaAPI(CommonCapellaAPI):
     Method Deprecated.
     New Method - ClusterOperationsAPIs.list_allowed_CIDRs
     def get_cluster_allowlist(self, cluster_id):
-        capella_api_response = self.capella_api_get('/v2/clusters' + '/' + cluster_id +
+        api_response = self.api_get('/v2/clusters' + '/' + cluster_id +
                                                     '/allowlist')
-        return (capella_api_response)
+        return (api_response)
     """
 
     """
     Method Deprecated.
     New Method - ClusterOperationsAPIs.delete_allowed_CIDR
     def delete_cluster_allowlist(self, cluster_id, allowlist_configuration):
-        capella_api_response = self.capella_api_del('/v2/clusters' + '/' + cluster_id +
+        api_response = self.api_del('/v2/clusters' + '/' + cluster_id +
                                                     '/allowlist', allowlist_configuration)
-        return (capella_api_response)
+        return (api_response)
     """
 
     """
     Method Deprecated.
     New Method - ClusterOperationsAPIs.add_CIDR_to_allowed_CIDRs_list
     def create_cluster_allowlist(self, cluster_id, allowlist_configuration):
-        capella_api_response = self.capella_api_post('/v2/clusters' + '/' + cluster_id +
+        api_response = self.api_post('/v2/clusters' + '/' + cluster_id +
                                                      '/allowlist', allowlist_configuration)
-        return (capella_api_response)
+        return (api_response)
     """
 
     def update_cluster_allowlist(
             self,
             cluster_id,
             new_allowlist_configuration):
-        capella_api_response = self.capella_api_put(
+        api_response = self.api_put(
             '/v2/clusters' + '/' + cluster_id + '/allowlist',
             new_allowlist_configuration)
-        return (capella_api_response)
+        return (api_response)
 
     # Cluster user
     """
     Method Deprecated.
     New Method - ClusterOperationsAPIs.create_database_user
     def create_cluster_user(self, cluster_id, cluster_user_configuration):
-        capella_api_response = self.capella_api_post('/v3/clusters' + '/' + cluster_id +
+        api_response = self.api_post('/v3/clusters' + '/' + cluster_id +
                                                      '/users', cluster_user_configuration)
-        return (capella_api_response)
+        return (api_response)
     """
 
     # Capella Users
@@ -3039,8 +3039,8 @@ class CapellaAPI(CommonCapellaAPI):
     Method Deprecated.
     New Method - ClusterOperationsAPIs.list_database_users
     def get_users(self):
-        capella_api_response = self.capella_api_get('/v2/users?perPage=' + str(self.perPage))
-        return (capella_api_response)
+        api_response = self.api_get('/v2/users?perPage=' + str(self.perPage))
+        return (api_response)
     """
 
     """
@@ -3982,9 +3982,9 @@ class CapellaAPI(CommonCapellaAPI):
         project_details = {"name": name, "tenantId": tenant_id}
 
         url = '{}/v2/organizations/{}/projects'.format(self.internal_url, tenant_id)
-        capella_api_response = self.do_internal_request(url, method="POST",
+        api_response = self.do_internal_request(url, method="POST",
                                                         params=json.dumps(project_details))
-        return capella_api_response
+        return api_response
     """
 
     """
@@ -3993,9 +3993,9 @@ class CapellaAPI(CommonCapellaAPI):
     def delete_project(self, tenant_id, project_id):
         url = '{}/v2/organizations/{}/projects/{}'.format(self.internal_url, tenant_id,
                                                           project_id)
-        capella_api_response = self.do_internal_request(url, method="DELETE",
+        api_response = self.do_internal_request(url, method="DELETE",
                                                         params='')
-        return capella_api_response
+        return api_response
     """
 
     def turn_off_cluster(self, tenant_id, project_id, cluster_id):
