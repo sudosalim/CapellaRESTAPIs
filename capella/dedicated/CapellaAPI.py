@@ -225,14 +225,19 @@ class CapellaAPI(CommonCapellaAPI):
                                     params=json.dumps(body))
         return resp
 
-    def allow_my_ip(self, tenant_id, project_id, cluster_id):
+    def allow_my_ip(self, tenant_id, project_id, cluster_id, all=False):
         url = '{}/v2/organizations/{}/projects/{}/clusters/{}'\
             .format(self.internal_url, tenant_id, project_id, cluster_id)
-        resp = self._urllib_request("https://ifconfig.me", method="GET")
-        if resp.status_code != 200:
-            raise Exception("Fetch public IP failed!")
-        body = {"create": [{"cidr": "{}/32".format(resp.content.decode()),
-                            "comment": ""}]}
+        body = dict()
+        if all:
+            body = {"create": [{"cidr": "0.0.0.0/0",
+                                "comment": ""}]}
+        else:
+            resp = self._urllib_request("https://ifconfig.me", method="GET")
+            if resp.status_code != 200:
+                raise Exception("Fetch public IP failed!")
+            body = {"create": [{"cidr": "{}/32".format(resp.content.decode()),
+                                "comment": ""}]}
         url = '{}/allowlists-bulk'.format(url)
         resp = self.do_internal_request(url, method="POST",
                                     params=json.dumps(body))

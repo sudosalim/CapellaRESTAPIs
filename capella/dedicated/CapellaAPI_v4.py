@@ -3168,7 +3168,7 @@ class CapellaAPI(CommonCapellaAPI):
     """
 
     def allow_my_ip(self, tenant_id, project_id, cluster_id):
-        url = '{}/v2/organizations/{}/projects/{}/clusters/{}' \
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}'\
             .format(self.internal_url, tenant_id, project_id, cluster_id)
         resp = self._urllib_request("https://ifconfig.me", method="GET")
         if resp.status_code != 200:
