@@ -3589,6 +3589,27 @@ class CapellaAPI(CommonCapellaAPI):
                                         params=json.dumps(config))
         return resp
 
+    def fetch_all_invitations(self):
+        """
+        Fetches all the invitations for a user
+        :return: list of invitations
+        """
+        url = "{}/invitations".format(self.internal_url)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def manage_invitation(self, invitation_id, action):
+        """
+        Method to accept or reject an invitation
+        :param invitation_id: Id of the invitation that needs to be
+        accepted or rejected.
+        :param action: accept/decline
+        :return:
+        """
+        url = "{}/invitations/{}".format(self.internal_url, invitation_id)
+        resp = self.do_internal_request(url, method="PUT",
+                                        params=json.dumps({"action": action}))
+        return resp
 
     def verify_email(self, token):
         """
