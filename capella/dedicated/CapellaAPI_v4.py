@@ -4011,3 +4011,9 @@ class CapellaAPI(CommonCapellaAPI):
         resp = self.do_internal_request(
             url, method="POST", params=json.dumps(payload))
         return resp
+
+    def get_root_ca(self, cluster_id):
+        url = '{}/v2/databases/{}/proxy/pools/default/trustedCAs' \
+            .format(self.internal_url, cluster_id)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
