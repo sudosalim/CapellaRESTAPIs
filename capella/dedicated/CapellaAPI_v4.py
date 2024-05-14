@@ -45,6 +45,7 @@ class ClusterOperationsAPIs(APIRequests):
         self.audit_log_exports_endpoint = self.cluster_endpoint + "/{}/auditLogExports"
         self.audit_log_endpoint = self.cluster_endpoint + "/{}/auditLog"
         self.audit_log_events_endpoint = self.cluster_endpoint + "/{}/auditLogEvents"
+        self.bucket_migration_endpoint = self.cluster_endpoint + "/{}/bucketStorageMigration"
 
     """
     Method to restore the backup with backupId under cluster, project and organization mentioned.
@@ -761,6 +762,34 @@ class ClusterOperationsAPIs(APIRequests):
         resp = self.api_del(
             self.cluster_on_off_schedule_endpoint.format(
                 organizationId, projectId, clusterId), params, headers)
+        return resp
+
+    """
+    Method migrates the specified buckets from couchstore -> magma over Capella.
+    :param organizationId (str) Organization ID under which the buckets are present.
+    :param projectId (str) Project ID under which the buckets are present.
+    :param clusterId (str) Cluster ID under which the buckets are present.
+    :param buckets (list)
+        :param (str) Bucket name
+    :param headers (dict) Headers to be sent with the API call. (NOTE THAT THIS PARAM IS DIFFERENT TO THE HEADER PARAM BEING SENT IN THE BODY OF THE ALERT IN THE CONFIG OBJECT)
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+    def update_bucket_storage_migration(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            buckets=[],
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info("Migrating buckets `{}` in cluster {} in project {} in organization {}.".format(buckets, clusterId, projectId, organizationId))
+        params = {
+            "buckets": buckets,
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+        resp = self.capella_api_put(
+            self.bucket_migration_endpoint.format(organizationId, projectId, clusterId), params, headers)
         return resp
 
     """
