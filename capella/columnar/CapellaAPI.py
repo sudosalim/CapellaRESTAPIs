@@ -283,3 +283,17 @@ class CapellaAPI(CommonCapellaAPI):
             .format(self.internal_url, tenant_id, project_id, instance_id)
         resp = self.do_internal_request(url, method="POST", params='')
         return resp
+
+    def execute_statement(self, tenant_id, project_id, instance_id, statement,
+                          client_context_id=None, analytics_timeout=120,
+                          time_out_unit="s"):
+
+        url = "{}/v2/organizations/{}/projects/{}/instance/{}/proxy/query/service".format(
+            self.internal_url, tenant_id, project_id, instance_id)
+
+        params = {'statement': statement, 'client_context_id': client_context_id,
+                  'timeout': str(analytics_timeout) + time_out_unit}
+
+        resp = self.do_internal_request(url, method="POST",
+                                        params=json.dumps(params))
+        return resp
