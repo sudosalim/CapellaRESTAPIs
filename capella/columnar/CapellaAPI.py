@@ -297,3 +297,24 @@ class CapellaAPI(CommonCapellaAPI):
         resp = self.do_internal_request(url, method="POST",
                                         params=json.dumps(params))
         return resp
+
+    def schedule_on_off(self, tenant_id, project_id, instance_id, timezone: "UTC", days, **kwargs):
+        """
+            Schedules the columnar instance on and off
+            Parameters:
+                tenant_id (str): The ID of the tenant associated with the project.
+                project_id (str): The ID of the project where the instance is located.
+                instance_id (str): The ID of the Columnar instance to create keys for.
+                timezone (str): The timezone to follow for schedule times
+                days (dict): Contains states, day and time for on off
+        """
+        body = {
+            "timezone": timezone,
+            "days": days,
+        }
+        for k, v in kwargs.items():
+            body[k] = v
+        url = '{}/v2/organizations/{}/projects/{}/instance/{}/schedules/onoff' \
+            .format(self.internal_url, tenant_id, project_id, instance_id)
+        resp = self.do_internal_request(url, method="PUT", params=json.dumps(body))
+        return resp
