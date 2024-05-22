@@ -298,7 +298,7 @@ class CapellaAPI(CommonCapellaAPI):
                                         params=json.dumps(params))
         return resp
 
-    def schedule_on_off(self, tenant_id, project_id, instance_id, timezone: "UTC", days, **kwargs):
+    def schedule_on_off(self, tenant_id, project_id, instance_id, days, timezone="UTC", **kwargs):
         """
             Schedules the columnar instance on and off
             Parameters:
@@ -306,7 +306,7 @@ class CapellaAPI(CommonCapellaAPI):
                 project_id (str): The ID of the project where the instance is located.
                 instance_id (str): The ID of the Columnar instance to create keys for.
                 timezone (str): The timezone to follow for schedule times
-                days (dict): Contains states, day and time for on off
+                days (list of dict): Contains states, day and time for on off
         """
         body = {
             "timezone": timezone,
