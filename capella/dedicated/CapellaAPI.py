@@ -265,6 +265,20 @@ class CapellaAPI(CommonCapellaAPI):
                                     params=json.dumps(param))
         return resp
 
+    def configure_autoscaling(self, cluster_id, config):
+        """
+        method to alter compute autoscaling config.
+        :param cluster_id:
+        :param config:
+        :return: response object
+        """
+        url = "{}/internal/support/clusters/{}/auto-scaling-config"\
+            .format(self.internal_url, cluster_id)
+        resp = self._urllib_request(url, method="PUT",
+                                    params=json.dumps(config),
+                                    headers=self.cbc_api_request_headers)
+        return resp
+
     def upgrade_dp_agent(self, cluster_id, version_hash):
         url = "{}/internal/support/clusters/{}/agent-versions/activate"\
               .format(self.internal_url, cluster_id)
@@ -823,18 +837,6 @@ class CapellaAPI(CommonCapellaAPI):
               .format(self.internal_url, tenant_id, project_id, cluster_id, replication_id)
         resp = self.do_internal_request(url, method="POST")
         return resp
-
-    def configure_autoscaling(self, cluster_id, config):
-        """
-        method to alter compute autoscaling config.
-        :param cluster_id:
-        :return: response object
-        """
-        url = "{}/internal/support/clusters/{}/auto-scaling-config"\
-            .format(self.internal_url, cluster_id)
-        resp = self.do_internal_request(url, method="PUT", params=json.dumps(config))
-        return resp
-
 
     def create_sgw_backend(self, tenant_id, config):
         """
