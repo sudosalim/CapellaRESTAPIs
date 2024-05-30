@@ -2,18 +2,17 @@
 # Generic/Built-in
 import base64
 import logging
-
 import json
-
 from ..common.CapellaAPI_v4 import OrganizationOperationsAPIs
+from ..lib.APIRequests import APIRequests
 
 
-class ColumnarAPIs(OrganizationOperationsAPIs):
+class ColumnarAPIs(APIRequests):
 
     def __init__(self, url, secret, access, bearer_token):
         super(ColumnarAPIs, self).__init__(url, secret, access, bearer_token)
         self.columnar_ops_API_log = logging.getLogger(__name__)
-        self.analytics_clusters_endpoint = self.project_endpoint + "/{}/analyticsClusters"
+        self.analytics_clusters_endpoint = "/v4/organizations/{}/projects/{}/analyticsClusters"
 
     def turn_analytics_cluster_off(
             self,
@@ -45,9 +44,9 @@ class ColumnarAPIs(OrganizationOperationsAPIs):
         else:
             params = None
 
-        resp = (self.capella_api_del("{}/{}".format(
+        resp = self.api_del("{}/{}".format(
             self.analytics_clusters_endpoint.format(
-                organizationId, projectId), instanceId), params, headers))
+                organizationId, projectId), instanceId), params, headers)
         return resp
 
     def turn_analytics_cluster_on(
@@ -80,9 +79,9 @@ class ColumnarAPIs(OrganizationOperationsAPIs):
         else:
             params = None
 
-        resp = (self.capella_api_post("{}/{}".format(
+        resp = self.api_post("{}/{}".format(
             self.analytics_clusters_endpoint.format(
-                organizationId, projectId), instanceId), params, headers))
+                organizationId, projectId), instanceId), params, headers)
         return resp
 
     def create_analytics_cluster(
@@ -129,7 +128,7 @@ class ColumnarAPIs(OrganizationOperationsAPIs):
         for k, v in kwargs:
             params[k] = v
 
-        resp = self.capella_api_post(
+        resp = self.api_post(
             self.analytics_clusters_endpoint.format(organizationId, projectId),
             params, headers)
         return resp
@@ -164,7 +163,7 @@ class ColumnarAPIs(OrganizationOperationsAPIs):
         else:
             params = None
 
-        resp = self.capella_api_del("{}/{}".format(
+        resp = self.api_del("{}/{}".format(
             self.analytics_clusters_endpoint.format(organizationId, projectId),
             instanceId), params, headers)
         return resp
@@ -199,7 +198,7 @@ class ColumnarAPIs(OrganizationOperationsAPIs):
         else:
             params = None
 
-        resp = self.capella_api_get("{}/{}".format(
+        resp = self.api_get("{}/{}".format(
             self.analytics_clusters_endpoint.format(organizationId, projectId),
             instanceId), params, headers)
         return resp
@@ -247,9 +246,8 @@ class ColumnarAPIs(OrganizationOperationsAPIs):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.capella_api_get(
-            self.organization_endpoint + "/{}/analyticsClusters"
-            .format(organizationId), params, headers)
+        resp = self.api_get("/v4/organizations/{}/analyticsClusters"
+                            .format(organizationId), params, headers)
         return resp
 
     def list_project_level_analytics_clusters(
@@ -296,7 +294,7 @@ class ColumnarAPIs(OrganizationOperationsAPIs):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.capella_api_get(
+        resp = self.api_get(
             self.analytics_clusters_endpoint.format(organizationId, projectId),
             params, headers)
         return resp
@@ -341,7 +339,7 @@ class ColumnarAPIs(OrganizationOperationsAPIs):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.capella_api_put("{}/{}".format(
+        resp = self.api_put("{}/{}".format(
             self.analytics_clusters_endpoint.format(organizationId, projectId),
             instanceId), params, headers)
         return resp

@@ -788,7 +788,7 @@ class ClusterOperationsAPIs(APIRequests):
         }
         for k, v in kwargs.items():
             params[k] = v
-        resp = self.capella_api_put(
+        resp = self.api_put(
             self.bucket_migration_endpoint.format(organizationId, projectId, clusterId), params, headers)
         return resp
 
