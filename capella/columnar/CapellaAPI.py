@@ -216,8 +216,8 @@ class CapellaAPI(CommonCapellaAPI):
         """
         url = "{}/v2/organizations/{}/projects/{}/instance/{}/apikeys?" \
               "page={}&perPage={}".format(
-              self.internal_url, tenant_id, project_id, instance_id,
-              page, perPage)
+            self.internal_url, tenant_id, project_id, instance_id,
+            page, perPage)
         resp = self.do_internal_request(url, method="GET")
         return resp
 
@@ -242,7 +242,7 @@ class CapellaAPI(CommonCapellaAPI):
             Parameters:
                 tenant_id (str): The ID of the tenant associated with the project.
                 project_id (str): The ID of the project where the instance is located.
-                instance_id (str): The ID of the Columnar instance to create keys for.
+                instance_id (str): The ID of the Columnar instance.
                 cidr (str): The CIDR that is to be added to the allowed CIDR list
                 comment (str): Comment for the CIDR that is to be added
                 **kwargs: Additional keyword arguments to pass to the API request.
@@ -277,7 +277,7 @@ class CapellaAPI(CommonCapellaAPI):
             Parameters:
                 tenant_id (str): The ID of the tenant associated with the project.
                 project_id (str): The ID of the project where the instance is located.
-                instance_id (str): The ID of the Columnar instance to create keys for.
+                instance_id (str): The ID of the Columnar instance.
         """
         url = '{}/v2/organizations/{}/projects/{}/instance/{}/on' \
             .format(self.internal_url, tenant_id, project_id, instance_id)
@@ -304,7 +304,7 @@ class CapellaAPI(CommonCapellaAPI):
             Parameters:
                 tenant_id (str): The ID of the tenant associated with the project.
                 project_id (str): The ID of the project where the instance is located.
-                instance_id (str): The ID of the Columnar instance to create keys for.
+                instance_id (str): The ID of the Columnar instance.
                 timezone (str): The timezone to follow for schedule times
                 days (list of dict): Contains states, day and time for on off
         """
@@ -317,4 +317,154 @@ class CapellaAPI(CommonCapellaAPI):
         url = '{}/v2/organizations/{}/projects/{}/instance/{}/schedules/onoff' \
             .format(self.internal_url, tenant_id, project_id, instance_id)
         resp = self.do_internal_request(url, method="PUT", params=json.dumps(body))
+        return resp
+
+    def create_backup(self, tenant_id, project_id, instance_id, retention=None):
+        """
+            Creates backup for columnar instance
+            Parameters:
+                tenant_id (str): The ID of the tenant associated with the project.
+                project_id (str): The ID of the project where the instance is located.
+                instance_id (str): The ID of the Columnar instance.
+                retention(int): Optional, Backup retention time in hours from 24-to-720
+        """
+        payload = None
+        if retention:
+            payload = {"retention": retention}
+        url = '{}/v2/organizations/{}/projects/{}/instance/{}/snapshotbackups'.format(
+            self.internal_url, tenant_id, project_id, instance_id)
+        resp = self.do_internal_request(url, method="POST", params=json.dumps(payload))
+        return resp
+
+    def list_backups(self, tenant_id, project_id, instance_id):
+        """
+            Creates backup for columnar instance
+            Parameters:
+                tenant_id (str): The ID of the tenant associated with the project.
+                project_id (str): The ID of the project where the instance is located.
+                instance_id (str): The ID of the Columnar instance.
+        """
+        url = '{}/v2/organizations/{}/projects/{}/instance/{}/snapshotbackups' \
+            .format(self.internal_url, tenant_id, project_id, instance_id)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def delete_backup(self, tenant_id, project_id, instance_id, backup_id):
+        """
+            Delete a backup belonging to the columnar instance
+            Parameters:
+                tenant_id (str): The ID of the tenant associated with the project.
+                project_id (str): The ID of the project where the instance is located.
+                instance_id (str): The ID of the Columnar instance.
+                backup_id (str): The ID of the backup that is to be deleted
+        """
+        url = '{}/v2/organizations/{}/projects/{}/instance/{}/snapshotbackups/{}' \
+            .format(self.internal_url, tenant_id, project_id, instance_id, backup_id)
+        resp = self.do_internal_request(url, method="DELETE")
+        return resp
+
+    def edit_backup_retention(self, tenant_id, project_id, instance_id, backup_id, retention):
+        """
+            Edit a backup retention
+            Parameters:
+                tenant_id (str): The ID of the tenant associated with the project.
+                project_id (str): The ID of the project where the instance is located.
+                instance_id (str): The ID of the Columnar instance.
+                backup_id (str): The ID of the backup that is to be deleted
+                retention (int): Backup retention time in hours from 24-to-720
+        """
+        payload = {"retention": retention}
+        url = '{}/v2/organizations/{}/projects/{}/instance/{}/snapshotbackups/{}' \
+            .format(self.internal_url, tenant_id, project_id, instance_id, backup_id)
+        resp = self.do_internal_request(url, method="PUT", params=json.dumps(payload))
+        return resp
+
+    def backup_restore_billing_rate(self, tenant_id, project_id, instance_id):
+        """
+            Get billing rate for backup and restore
+            Parameters:
+                tenant_id (str): The ID of the tenant associated with the project.
+                project_id (str): The ID of the project where the instance is located.
+                instance_id (str): The ID of the Columnar instance.
+        """
+        url = '{}/v2/organizations/{}/projects/{}/instance/{}/snapshotbackups/cost' \
+            .format(self.internal_url, tenant_id, project_id, instance_id)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def create_restore(self, tenant_id, project_id, instance_id, backup_id):
+        """
+            Create restore of a backup
+            Parameters:
+                tenant_id (str): The ID of the tenant associated with the project.
+                project_id (str): The ID of the project where the instance is located.
+                instance_id (str): The ID of the Columnar instance.
+                backup_id (str): The ID of the backup that is to be restored
+        """
+        url = '{}/v2/organizations/{}/projects/{}/instance/{}/snapshotbackups/{}/restore' \
+            .format(self.internal_url, tenant_id, project_id, instance_id, backup_id)
+        resp = self.do_internal_request(url, method="POST")
+        return resp
+
+    def list_restores(self, tenant_id, project_id, instance_id, backup_id):
+        """
+            Create restore of a backup
+            Parameters:
+                tenant_id (str): The ID of the tenant associated with the project.
+                project_id (str): The ID of the project where the instance is located.
+                instance_id (str): The ID of the Columnar instance.
+                backup_id (str): The ID of the backup
+        """
+        url = '{}/v2/organizations/{}/projects/{}/instance/{}/snapshotbackups/{}/restores' \
+            .format(self.internal_url, tenant_id, project_id, instance_id, backup_id)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def schedule_backup_create_update(self, tenant_id, project_id, instance_id, interval, retention, start_time):
+        """
+            Create restore of a backup
+            Parameters:
+                tenant_id (str): The ID of the tenant associated with the project.
+                project_id (str): The ID of the project where the instance is located.
+                instance_id (str): The ID of the Columnar instance.
+                interval (int): hours
+                retention (int): hours from 24-to-720
+                start_time (timestamp-in-RFC3339): Optional, Time to start backup
+        """
+        payload = {
+            "interval": interval,
+            "retention": retention,
+        }
+        if start_time:
+            payload["startTime"] = start_time
+
+        url = '{}/v2/organizations/{}/projects/{}/instance/{}/snapshotbackupschedule' \
+            .format(self.internal_url, tenant_id, project_id, instance_id)
+        resp = self.do_internal_request(url, method="PUT", params=json.dumps(payload))
+        return resp
+
+    def get_backup_schedules(self, tenant_id, project_id, instance_id):
+        """
+            Get all schedules available for the columnar instance
+            Parameters:
+                tenant_id (str): The ID of the tenant associated with the project.
+                project_id (str): The ID of the project where the instance is located.
+                instance_id (str): The ID of the Columnar instance.
+        """
+        url = '{}/v2/organizations/{}/projects/{}/instance/{}/snapshotbackupschedule' \
+            .format(self.internal_url, tenant_id, project_id, instance_id)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def delete_schedule_backup(self, tenant_id, project_id, instance_id):
+        """
+            Delete all schedule backups for the columnar instance
+            Parameters:
+                tenant_id (str): The ID of the tenant associated with the project.
+                project_id (str): The ID of the project where the instance is located.
+                instance_id (str): The ID of the Columnar instance.
+        """
+        url = '{}/v2/organizations/{}/projects/{}/instance/{}/snapshotbackupschedule' \
+            .format(self.internal_url, tenant_id, project_id, instance_id)
+        resp = self.do_internal_request(url, method="DELETE")
         return resp
