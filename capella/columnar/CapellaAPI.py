@@ -87,7 +87,7 @@ class CapellaAPI(CommonCapellaAPI):
             "region": region,
             "nodes": nodes,
             "instanceTypes": instance_types,
-            "supportPackage": support_package,
+            "package": support_package,
             "availabilityZone": availability_zone
         }
         for key, value in kwargs.items():
