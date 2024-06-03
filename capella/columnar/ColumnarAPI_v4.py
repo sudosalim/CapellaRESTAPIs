@@ -13,6 +13,7 @@ class ColumnarAPIs(APIRequests):
         super(ColumnarAPIs, self).__init__(url, secret, access, bearer_token)
         self.columnar_ops_API_log = logging.getLogger(__name__)
         self.analytics_clusters_endpoint = "/v4/organizations/{}/projects/{}/analyticsClusters"
+        self.analytics_on_off_endpoint = self.analytics_clusters_endpoint + "/{}/onOffSchedule"
 
     def turn_analytics_cluster_off(
             self,
@@ -342,4 +343,153 @@ class ColumnarAPIs(APIRequests):
         resp = self.api_put("{}/{}".format(
             self.analytics_clusters_endpoint.format(organizationId, projectId),
             instanceId), params, headers)
+        return resp
+
+    def create_on_off_schedule(
+            self,
+            organizationId,
+            projectId,
+            instanceId,
+            timezone,
+            days,
+            headers=None,
+            **kwargs):
+        """
+        Creates a schedule for switching the columnar instance on off on weekly basis
+
+        Args:
+            organizationId: The ID of the tenant. (UUID)
+            projectId: The ID of the project. (UUID)
+            instanceId: The ID of the instance which has to be scheduled on/off. (UUID)
+            timezone: The local time-zone that the scheduled days shall fall into (str)
+            days: List of each day having its schedule params (list)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.columnar_ops_API_log.info(
+            "Creating on off schedule for the instance {}, inside project {}, "
+            "inside tenant {}.".format(instanceId, projectId, organizationId))
+
+        params = {
+            "timezone": timezone,
+            "days": days
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_post(self.analytics_on_off_endpoint.format(
+            organizationId, projectId, instanceId), params, headers)
+        return resp
+
+    def delete_on_off_schedule(
+            self,
+            organizationId,
+            projectId,
+            instanceId,
+            headers=None,
+            **kwargs):
+        """
+        Deletes the on/off schedule (if present) for the specified instance,
+
+        Args:
+            organizationId: The ID of the tenant. (UUID)
+            projectId: The ID of the project. (UUID)
+            instanceId: The ID of the instance for which the scheduled has to be cleared. (UUID)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.columnar_ops_API_log.info(
+            "Deleting on/off schedule for instance {}, inside project {}, "
+            "inside tenant {}.".format(instanceId, projectId, organizationId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_del(self.analytics_on_off_endpoint.format(
+            organizationId, projectId, instanceId), params, headers)
+        return resp
+
+    def fetch_on_off_schedule_info(
+            self,
+            organizationId,
+            projectId,
+            instanceId,
+            headers=None,
+            **kwargs):
+        """
+        Gets the details for the on/off schedule of the given instance.
+
+        Args:
+            organizationId: ID of the tenant. (UUID)
+            projectId: ID of the Project. (UUID)
+            instanceId: ID of the instance for which the on/off details have to be fetched. (UUID)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.columnar_ops_API_log.info(
+            "Fetching on/off schedule details for the instance {}, inside "
+            "project {}, inside tenant {}".format(instanceId, projectId,
+                                                  organizationId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_get(self.analytics_clusters_endpoint.format(
+            organizationId, projectId, instanceId), params, headers)
+        return resp
+
+    def update_on_off_schedule(
+            self,
+            organizationId,
+            projectId,
+            instanceId,
+            timezone,
+            days,
+            headers=None,
+            **kwargs):
+        """
+        Change the on/off schedule for a specific instance.
+
+        Args:
+            organizationId: ID of the tenant. (UUID)
+            projectId: ID of the Project. (UUID)
+            instanceId: ID of the instance for which the on/off details have to be changed. (UUID)
+            timezone: The local time-zone that the scheduled days shall fall into (str)
+            days: List of each day having its schedule params (list)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.columnar_ops_API_log.info(
+            "Changing on/off schedule for instance {}, inside project {}, "
+            "inside tenant {}".format(instanceId, projectId, instanceId))
+
+        params = {
+            "timezone": timezone,
+            "days": days
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_post(self.analytics_on_off_endpoint.format(
+            organizationId, projectId, instanceId), params, headers)
         return resp
