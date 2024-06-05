@@ -40,12 +40,291 @@ class ClusterOperationsAPIs(APIRequests):
             "/{}/onOffSchedule"
         self.cluster_on_off_endpoint = self.cluster_endpoint + "/{}/activationState"
         self.appservice_on_off_endpoint = self.cluster_appservice_api + "/{}/activationState"
+
         self.alerts_endpoint = organization_endpoint + "/{}/projects/{}/alertIntegrations"
         self.test_alert_endpoint = self.alerts_endpoint[:-1] + "Test"
+
         self.audit_log_exports_endpoint = self.cluster_endpoint + "/{}/auditLogExports"
         self.audit_log_endpoint = self.cluster_endpoint + "/{}/auditLog"
         self.audit_log_events_endpoint = self.cluster_endpoint + "/{}/auditLogEvents"
+
         self.bucket_migration_endpoint = self.cluster_endpoint + "/{}/bucketStorageMigration"
+
+        self.private_network_service_endpoint = self.cluster_endpoint + "/{}/privateEndpointService"
+        self.list_private_networks_endpoint = self.private_network_service_endpoint + "/endpoints"
+        self.private_network_command_endpoint = self.list_private_networks_endpoint[:-1] + "Command"
+        self.associate_private_network_endpoint = self.list_private_networks_endpoint + "/{}/associate"
+        self.unassociate_private_network_endpoint = self.list_private_networks_endpoint + "/{}/unassociate"
+
+    def accept_private_endpoint(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            endpointId,
+            headers=None,
+            **kwargs):
+        """
+        Accepts a new private endpoint connection request so that it is associated with the endpoint service. This means the private endpoint is available for use.
+
+        Args:
+            organizationId: ID of the tenant. (UUID)
+            projectId: ID of the project. (UUID)
+            clusterId: ID of the capella cluster to be peered. (UUID)
+            endpointId: ID of the peering endpoint. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code ONLY
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Accepting private endpoint request for {}, inside cluster {}, "
+            "inside project {}, inside tenant {}.".format(
+                endpointId, clusterId, projectId, organizationId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_post(self.associate_private_network_endpoint.format(
+            organizationId, projectId, clusterId, endpointId), params, headers)
+        return resp
+
+    def delete_private_endpoint(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            endpointId,
+            headers=None,
+            **kwargs):
+        """
+        Removes the private endpoint associated with the endpoint service. This means the private endpoint is no longer able to connect to the private endpoint service.
+
+        Args:
+            organizationId: ID of the tenant. (UUID)
+            projectId: ID of the project. (UUID)
+            clusterId: ID of the capella cluster. (UUID)
+            endpointId: endpoint for which the Service has to be removed. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code ONLY
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Removing the private endpoint for {}, inside cluster {}, "
+            "inside project {}, inside tenant".format(
+                endpointId, clusterId, projectId, organizationId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_post(self.unassociate_private_network_endpoint.format(
+            organizationId, projectId, clusterId, endpointId), params, headers)
+        return resp
+
+    def disable_private_endpoint_service(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            headers=None,
+            **kwargs):
+        """
+        Disables the Private Endpoint service for a capella cluster.
+
+        Args:
+            organizationId: ID of the tenant. (UUID)
+            projectId: ID of the project. (UUID)
+            clusterId: ID of the capella cluster for which private endpoints have to be disabled. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code ONLY
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Disabling Private Endpoint Service for cluster {}, in project {},"
+            " in tenant {}.".format(clusterId, projectId, organizationId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_del(self.private_network_service_endpoint.format(
+            organizationId, projectId, clusterId), params, headers)
+        return resp
+
+    def enable_private_endpoint_service(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            headers=None,
+            **kwargs):
+        """
+        Enables the Private Endpoint Service for a Capella Cluster.
+
+        Args:
+            organizationId: ID of the tenant. (UUID)
+            projectId: ID of the project. (UUID)
+            clusterId: ID of the capella cluster for which private endpoints have to be disabled. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code ONLY
+            Error : message, hint, code, HttpStatusCode
+         """
+        self.cluster_ops_API_log.info(
+            "Enabling Private endpoint service on cluster {}, in project {}, "
+            "in tenant {}".format(clusterId, projectId, organizationId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_post(self.private_network_service_endpoint.format(
+            organizationId, projectId, clusterId), params, headers)
+        return resp
+
+    def fetch_private_endpoint_service_status_info(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            headers=None,
+            **kwargs):
+        """
+        Determines if the endpoint service is enabled or disabled on your cluster.
+
+        Args:
+            organizationId: ID of the tenant. (UUID)
+            projectId: ID of the project. (UUID)
+            clusterId: ID of the tenant. (UUID)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code ONLY
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Fetching Private Endpoint info of cluster {}, in project {}, "
+            "in tenant {}".format(clusterId, projectId, organizationId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_get(self.private_network_service_endpoint.format(
+            organizationId, projectId, clusterId), params, headers)
+        return resp
+
+    def list_private_endpoint(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            page=None,
+            perPage=None,
+            sortBy=None,
+            sortDirection=None,
+            headers=None,
+            **kwargs):
+        """
+        Returns a list of private endpoints associated with the endpoint service for your Capella cluster, along with the endpoint state. Each private endpoint connects a private network to the Capella cluster.
+
+        Args:
+            organizationId: ID of the tenant. (UUID)
+            projectId: ID of the project. (UUID)
+            clusterId: ID of the capella cluster which has the endpoint service and m multiple private endpoints associated with it. (UUID)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+            page: Sets what page you would like to view. (int)
+            perPage: Sets how many results you would like to have on each page. (int)
+            sortBy: Sets order of how you would like to sort results and also the key you would like to order by ([string])
+                Example: sortBy=name
+            sortDirection: The order on which the items will be sorted. (str)
+                Accepted Values - asc / desc
+
+        Returns:
+            Success : Status Code, dict
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Listing all the private endpoints linked to the endpoint "
+            "service for cluster {}, in project {}, in tenant {}".format(
+                clusterId, projectId, organizationId))
+
+        params = {}
+        if page:
+            params["page"] = page
+        if perPage:
+            params["perPage"] = perPage
+        if perPage:
+            params["sortBy"] = sortBy
+        if perPage:
+            params["sortDirection"] = sortDirection
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_get(self.list_private_networks_endpoint.format(
+            organizationId, projectId, clusterId), params, headers)
+        return resp
+
+    def post_private_endpoint_command(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            vpcID,
+            subnetIDs,
+            headers=None,
+            **kwargs):
+        """
+        Retrieves the command or script to be executed in order to create the private endpoint which will provides a private connection between the specified VPC and the specified Capella private endpoint service.
+
+        Args:
+            organizationId: ID of the tenant. (UUID)
+            projectId: ID of the project. (UUID)
+            clusterId: ID of the capella cluster having private endpoint service. (UUID)
+            vpcID: ID of the Virtual Private Cloud, for which the command has to be retreived. (string)
+            subnetIDs: Subnets within the virtual private clouds. (list)
+                subnetIDs: ID of each subnet in the list of subnetIDs. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code, (list)
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "getting command for the subnets inside vpc for cluster {}, "
+            "inside project {}, inside tenant {}".format(
+                clusterId, projectId, organizationId))
+
+        params = {
+            "vpcID": vpcID,
+            "subnetIDs": subnetIDs,
+        }
+        for k, v in kwargs:
+            params[k] = v
+
+        resp = self.api_post(self.endpoint_command_endpoint.format(
+            organizationId, projectId, clusterId), params, headers)
+        return resp
 
     """
     Method to restore the backup with backupId under cluster, project and organization mentioned.
