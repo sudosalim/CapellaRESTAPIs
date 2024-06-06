@@ -93,6 +93,7 @@ class ColumnarAPIs(APIRequests):
             cloudProvider,
             region,
             nodes,
+            support,
             description="",
             headers=None,
             **kwargs):
@@ -106,6 +107,9 @@ class ColumnarAPIs(APIRequests):
             cloudProvider: Keyword. (str)
             region: keyword, based on cloudProvider. (str)
             nodes: Number of nodes to be allotted to the instance. (int)
+            support: The Plan and Timezone details for the instance. (dict)
+                plan: Developer / Enterprise (string)
+                timezone: one of the AWS timezones (string)
             description: Description of the columnar instance. (str)
             headers: Headers to be sent with the API call. (dict)
             **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
@@ -122,7 +126,8 @@ class ColumnarAPIs(APIRequests):
             "name": name,
             "cloudProvider": cloudProvider,
             "region": region,
-            "nodes": nodes
+            "nodes": nodes,
+            "support": support
         }
         if description is not None:
             params["description"] = description
