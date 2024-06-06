@@ -336,16 +336,18 @@ class CapellaAPI(CommonCapellaAPI):
         resp = self.do_internal_request(url, method="POST", params=json.dumps(payload))
         return resp
 
-    def list_backups(self, tenant_id, project_id, instance_id):
+    def list_backups(self, tenant_id, project_id, instance_id, page=1, perPage=100):
         """
             Creates backup for columnar instance
             Parameters:
                 tenant_id (str): The ID of the tenant associated with the project.
                 project_id (str): The ID of the project where the instance is located.
                 instance_id (str): The ID of the Columnar instance.
+                page (int): The page number.
+                perPage (int): Item per page.
         """
-        url = '{}/v2/organizations/{}/projects/{}/instance/{}/snapshotbackups' \
-            .format(self.internal_url, tenant_id, project_id, instance_id)
+        url = '{}/v2/organizations/{}/projects/{}/instance/{}/snapshotbackups?page={}&perPage={}' \
+            .format(self.internal_url, tenant_id, project_id, instance_id, page, perPage)
         resp = self.do_internal_request(url, method="GET")
         return resp
 
