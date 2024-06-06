@@ -328,7 +328,7 @@ class CapellaAPI(CommonCapellaAPI):
                 instance_id (str): The ID of the Columnar instance.
                 retention(int): Optional, Backup retention time in hours from 24-to-720
         """
-        payload = None
+        payload = {}
         if retention:
             payload = {"retention": retention}
         url = '{}/v2/organizations/{}/projects/{}/instance/{}/snapshotbackups'.format(
