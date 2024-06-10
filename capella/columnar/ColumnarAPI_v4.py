@@ -455,7 +455,7 @@ class ColumnarAPIs(APIRequests):
         else:
             params = None
 
-        resp = self.api_get(self.analytics_clusters_endpoint.format(
+        resp = self.api_get(self.analytics_on_off_endpoint.format(
             organizationId, projectId, instanceId), params, headers)
         return resp
 
@@ -495,6 +495,6 @@ class ColumnarAPIs(APIRequests):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.api_post(self.analytics_on_off_endpoint.format(
+        resp = self.api_put(self.analytics_on_off_endpoint.format(
             organizationId, projectId, instanceId), params, headers)
         return resp
