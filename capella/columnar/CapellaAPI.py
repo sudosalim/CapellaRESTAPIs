@@ -17,6 +17,57 @@ class CapellaAPI(CommonCapellaAPI):
             for internal support.
     """
 
+    def set_trigger_time_for_onoff(self, time, cluster_ids):
+        """
+        Use to trigger schedule on/off by providing instance a false time to compare to
+        Parameters:
+            time (str): Time in UTC
+            cluster_ids (list): List to cluster ids of the instances
+        """
+        url = "{}/internal/support/onoff/queue-schedule-operations".format(
+            self.internal_url
+        )
+        body = {
+            "scheduledTimeInUTC": time,
+            "clusters": cluster_ids
+        }
+        resp = self.do_internal_request(url, "POST", params=json.dumps(body))
+        return resp
+
+    def set_trigger_time_for_scheduled_backup(self, time, instances, all_instances=False):
+        """
+        Use to set a false time to the instance to start schdeuled backup
+        Parameters:
+            time (str): Time in UTC
+            instances (list) : All the instance to relay false time to
+            all_instances (bool): To enable false time for all the instances in an environment
+        """
+        body = {
+            "time": time,
+            "instances": instances,
+            "all_instances": all_instances
+        }
+        url = "{}/internal/support/columnar/recovery/scheduling".format(self.internal_url)
+        resp = self.do_internal_request(url, "POST", params=json.dumps(body))
+        return resp
+
+    def set_trigger_time_for_backup_retention(self, time, instances, all_instances=False):
+        """
+        Provide false time to check for retention deletion
+        Parameters:
+            time (str): Time in UTC
+            instances (list): Instance ids of all the instance to apply to
+            all_instances (bool): To enable false time for all the instances in an environment
+        """
+        body = {
+            "retentionTimeInUTC": time,
+            "instanceIds": instances,
+            "allInstances": all_instances
+        }
+        url = "{}/internal/support/columnar/recovery/retention".format(self.internal_url)
+        resp = self.do_internal_request(url, "POST", params=json.dumps(body))
+        return resp
+
     def get_columnar_services(self):
         """
             Retrieve a list of all Columnar services.
