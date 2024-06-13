@@ -109,43 +109,29 @@ class CapellaAPI(CommonCapellaAPI):
         resp = self.do_internal_request(url, "GET")
         return resp
 
-    def create_columnar_instance(self, tenant_id, project_id, name,
-                                 description, provider, region, nodes,
-                                 instance_types, support_package, availability_zone,
-                                 **kwargs):
+    def create_columnar_instance(self, tenant_id, project_id, config):
         """
             Create a new Columnar instance within a specified project.
 
             Parameters:
                 tenant_id (str): The ID of the tenant under which the instance will be created.
                 project_id (str): The ID of the project where the instance will be added.
-                name (str): The name of the Columnar instance.
-                description (str): A description for the Columnar instance.
-                provider (str): The provider or cloud platform for the instance (e.g., AWS, Azure).
-                region (str): The region or location where the instance will be deployed.
-                nodes (int): The number of nodes to allocate for the instance.
-                instance_types (dict): Instance type to deploy the columnar instance with.
-                support_package (dict): The support package selected for columnar instance.
-                availability_zone (string): single vs multiple availability zones.
-                **kwargs: Additional keyword arguments to pass to the API request.
+                config (dict): This contains the deployment parameters needed. Sample Below:
+                {'availabilityZone': 'single',
+                 'description': 'Have fun with Columnar',
+                 'instanceTypes': {'memory': '16GB', 'vcpus': '4vCPUs'},
+                 'name': 'do-not-delete_Columnar ;-)',
+                 'nodes': 2,
+                 'overRide': {'image': 'Choose your own',
+                              'token': 'secret'},
+                 'provider': 'aws',
+                 'region': 'us-east-1',
+                 'package': {'key': 'Developer Pro', 'timezone': 'PT'}}
         """
         url = "{}/v2/organizations/{}/projects/{}/instance".format(
             self.internal_url, tenant_id, project_id)
-        body = {
-            "name": name,
-            "description": description,
-            "provider": provider,
-            "region": region,
-            "nodes": nodes,
-            "instanceTypes": instance_types,
-            "package": support_package,
-            "availabilityZone": availability_zone
-        }
-        for key, value in kwargs.items():
-            body[key] = value
-
         resp = self.do_internal_request(url, method="POST",
-                                        params=json.dumps(body))
+                                        params=json.dumps(config))
         return resp
 
     def get_columnar_instances(self, tenant_id, project_id, page=1,
