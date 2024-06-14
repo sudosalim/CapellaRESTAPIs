@@ -31,7 +31,8 @@ class CapellaAPI(CommonCapellaAPI):
             "scheduledTimeInUTC": time,
             "clusters": cluster_ids
         }
-        resp = self.do_internal_request(url, "POST", params=json.dumps(body))
+        resp = self._urllib_request(url, "POST", params=json.dumps(body),
+                                    headers=self.cbc_api_request_headers)
         return resp
 
     def set_trigger_time_for_scheduled_backup(self, time, instances, all_instances=False):
@@ -48,7 +49,8 @@ class CapellaAPI(CommonCapellaAPI):
             "all_instances": all_instances
         }
         url = "{}/internal/support/columnar/recovery/scheduling".format(self.internal_url)
-        resp = self.do_internal_request(url, "POST", params=json.dumps(body))
+        resp = self._urllib_request(url, "POST", params=json.dumps(body),
+                                    headers=self.cbc_api_request_headers)
         return resp
 
     def set_trigger_time_for_backup_retention(self, time, instances, all_instances=False):
@@ -65,7 +67,8 @@ class CapellaAPI(CommonCapellaAPI):
             "allInstances": all_instances
         }
         url = "{}/internal/support/columnar/recovery/retention".format(self.internal_url)
-        resp = self.do_internal_request(url, "POST", params=json.dumps(body))
+        resp = self._urllib_request(url, "POST", params=json.dumps(body),
+                                    headers=self.cbc_api_request_headers)
         return resp
 
     def get_columnar_services(self):
