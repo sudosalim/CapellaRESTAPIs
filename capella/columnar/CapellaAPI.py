@@ -510,3 +510,25 @@ class CapellaAPI(CommonCapellaAPI):
             .format(self.internal_url, tenant_id, project_id, instance_id)
         resp = self.do_internal_request(url, method="DELETE")
         return resp
+
+    def create_link(self, tenant_id, project_id, instance_id, link_name, cluster_id):
+        """
+            Create a remote link to a Capella Provisioned cluster.
+            Parameters:
+                tenant_id (str): The ID of the tenant associated with the project.
+                project_id (str): The ID of the project where the instance is located.
+                instance_id (str): The ID of the Columnar instance.
+                link_name (str): The name for the link.
+                cluster_id (str): The ID of the Capella Provisioned cluster to link to.
+
+            Note: This creates a background job to create the link, as link creation involves
+            multiple steps including setting up VPC peering between the two Capella clusters.
+        """
+        payload = {
+            "linkName": link_name,
+            "provisionedCluster": {"clusterId": cluster_id},
+        }
+        url = "{}/v2/organizations/{}/projects/{}/instance/{}/links".format(
+            self.internal_url, tenant_id, project_id, instance_id)
+        resp = self.do_internal_request(url, method="POST", params=json.dumps(payload))
+        return resp
