@@ -49,12 +49,169 @@ class ClusterOperationsAPIs(APIRequests):
         self.audit_log_events_endpoint = self.cluster_endpoint + "/{}/auditLogEvents"
 
         self.bucket_migration_endpoint = self.cluster_endpoint + "/{}/bucketStorageMigration"
+        self.vpc_endpoint = self.cluster_endpoint + "/{}/networkPeers"
 
         self.private_network_service_endpoint = self.cluster_endpoint + "/{}/privateEndpointService"
         self.list_private_networks_endpoint = self.private_network_service_endpoint + "/endpoints"
         self.private_network_command_endpoint = self.list_private_networks_endpoint[:-1] + "Command"
         self.associate_private_network_endpoint = self.list_private_networks_endpoint + "/{}/associate"
         self.unassociate_private_network_endpoint = self.list_private_networks_endpoint + "/{}/unassociate"
+
+    def fetch_network_peer_record_info(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            vpcID,
+            headers=None,
+            **kwargs):
+        """
+        Gets the details related to the network peering connection between a capella cluster and the Virtual Private Cloud (within a cloud Provider) that it is peered with.
+
+        Args:
+            organizationId: The ID of the tenant. (UUID)
+            projectId: The ID of the project having the cluster. (UUID)
+            clusterId: The ID of the cluster which has been peered. (UUID)
+            vpcID: The ID of the Virtual Private Cloud. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and Response Body
+            Error : message, hint, code, HttpStatusCode
+        """
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_get("{}/{}".format(self.vpc_endpoint.format(
+            organizationId, projectId, clusterId), vpcID), params, headers)
+        return resp
+
+    def create_network_peer(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            name,
+            pConf,
+            pType,
+            headers=None,
+            **kwargs):
+        """
+        Creates a peering connection between the capella cluster and the VPC on the cloud provider.
+
+        Args:
+            organizationId: The ID of the tenant. (UUID)
+            projectId: The ID of the project having the cluster. (UUID)
+            clusterId: The ID of the cluster which to be peered. (UUID)
+            name: Name of the VPC Peer connection
+            pConf: Provider configuration. (object)
+                AWSConfig: Configuration of the cloud being peered with capella cluster. The inner params are based on the key of this object, ie, the cloud provider specifically. (obj)
+                    "accountId": User Account related to the cloud Provider. (string)
+                    "cidr": Network IP / Subnet IP. (IP)
+                    region: Keyword. (string)
+                    vpcId: (string)
+                providerId: ID of the connection establishment fetched from the Provider (string)
+            pType: Provider type. (string) [gcp, aws, azure]
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code ONLY
+            Error : message, hint, code, HttpStatusCode
+        """
+        params = {
+            "name": name,
+            "providerType": pType,
+            "providerConfig": pConf
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_post(self.vpc_endpoint.format(
+            organizationId, projectId, clusterId), params, headers)
+        return resp
+
+    def delete_network_peer(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            vpcID,
+            headers=None,
+            **kwargs):
+        """
+        Deletes the peering connection between the capella cluster and the VPC on the cloud provider.
+
+        Args:
+            organizationId: The ID of the tenant. (UUID)
+            projectId: The ID of the project having the cluster. (UUID)
+            clusterId: The ID of the cluster which has been peered. (UUID)
+            vpcID: The ID of the Virtual Private Cloud. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code ONLY
+            Error : message, hint, code, HttpStatusCode
+        """
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_del("{}/{}".format(self.vpc_endpoint.format(
+            organizationId, projectId, clusterId), vpcID), params, headers)
+        return resp
+
+    def list_network_peer_records(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            page=None,
+            perPage=None,
+            sortBy=None,
+            sortDirection=None,
+            headers=None,
+            **kwargs):
+        """
+        Lists all the peering connections between the capella cluster and any of the multiple VPCs on same/multiple cloud providers.
+
+        Args:
+            organizationId: The ID of the tenant. (UUID)
+            projectId: The ID of the project having the cluster. (UUID)
+            clusterId: The ID of the cluster which has-been/has-to-be peered. (UUID)
+            page: Sets what page you would like to view. (int)
+            perPage: Sets how many results you would like to have on each page. (int)
+            sortBy: Sets order of how you would like to sort results and also the key you would like to order by ([string])
+                Example: sortBy=name
+            sortDirection: The order on which the items will be sorted. (str)
+                Accepted Values - asc / desc
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code, dict
+            Error : message, hint, code, HttpStatusCode
+        """
+        params = {}
+        if page:
+            params["page"] = page
+        if perPage:
+            params["perPage"] = perPage
+        if perPage:
+            params["sortBy"] = sortBy
+        if perPage:
+            params["sortDirection"] = sortDirection
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_get(self.vpc_endpoint.format(
+            organizationId, projectId, clusterId), params, headers)
+        return resp
 
     def accept_private_endpoint(
             self,
@@ -258,6 +415,8 @@ class ClusterOperationsAPIs(APIRequests):
                 Example: sortBy=name
             sortDirection: The order on which the items will be sorted. (str)
                 Accepted Values - asc / desc
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
 
         Returns:
             Success : Status Code, dict
@@ -322,7 +481,7 @@ class ClusterOperationsAPIs(APIRequests):
         for k, v in kwargs:
             params[k] = v
 
-        resp = self.api_post(self.endpoint_command_endpoint.format(
+        resp = self.api_post(self.private_network_command_endpoint.format(
             organizationId, projectId, clusterId), params, headers)
         return resp
 
