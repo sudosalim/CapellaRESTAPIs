@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 # Generic/Built-in
-import base64
+
 import logging
-import json
-from ..common.CapellaAPI_v4 import OrganizationOperationsAPIs
 from ..lib.APIRequests import APIRequests
 
 
@@ -13,7 +11,8 @@ class ColumnarAPIs(APIRequests):
         super(ColumnarAPIs, self).__init__(url, secret, access, bearer_token)
         self.columnar_ops_API_log = logging.getLogger(__name__)
         self.analytics_clusters_endpoint = "/v4/organizations/{}/projects/{}/analyticsClusters"
-        self.analytics_on_off_endpoint = self.analytics_clusters_endpoint + "/{}/onOffSchedule"
+        self.on_off_endpoint = self.analytics_clusters_endpoint + "/{}/activationState"
+        self.schedule_on_off_endpoint = self.analytics_clusters_endpoint + "/{}/onOffSchedule"
 
     def turn_analytics_cluster_off(
             self,
@@ -45,9 +44,8 @@ class ColumnarAPIs(APIRequests):
         else:
             params = None
 
-        resp = self.api_del("{}/{}".format(
-            self.analytics_clusters_endpoint.format(
-                organizationId, projectId), instanceId), params, headers)
+        resp = self.api_del(self.on_off_endpoint.format(
+            organizationId, projectId, instanceId), params, headers)
         return resp
 
     def turn_analytics_cluster_on(
@@ -80,9 +78,8 @@ class ColumnarAPIs(APIRequests):
         else:
             params = None
 
-        resp = self.api_post("{}/{}".format(
-            self.analytics_clusters_endpoint.format(
-                organizationId, projectId), instanceId), params, headers)
+        resp = self.api_post(self.on_off_endpoint.format(
+            organizationId, projectId, instanceId), params, headers)
         return resp
 
     def create_analytics_cluster(
@@ -91,9 +88,11 @@ class ColumnarAPIs(APIRequests):
             projectId,
             name,
             cloudProvider,
+            compute,
             region,
             nodes,
             support,
+            availability,
             description="",
             headers=None,
             **kwargs):
@@ -105,11 +104,15 @@ class ColumnarAPIs(APIRequests):
             projectId: The ID of the Project in which the instance is present. (UUID)
             name: Name of the instance. (str)
             cloudProvider: Keyword. (str)
+            compute: The computational params of the instance. (obj)
+                cpu: Number vCPUs allocated to the instance. (int)
+                ram: RAM (in GBs) allocated to the instance. (int)
             region: keyword, based on cloudProvider. (str)
             nodes: Number of nodes to be allotted to the instance. (int)
             support: The Plan and Timezone details for the instance. (dict)
                 plan: Developer / Enterprise (string)
                 timezone: one of the AWS timezones (string)
+            availability: The availability zone configuration. Must be one of 'single' or 'multi. (str)
             description: Description of the columnar instance. (str)
             headers: Headers to be sent with the API call. (dict)
             **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
@@ -125,9 +128,11 @@ class ColumnarAPIs(APIRequests):
         params = {
             "name": name,
             "cloudProvider": cloudProvider,
+            "compute": compute,
             "region": region,
             "nodes": nodes,
-            "support": support
+            "support": support,
+            "availability": availability
         }
         if description is not None:
             params["description"] = description
@@ -386,7 +391,7 @@ class ColumnarAPIs(APIRequests):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.api_post(self.analytics_on_off_endpoint.format(
+        resp = self.api_post(self.schedule_on_off_endpoint.format(
             organizationId, projectId, instanceId), params, headers)
         return resp
 
@@ -420,7 +425,7 @@ class ColumnarAPIs(APIRequests):
         else:
             params = None
 
-        resp = self.api_del(self.analytics_on_off_endpoint.format(
+        resp = self.api_del(self.schedule_on_off_endpoint.format(
             organizationId, projectId, instanceId), params, headers)
         return resp
 
@@ -455,7 +460,7 @@ class ColumnarAPIs(APIRequests):
         else:
             params = None
 
-        resp = self.api_get(self.analytics_on_off_endpoint.format(
+        resp = self.api_get(self.schedule_on_off_endpoint.format(
             organizationId, projectId, instanceId), params, headers)
         return resp
 
@@ -495,6 +500,6 @@ class ColumnarAPIs(APIRequests):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.api_put(self.analytics_on_off_endpoint.format(
+        resp = self.api_put(self.schedule_on_off_endpoint.format(
             organizationId, projectId, instanceId), params, headers)
         return resp
