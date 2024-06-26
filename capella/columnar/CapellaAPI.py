@@ -532,3 +532,31 @@ class CapellaAPI(CommonCapellaAPI):
             self.internal_url, tenant_id, project_id, instance_id)
         resp = self.do_internal_request(url, method="POST", params=json.dumps(payload))
         return resp
+
+    def create_analytics_admin_user(self, instance_id):
+        """
+        Note - This will not work on production environment.
+        Will create couchbase-cloud-qe with analytics_admin permission.
+        Parameters:
+            instance_id (str): Columnar instance ID
+        """
+        url = "{0}/internal/support/instances/{1}/qe-account".format(
+            self.internal_url, instance_id
+        )
+        resp = self._urllib_request(url, "POST",
+                                    headers=self.cbc_api_request_headers)
+        return resp
+
+    def delete_analytics_admin_user(self, instance_id):
+        """
+        Note - This will not work on production environment.
+        Will delete couchbase-cloud-qe with analytics_admin permission.
+        Parameters:
+            instance_id (str): Columnar instance ID
+        """
+        url = "{0}/internal/support/instances/{1}/qe-account".format(
+            self.internal_url, instance_id
+        )
+        resp = self._urllib_request(url, "DELETE",
+                                    headers=self.cbc_api_request_headers)
+        return resp
