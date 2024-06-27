@@ -169,6 +169,17 @@ class CapellaAPI(CommonCapellaAPI):
         resp = self.do_internal_request(url, method="GET")
         return resp
 
+    def get_columnar_nodes(self, instance_id):
+        """
+            Retrieve information about the nodes of a specific Columnar instance.
+
+            Parameters:
+                instance_id (str): The ID of the Columnar instance to delete.
+        """
+        url = "{}/internal/support/instances/{}/nodes".format(self.internal_url, instance_id)
+        resp = self._urllib_request(url, "GET", headers=self.cbc_api_request_headers)
+        return resp
+
     def delete_columnar_instance(self, tenant_id, project_id, instance_id):
         """
             Delete a specific Columnar instance within a project.
