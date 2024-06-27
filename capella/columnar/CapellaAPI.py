@@ -389,7 +389,7 @@ class CapellaAPI(CommonCapellaAPI):
 
     def list_backups(self, tenant_id, project_id, instance_id, page=1, perPage=100):
         """
-            Creates backup for columnar instance
+            List all backups for a columnar instance
             Parameters:
                 tenant_id (str): The ID of the tenant associated with the project.
                 project_id (str): The ID of the project where the instance is located.
@@ -459,23 +459,38 @@ class CapellaAPI(CommonCapellaAPI):
         resp = self.do_internal_request(url, method="POST")
         return resp
 
-    def list_restores(self, tenant_id, project_id, instance_id, backup_id):
+    def list_restores(self, tenant_id, project_id, instance_id, page=1, perPage=100):
         """
-            Create restore of a backup
+            List all restores for a columnar instance
             Parameters:
                 tenant_id (str): The ID of the tenant associated with the project.
                 project_id (str): The ID of the project where the instance is located.
                 instance_id (str): The ID of the Columnar instance.
-                backup_id (str): The ID of the backup
         """
-        url = '{}/v2/organizations/{}/projects/{}/instance/{}/snapshotbackups/{}/restores' \
-            .format(self.internal_url, tenant_id, project_id, instance_id, backup_id)
+        url = (
+            "{}/v2/organizations/{}/projects/{}/instance/{}/"
+            "snapshotbackups/restores?page={}&perPage={}"
+        ).format(self.internal_url, tenant_id, project_id, instance_id, page, perPage)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def get_restore_progress(self, tenant_id, project_id, instance_id, restore_id):
+        """
+            Get the progress of a restore on a columnar instance
+            Parameters:
+                tenant_id (str): The ID of the tenant associated with the project.
+                project_id (str): The ID of the project where the instance is located.
+                instance_id (str): The ID of the Columnar instance.
+                restore_id (str): The ID of the restore
+        """
+        url = "{}/v2/organizations/{}/projects/{}/instance/{}/snapshotbackups/restores/{}/progress"\
+            .format(self.internal_url, tenant_id, project_id, instance_id, restore_id)
         resp = self.do_internal_request(url, method="GET")
         return resp
 
     def schedule_backup_create_update(self, tenant_id, project_id, instance_id, interval, retention, start_time):
         """
-            Create restore of a backup
+            Create/update (upsert) backup schedule of a columnar instance
             Parameters:
                 tenant_id (str): The ID of the tenant associated with the project.
                 project_id (str): The ID of the project where the instance is located.
