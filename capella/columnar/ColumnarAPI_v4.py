@@ -11,6 +11,7 @@ class ColumnarAPIs(APIRequests):
         super(ColumnarAPIs, self).__init__(url, secret, access, bearer_token)
         self.columnar_ops_API_log = logging.getLogger(__name__)
         self.analytics_clusters_endpoint = "/v4/organizations/{}/projects/{}/analyticsClusters"
+        self.org_level_analytics_clusters_endpoint = "/v4/organizations/{}/analyticsClusters"
         self.on_off_endpoint = self.analytics_clusters_endpoint + "/{}/activationState"
         self.schedule_on_off_endpoint = self.analytics_clusters_endpoint + "/{}/onOffSchedule"
 
@@ -139,9 +140,8 @@ class ColumnarAPIs(APIRequests):
         for k, v in kwargs:
             params[k] = v
 
-        resp = self.api_post(
-            self.analytics_clusters_endpoint.format(organizationId, projectId),
-            params, headers)
+        resp = self.api_post(self.analytics_clusters_endpoint.format(
+            organizationId, projectId), params, headers)
         return resp
 
     def delete_analytics_cluster(
@@ -257,8 +257,8 @@ class ColumnarAPIs(APIRequests):
         for k, v in kwargs.items():
             params[k] = v
 
-        resp = self.api_get("/v4/organizations/{}/analyticsClusters"
-                            .format(organizationId), params, headers)
+        resp = self.api_get(self.org_level_analytics_clusters_endpoint.format(
+            organizationId), params, headers)
         return resp
 
     def list_project_level_analytics_clusters(
@@ -317,7 +317,8 @@ class ColumnarAPIs(APIRequests):
             instanceId,
             name,
             nodes,
-            description="",
+            support,
+            description=None,
             headers=None,
             **kwargs):
         """
@@ -329,6 +330,9 @@ class ColumnarAPIs(APIRequests):
             instanceId: The ID of the Instance. (UUID)
             name: New name of the instance
             nodes: New number of nodes to be allotted to the instance. (int)
+            support: The Plan and Timezone details for the instance. (dict)
+                plan: Developer / Enterprise (string)
+                timezone: one of the AWS timezones (string)
             description: New description of the columnar instance. (str)
             headers: Headers to be sent with the API call. (dict)
             **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
@@ -344,6 +348,7 @@ class ColumnarAPIs(APIRequests):
         params = {
             "name": name,
             "nodes": nodes,
+            "support": support
         }
         if description is not None:
             params["description"] = description
