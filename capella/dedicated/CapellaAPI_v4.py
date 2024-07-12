@@ -57,6 +57,168 @@ class ClusterOperationsAPIs(APIRequests):
         self.associate_private_network_endpoint = self.list_private_networks_endpoint + "/{}/associate"
         self.unassociate_private_network_endpoint = self.list_private_networks_endpoint + "/{}/unassociate"
 
+        self.tenant_events_endpoint = organization_endpoint + "/{}/events"
+        self.project_events_endpoint = organization_endpoint + "/{}/projects/{}/events"
+
+    def list_tenant_events(
+            self,
+            organizationId,
+            page=None,
+            perPage=None,
+            sortBy=None,
+            sortDirection=None,
+            headers=None,
+            **kwargs):
+        """
+        Returns the List containing all the events happened so far inside a specific tenant.
+
+        Args:
+            organizationId: The ID of the tenant to list the events for. (UUID)
+            page: Sets what page you would like to view. (int)
+            perPage: Sets how many results you would like to have on each page. (int)
+            sortBy: Sets order of how you would like to sort results and also the key you would like to order by ([string])
+                Example: sortBy=name
+            sortDirection: The order on which the items will be sorted. (str)
+                Accepted Values - asc / desc
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and Response Body
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Listing events inside the tenant {}".format(organizationId))
+
+        params = {}
+        if page:
+            params["page"] = page
+        if perPage:
+            params["perPage"] = perPage
+        if sortBy:
+            params["sortBy"] = sortBy
+        if sortDirection:
+            params["sortDirection"] = sortDirection
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_get(self.tenant_events_endpoint.format(
+            organizationId), params, headers)
+        return resp
+
+    def fetch_tenant_event_info(
+            self,
+            organizationId,
+            eventId,
+            headers=None,
+            **kwargs):
+        """
+        Fetches a specific event inside the specified tenant, based on the ID.
+
+        Args:
+            organizationId: The ID of the tenant to list the events for. (UUID)
+            eventId: The ID of the event to be fetched the info for. (UUID)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and Response Body
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Fetching information for event {} inside tenant {}".format(
+                eventId, organizationId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.api_get("{}/{}".format(self.tenant_events_endpoint.format(
+            organizationId), eventId), params, headers)
+        return resp
+
+    def list_project_events(
+            self,
+            organizationId,
+            projectId,
+            page=None,
+            perPage=None,
+            sortBy=None,
+            sortDirection=None,
+            headers=None,
+            **kwargs):
+        """
+        Lists all the events happened so far inside a specific project in a tenant.
+
+        Args:
+            organizationId: The ID of the tenant inside which the project is present. (UUID)
+            projectId: The ID of project for which all the events have to be listed. (UUID)
+            page: Sets what page you would like to view. (int)
+            perPage: Sets how many results you would like to have on each page. (int)
+            sortBy: Sets order of how you would like to sort results and also the key you would like to order by ([string])
+                Example: sortBy=name
+            sortDirection: The order on which the items will be sorted. (str)
+                Accepted Values - asc / desc
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and Response Body
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Listing the events inside the project {}, inside the tenant {}"
+            .format(projectId, organizationId))
+
+        params = {}
+        if page:
+            params["page"] = page
+        if perPage:
+            params["perPage"] = perPage
+        if sortBy:
+            params["sortBy"] = sortBy
+        if sortDirection:
+            params["sortDirection"] = sortDirection
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_get(self.project_events_endpoint.format(
+            organizationId, projectId), params, headers)
+        return resp
+
+    def fetch_project_event_info(
+            self,
+            organizationId,
+            projectId,
+            eventId,
+            headers=None,
+            **kwargs):
+        """
+        Fetches the information for a specific event inside a project based on the eventID and projectID
+
+        Args:
+            organizationId: The tenantID inside which the project is present. (UUID)
+            projectId: The projectID for which the tenant has to be fetched. (UUID)
+            eventId: The ID of the event to be fetched. (UUID)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and Response Body
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Fetching info for event {}, inside the project {}, "
+            "inside the tenant {}".format(eventId, projectId, organizationId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.api_get("{}/{}".format(self.project_events_endpoint.format(
+            organizationId, projectId), eventId), params, headers)
+        return resp
+
     def fetch_network_peer_record_info(
             self,
             organizationId,
