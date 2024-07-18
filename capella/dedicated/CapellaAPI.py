@@ -1064,6 +1064,51 @@ class CapellaAPI(CommonCapellaAPI):
                                         params=json.dumps(config))
         return resp
 
+    def sgw_enable_audit_logging(self, tenant_id, project_id, cluster_id, backend_id):
+        "Enable audit logging for the sgw"
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/audit-logging/enable' \
+              .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id)
+        resp = self.do_internal_request(url, method="POST")
+        return resp
+
+    def sgw_disable_audit_logging(self, tenant_id, project_id, cluster_id, backend_id):
+        "Disable audit logging for the sgw"
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/audit-logging/disable' \
+              .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id)
+        resp = self.do_internal_request(url, method="POST")
+        return resp
+
+    def sgw_get_audit_logging_state(self, tenant_id, project_id, cluster_id, backend_id):
+        "Get audit logging state"
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/audit-logging' \
+              .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def sgw_set_audit_logging_config(self, tenant_id, project_id, cluster_id, backend_id, db_name, config):
+        "Set audit logging config"
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/audit-logging/{}/config' \
+              .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id, db_name)
+        resp = self.do_internal_request(url, method="PUT",
+                                        params=json.dumps(config))
+        return resp
+
+    def sgw_update_audit_logging_config(self, tenant_id, project_id, cluster_id, backend_id, db_name, config):
+        "Update audit logging config"
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/audit-logging/{}/config' \
+              .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id, db_name)
+        resp = self.do_internal_request(url, method="POST",
+                                        params=json.dumps(config))
+        return resp
+
+    def sgw_get_audit_logging_config(self, tenant_id, project_id, cluster_id, backend_id, db_name, config):
+        "Get audit logging config"
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/audit-logging{}/config' \
+              .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id, db_name)
+        resp = self.do_internal_request(url, method="GET",
+                                        params=json.dumps(config))
+        return resp
+
     def get_node_metrics(self, tenant_id, project_id, cluster_id, metrics, step, start, end):
         url = '{}/v2/organizations/{}/projects/{}/clusters/{}/metrics/{}/query_range' \
               .format(self.internal_url, tenant_id, project_id, cluster_id, metrics)
