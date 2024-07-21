@@ -1166,3 +1166,12 @@ class CapellaAPI(CommonCapellaAPI):
             .format(self.internal_url, cluster_id)
         resp = self.do_internal_request(url, method="GET")
         return resp
+
+    def toggle_cluster_deletion_protection(self, tenant_id, project_id,
+                                           cluster_id, deletion_protection):
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}' \
+            .format(self.internal_url, tenant_id, project_id, cluster_id)
+        payload = {"deletionProtection": deletion_protection}
+        resp = self.do_internal_request(url, method="PATCH",
+                                        params=json.dumps(payload))
+        return resp
