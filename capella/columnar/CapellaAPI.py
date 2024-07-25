@@ -17,19 +17,19 @@ class CapellaAPI(CommonCapellaAPI):
             for internal support.
     """
 
-    def set_trigger_time_for_onoff(self, time, cluster_ids):
+    def set_trigger_time_for_onoff(self, time, instance_ids):
         """
         Use to trigger schedule on/off by providing instance a false time to compare to
         Parameters:
             time (str): Time in UTC
-            cluster_ids (list): List to cluster ids of the instances
+            instance_ids (list): List to instance ids of the instances
         """
-        url = "{}/internal/support/onoff/queue-schedule-operations".format(
+        url = "{}/internal/support/onoff/queue-schedule-operations/columnar".format(
             self.internal_url
         )
         body = {
             "scheduledTimeInUTC": time,
-            "clusters": cluster_ids
+            "clusters": instance_ids
         }
         resp = self._urllib_request(url, "POST", params=json.dumps(body),
                                     headers=self.cbc_api_request_headers)
