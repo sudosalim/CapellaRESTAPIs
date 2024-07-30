@@ -48,6 +48,7 @@ class ClusterOperationsAPIs(APIRequests):
         self.audit_log_endpoint = self.cluster_endpoint + "/{}/auditLog"
         self.audit_log_events_endpoint = self.cluster_endpoint + "/{}/auditLogEvents"
 
+        self.flush_buckets_endpoint = self.bucket_endpoint + "/{}/flush"
         self.bucket_migration_endpoint = self.cluster_endpoint + "/{}/bucketStorageMigration"
         self.vpc_endpoint = self.cluster_endpoint + "/{}/networkPeers"
 
@@ -59,6 +60,44 @@ class ClusterOperationsAPIs(APIRequests):
 
         self.tenant_events_endpoint = organization_endpoint + "/{}/events"
         self.project_events_endpoint = organization_endpoint + "/{}/projects/{}/events"
+
+    def flush_bucket(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            bucketId,
+            headers=None,
+            **kwargs):
+        """
+        A post endpoint used to flush the bucket based on the ID passed,
+        PREREQUISITE :- The flush setting on the bucket should be enabled.
+
+        Args:
+            organizationId: The ID of the tenant. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster inside the project in which the bucket is present. (UUID)
+            bucketId: ID of the bucket to be flushed. (bucket ID)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and Response Body
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Flushing bucket: {}, inside the cluster: {}, "
+            "inside the project: {}, inside the tenant: {}"
+            .format(bucketId, clusterId, projectId, organizationId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_post(self.flush_buckets_endpoint.format(
+            organizationId, projectId, clusterId, bucketId), params, headers)
+        return resp
 
     def list_tenant_events(
             self,
