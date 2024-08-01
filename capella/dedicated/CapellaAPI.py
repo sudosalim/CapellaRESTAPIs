@@ -1175,3 +1175,9 @@ class CapellaAPI(CommonCapellaAPI):
         resp = self.do_internal_request(url, method="PATCH",
                                         params=json.dumps(payload))
         return resp
+
+    def get_unique_cidr(self, tenant_id):
+        url = '{}/v2/organizations/{}/clusters/deployment-options/v2'.format(self.internal_url,
+                                                                         tenant_id)
+        resp = self.do_internal_request(url, method='GET')
+        return resp
