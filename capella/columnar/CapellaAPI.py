@@ -483,7 +483,7 @@ class CapellaAPI(CommonCapellaAPI):
                 instance_id (str): The ID of the Columnar instance.
                 restore_id (str): The ID of the restore
         """
-        url = "{}/v2/organizations/{}/projects/{}/instance/{}/snapshotbackups/restores/{}/progress"\
+        url = "{}/v2/organizations/{}/projects/{}/instance/{}/snapshotbackups/restores/{}/progress" \
             .format(self.internal_url, tenant_id, project_id, instance_id, restore_id)
         resp = self.do_internal_request(url, method="GET")
         return resp
@@ -585,4 +585,21 @@ class CapellaAPI(CommonCapellaAPI):
         )
         resp = self._urllib_request(url, "DELETE",
                                     headers=self.cbc_api_request_headers)
+        return resp
+
+    def list_all_roles(self, tenant_id, project_id, instance_id, page=1, perPage=100):
+        """
+        List all the rbac roles in the columnar instance
+        Parameters:
+            tenant_id (str): The ID of the tenant associated with the project.
+            project_id (str): The ID of the project where the instance is located.
+            instance_id (str): The ID of the Columnar instance.
+            page (int): The page number.
+            perPage (int): Item per page.
+
+        """
+        url = "{}/v2/organizations/{}/projects/{}/instance/{}/roles?page={}&perPage=" \
+              "{}".format(
+            self.internal_url, tenant_id, project_id, instance_id, page, perPage)
+        resp = self.do_internal_request(url, method="GET")
         return resp
