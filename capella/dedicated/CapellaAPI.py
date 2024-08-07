@@ -1181,3 +1181,8 @@ class CapellaAPI(CommonCapellaAPI):
                                                                          tenant_id)
         resp = self.do_internal_request(url, method='GET')
         return resp
+
+    def deploy_v2_cluster(self, tenant_id, payload):
+        url = '{}/v2/organizations/{}/clusters/v2'.format(self.internal_url, tenant_id)
+        resp = self.do_internal_request(url, method="POST", params=json.dumps(payload))
+        return resp
