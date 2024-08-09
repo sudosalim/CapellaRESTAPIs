@@ -61,6 +61,146 @@ class ClusterOperationsAPIs(APIRequests):
         self.tenant_events_endpoint = organization_endpoint + "/{}/events"
         self.project_events_endpoint = organization_endpoint + "/{}/projects/{}/events"
 
+        self.app_svc_audit_log_exports_endpoint = self.cluster_appservice_api + "/{}/auditLogExports"
+
+    def create_app_svc_audit_log_export(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            start,
+            end,
+            headers=None,
+            **kwargs):
+        """
+        For creation of export logs for a specific App Service inside a Cluster.
+
+        Args:
+            organizationId: The ID of the tenant. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster inside the project in which the app service is present. (UUID)
+            appServiceId: ID of the app service for which export logs are to be generated. (UUID)
+            start: The start time for the audit logs exports. (%Y-%m-%dT%H:%M:%S)
+            end: The end time for the audit logs exports. (%Y-%m-%dT%H:%M:%S)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code ONLY
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Creating export logs for App Service: {}, inside the Cluster: {},"
+            " inside the Project: {}, inside the Tenant: {}".format(
+                appServiceId, clusterId, projectId, organizationId))
+        params = {
+            "start": start,
+            "end": end,
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_post(self.app_svc_audit_log_exports_endpoint.format(
+                organizationId, projectId, clusterId, appServiceId),
+            params, headers)
+        return resp
+
+    def list_app_svc_audit_log_exports(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            page=None,
+            perPage=None,
+            sortBy=None,
+            sortDirection=None,
+            headers=None,
+            **kwargs):
+        """
+        For listing export logs for a specific App Service inside a Cluster.
+
+        Args:
+            organizationId: The ID of the tenant. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster inside the project in which the app service is present. (UUID)
+            appServiceId: ID of the app service for which export logs are to be generated. (UUID)
+            page: Sets what page you would like to view. (int)
+            perPage: Sets how many results you would like to have on each page. (int)
+            sortBy: Sets order of how you would like to sort results and also the key you would like to order by ([string])
+                Example: sortBy=name
+            sortDirection: The order on which the items will be sorted. (str)
+                Accepted Values - asc / desc
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and Response Body
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Listing audit log exports for App Service: {}, inside the "
+            "Cluster: {}, inside the Project: {}, in the Tenant: {}".format(
+                appServiceId, clusterId, projectId, organizationId))
+        params = {}
+        if page:
+            params["page"] = page
+        if perPage:
+            params["perPage"] = perPage
+        if sortBy:
+            params["sortBy"] = sortBy
+        if sortDirection:
+            params["sortDirection"] = sortDirection
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_get(self.app_svc_audit_log_exports_endpoint.format(
+                organizationId, projectId, clusterId, appServiceId),
+            params, headers)
+        return resp
+
+    def fetch_app_svc_audit_log_export_info(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            auditLogExportId,
+            headers=None,
+            **kwargs):
+        """
+        Fetches the audit log export information for a specific scheduled export based on the exportID linked to the audit log.
+
+        Args:
+            organizationId: The ID of the tenant. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster inside the project in which the app service is present. (UUID)
+            appServiceId: ID of the app service for which export logs are to be generated. (UUID)
+            auditLogExportId: The ID of the specific audit log export for which the specifications have to be fetched. (UUID)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Fetching specification for the audit log export: {}, linked to "
+            "the app service: {}, inside the cluster: {}, inside the "
+            "project: {}, inside the tenant: {}".format(
+                auditLogExportId, appServiceId, clusterId, projectId,
+                organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.api_get("{}/{}".format(
+            self.app_svc_audit_log_exports_endpoint.format(
+                organizationId, projectId, clusterId, appServiceId),
+            auditLogExportId), params, headers)
+        return resp
+
     def flush_bucket(
             self,
             organizationId,
