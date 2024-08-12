@@ -62,6 +62,142 @@ class ClusterOperationsAPIs(APIRequests):
         self.project_events_endpoint = organization_endpoint + "/{}/projects/{}/events"
 
         self.app_svc_audit_log_exports_endpoint = self.cluster_appservice_api + "/{}/auditLogExports"
+        self.app_svc_audit_log_streaming_endpoint = self.cluster_appservice_api + "/{}/auditLogStreaming"
+
+    def patch_app_service_audit_log_streaming(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            op,
+            path,
+            value,
+            headers=None,
+            **kwargs):
+        """
+        Used to pause or resume streaming.
+        If log streaming is paused we will retain the collector credentials.
+
+        Args:
+            organizationId: The tenant in which app service is present. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster having the app service. (UUID)
+            appServiceId: ID of the app service for which app service is being tuned. (UUID)
+            op: The operation to be run on the streaming. (string)
+            path: The path of the app service streaming. (string)
+            value: The value to set for the app service streaming. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code ONLY
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Changing streaming config for appService: {}, in the cluster: {},"
+            " inside the project: {}, inside the tenant: {}".format(
+                appServiceId, clusterId, projectId, organizationId))
+        params = {
+            "op": op,
+            "path": path,
+            "value": value
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_patch(self.app_svc_audit_log_streaming_endpoint.format(
+                organizationId, projectId, clusterId, appServiceId),
+            params, headers)
+        return resp
+
+    def update_app_service_audit_log_streaming(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            streamingEnabled,
+            disabledAppEndpoints,
+            credentials,
+            headers=None,
+            **kwargs):
+        """
+        Sets up audit log streaming for a specific App Service with filters. If streamingEnabled is true log streaming will begin.
+        Ensure you have provided collector credentials if you wish to begin streaming; log streaming cannot be enabled without credentials. Refer to schema below to see required fields for your log collection provider. Providers include Datadog, Sumo Logic, and generic HTTP.
+        To remove the credentials, disable log streaming by setting streamingEnabled to false and overwrite the credentials with an empty secrets field.
+        To start or resume streaming, set streamingEnabled to true. To pause log streaming, set streamingEnabled to false.
+
+        Args:
+            organizationId: ID of the tenant. (UUID)
+            projectId: ID of the project which contains the cluster. (UUID)
+            clusterId: ID of the cluster which has the linked App Service. (UUID)
+            appServiceId: ID of the App Service for which streaming has to be configured. (UUID)
+            streamingEnabled: Param to stop / start the streaming. (bool)
+            disabledAppEndpoints: The App Endpoints inside the App Service
+            which have to be ignored while streaming logs. (list (of strings))
+            credentials: The required creds related to the service provider
+            to which the Audit Logs are being streamed to. (obj)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code ONLY
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Updating audit logs streaming config for App Service: {}, linked "
+            "to the cluster: {}, inside the project: {}, inside the tenant: {}"
+            .format(appServiceId, clusterId, projectId, organizationId))
+        params = {
+            "streamingEnabled": streamingEnabled,
+            "disabledAppEndpoints": disabledAppEndpoints,
+            "credentials": credentials
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_put(self.app_svc_audit_log_streaming_endpoint.format(
+                organizationId, projectId, clusterId, appServiceId),
+            params, headers)
+        return resp
+
+    def fetch_app_service_audit_log_streaming_info(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            headers=None,
+            **kwargs):
+        """
+        Retrieves the current state of audit log streaming for a specific App Service, as well as the output type and enabled App endpoints.
+
+        Args:
+            organizationId: ID of the tenant. (UUID)
+            projectId: ID of the project which contains the cluster. (UUID)
+            clusterId: ID of the cluster which has the linked App Service. (UUID)
+            appServiceId: ID of the App Service for which streaming state has to be fetched. (UUID)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response Body (json)
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Fetching audit log streaming state for app service: {}, linked to"
+            " cluster: {}, inside project: {}, inside tenant: {}".format(
+                appServiceId, clusterId, projectId, organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_get(self.app_svc_audit_log_streaming_endpoint.format(
+                organizationId, projectId, clusterId, appServiceId),
+            params, headers)
+        return resp
 
     def create_app_svc_audit_log_export(
             self,
