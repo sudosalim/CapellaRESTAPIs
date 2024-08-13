@@ -925,8 +925,7 @@ class ClusterOperationsAPIs(APIRequests):
             organizationId,
             projectId,
             clusterId,
-            vpcID,
-            subnetIDs,
+            payload,
             headers=None,
             **kwargs):
         """
@@ -936,9 +935,7 @@ class ClusterOperationsAPIs(APIRequests):
             organizationId: ID of the tenant. (UUID)
             projectId: ID of the project. (UUID)
             clusterId: ID of the capella cluster having private endpoint service. (UUID)
-            vpcID: ID of the Virtual Private Cloud, for which the command has to be retreived. (string)
-            subnetIDs: Subnets within the virtual private clouds. (list)
-                subnetIDs: ID of each subnet in the list of subnetIDs. (string)
+            payload: Private Network command payload, specific to the CSP. (string)
             headers: Headers to be sent with the API call. (dict)
             **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
 
@@ -951,10 +948,7 @@ class ClusterOperationsAPIs(APIRequests):
             "inside project {}, inside tenant {}".format(
                 clusterId, projectId, organizationId))
 
-        params = {
-            "vpcID": vpcID,
-            "subnetIDs": subnetIDs,
-        }
+        params = payload
         for k, v in kwargs:
             params[k] = v
 
