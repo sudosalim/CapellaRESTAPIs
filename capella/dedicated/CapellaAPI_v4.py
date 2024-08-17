@@ -63,6 +63,102 @@ class ClusterOperationsAPIs(APIRequests):
 
         self.app_svc_audit_log_exports_endpoint = self.cluster_appservice_api + "/{}/auditLogExports"
         self.app_svc_audit_log_streaming_endpoint = self.cluster_appservice_api + "/{}/auditLogStreaming"
+        self.app_svc_audit_log_config_endpoint = self.cluster_appservice_api = "/{}/appEndpoints/{}/auditLog"
+
+    def update_app_svc_audit_log_config(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointName,
+            auditEnabled,
+            enabledEventIds,
+            disabledUsers,
+            disabledRoles,
+            headers=None,
+            **kwargs):
+        """
+        Updates the audit logging configuration for a specific App Endpoint. Operations performed by disabled users and roles are excluded from audit logs.
+        See a list of event IDs by calling /auditLogEvents, add event IDs to the enabledEventIds field to enable audit logging for those events.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster which has the app service inside it. (UUID)
+            appServiceId: ID of the app service linked to the cluster. (UUID)
+            appEndpointName: name of the endpoint inside the app service. (string)
+            auditEnabled: Whether to enable audit logs or not. (bool)
+            enabledEventIds: IDs of the events for which audit logging is to be enabled. (list)
+            disabledUsers: Users which are disabled from being logged no matter the audit logging state. (list)
+            disabledRoles: Roles that are excluded from being logged no matter the audit logging config. (list)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code ONLY
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Updating audit logging config for app endpoint: {}, inside app "
+            "service: {}, linked to the cluster: {}, inside the project: {}, "
+            "inside the tenant: {}"
+            .format(appEndpointName, appServiceId, clusterId, projectId,
+                    organizationId))
+        params = {
+            "auditEnabled": auditEnabled,
+            "enabledEventIds": enabledEventIds,
+            "disabledUsers": disabledUsers,
+            "disabledRoles": disabledRoles
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_put(self.app_svc_audit_log_config_endpoint.format(
+            organizationId, projectId, clusterId, appServiceId,
+            appEndpointName), params, headers)
+        return resp
+
+    def fetch_app_endpoint_audit_log_config_info(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointName,
+            headers=None,
+            **kwargs):
+        """
+        Retrieves the audit logging configuration for a specific App Endpoint.
+
+        Args:
+            organizationId: The tenant in which app service is present. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster having the app service. (UUID)
+            appServiceId: ID of the app service for which app service which has the relative app endpoint. (UUID)
+            appEndpointName: The name of the App Endpoint for which the config is to be fetched for. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response Body (json)
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Fetching audit log config for app endpoint: {}, inside the app "
+            "service: {}, linked to cluster: {}, inside the project: {}, "
+            "inside the tenant: {}"
+            .format(appEndpointName, appServiceId, clusterId, projectId,
+                    organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_get(self.app_svc_audit_log_config_endpoint.format(
+            organizationId, projectId, clusterId, appServiceId,
+            appEndpointName), params, headers)
+        return resp
 
     def patch_app_service_audit_log_streaming(
             self,
