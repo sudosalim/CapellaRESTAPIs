@@ -61,9 +61,129 @@ class ClusterOperationsAPIs(APIRequests):
         self.tenant_events_endpoint = organization_endpoint + "/{}/events"
         self.project_events_endpoint = organization_endpoint + "/{}/projects/{}/events"
 
-        self.app_svc_audit_log_exports_endpoint = self.cluster_appservice_api + "/{}/auditLogExports"
-        self.app_svc_audit_log_streaming_endpoint = self.cluster_appservice_api + "/{}/auditLogStreaming"
-        self.app_svc_audit_log_config_endpoint = self.cluster_appservice_api = "/{}/appEndpoints/{}/auditLog"
+        self.app_svc_audit_log_endpoint = self.cluster_appservice_api + "/{}/auditLog"
+        self.app_svc_audit_log_exports_endpoint = self.app_svc_audit_log_endpoint + "Exports"
+        self.app_svc_audit_log_streaming_endpoint = self.app_svc_audit_log_endpoint + "Streaming"
+        self.app_svc_audit_log_config_endpoint = self.cluster_appservice_api + "/{}/appEndpoints/{}/auditLog"
+        self.app_svc_audit_log_events_endpoint = self.app_svc_audit_log_config_endpoint + "Events"
+
+    def update_app_svc_audit_log_state(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            auditEnabled,
+            headers=None,
+            **kwargs):
+        """
+        Enable or disable Audit Logging for an App Service.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster which has the app service inside it. (UUID)
+            appServiceId: ID of the app service linked to the cluster. (UUID)
+            auditEnabled: Stop or start audit logging for the app service. (bool)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code ONLY.
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Updating audit logging state of app service: {}, linked to the "
+            "cluster: {}, inside project: {}, inside tenant: {}"
+            .format(appServiceId, clusterId, projectId, organizationId))
+        params = {
+            "auditEnabled": auditEnabled
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_put(self.app_svc_audit_log_endpoint.format(
+                organizationId, projectId, clusterId, appServiceId),
+            params, headers)
+        return resp
+
+    def fetch_app_svc_audit_log_state_info(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            headers=None,
+            **kwargs):
+        """
+        Retrieves the audit logging state for a specific App Service.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster which has the app service inside it. (UUID)
+            appServiceId: ID of the app service linked to the cluster. (UUID)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Fetching audit logging state of app service: {}, linked to the "
+            "cluster: {}, inside project: {}, inside tenant: {}"
+            .format(appServiceId, clusterId, projectId, organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_get(self.app_svc_audit_log_endpoint.format(
+                organizationId, projectId, clusterId, appServiceId),
+            params, headers)
+        return resp
+
+    def list_app_svc_audit_log_events(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointName,
+            headers=None,
+            **kwargs):
+        """
+        Retrieves all audit log event ids, their descriptions and enabled status for an App Endpoint. The list of filterable event IDs can be specified while configuring audit logging for the App Service.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster which has the app service inside it. (UUID)
+            appServiceId: ID of the app service linked to the cluster. (UUID)
+            appEndpointName: name of the endpoint inside the app service. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Listing Audit Log Events for the App Endpoint: {}, inside the "
+            "app Service: {}, linked to the cluster: {}, inside the project: "
+            "{}, inside the tenant: {}".format(appEndpointName, appServiceId,
+                                               clusterId, projectId,
+                                               organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_get(self.app_svc_audit_log_events_endpoint.format(
+            organizationId, projectId, clusterId, appServiceId,
+            appEndpointName), params, headers)
+        return resp
 
     def update_app_svc_audit_log_config(
             self,
