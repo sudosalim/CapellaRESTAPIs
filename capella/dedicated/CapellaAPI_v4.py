@@ -51,6 +51,7 @@ class ClusterOperationsAPIs(APIRequests):
         self.flush_buckets_endpoint = self.bucket_endpoint + "/{}/flush"
         self.bucket_migration_endpoint = self.cluster_endpoint + "/{}/bucketStorageMigration"
         self.vpc_endpoint = self.cluster_endpoint + "/{}/networkPeers"
+        self.vnet_peering_cmd_endpoint = self.vpc_endpoint + "/networkPeerCommand"
 
         self.private_network_service_endpoint = self.cluster_endpoint + "/{}/privateEndpointService"
         self.list_private_networks_endpoint = self.private_network_service_endpoint + "/endpoints"
@@ -903,6 +904,51 @@ class ClusterOperationsAPIs(APIRequests):
             params[k] = v
 
         resp = self.api_get(self.vpc_endpoint.format(
+            organizationId, projectId, clusterId), params, headers)
+        return resp
+
+    def get_azure_vnet_peering_command(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            tenantId,
+            subscriptionId,
+            resourceGroup,
+            vnetId,
+            vnetPeeringServicePrincipal,
+            headers=None,
+            **kwargs):
+        """
+        Retrieves the role assignment command or script to be executed in the Azure CLI to assign a new network contributor role.
+        It scopes only to the specified subscription and the virtual network within that subscription
+        Args:
+            organizationId: The ID of the tenant. (UUID)
+            projectId: The ID of the project having the cluster. (UUID)
+            clusterId: The ID of the Azure cluster for which to get the peering command. (UUID)
+            tenantId: The ID of the Azure tenant. (UUID)
+            subscriptionId: The ID of the Azure subscription. (UUID)
+            resourceGroup: Name of the resource group where the VPC is created. (string)
+            vnetId: The vnet ID for which to generate peering command. (string)
+            vnetPeeringServicePrincipal: The ID of the vnet service principal created when peering access is allowed through the UI. (UUID)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+        Returns:
+            Success : Status Code, dict
+            Error : message, hint, code, HttpStatusCode
+        """
+
+        params = {
+            "tenantId": tenantId,
+            "subscriptionId": subscriptionId,
+            "resourceGroup": resourceGroup,
+            "vnetId": vnetId,
+            "vnetPeeringServicePrincipal": vnetPeeringServicePrincipal
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_post(self.vnet_peering_cmd_endpoint.format(
             organizationId, projectId, clusterId), params, headers)
         return resp
 
