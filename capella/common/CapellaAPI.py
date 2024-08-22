@@ -359,9 +359,9 @@ class CommonCapellaAPI(APIRequests):
                 },
                 "optional": false,
                 "visibility": "visible",
-                "title": f"Cluster Upgrade",
+                "title": "Cluster Upgrade",
                 "priority": "Upgrade",
-                "description": f"Cluster Upgrade to {new_image}",
+                "description": "Cluster Upgrade to {}.format(new_image)",
                 "renewClusterCert": true
             },
             "window": {
