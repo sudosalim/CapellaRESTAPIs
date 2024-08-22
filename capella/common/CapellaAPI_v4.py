@@ -926,3 +926,60 @@ class CommonCapellaAPI(APIRequests):
         resp = self.do_internal_request(
             url, method="POST", params=json.dumps(payload))
         return resp
+
+    """
+    Method to schedule maintenance jobs.
+    """
+    def schedule_cluster_maintainance(self, payload):
+        url = "{}/internal/support/maintenance/schedules".format(
+            self.internal_url)
+        resp = self._urllib_request(url, "POST", params=json.dumps(payload),
+                                    headers=self.cbc_api_request_headers)
+        return resp
+
+    """
+    Method to schedule cluster upgrades.
+    :param current_images <list> List of AMI versions which needs to be
+    upgraded.
+    :param new_image <str> New AMI version to which cluster/s have to be
+    upgraded.
+    :param start_datetime <str> Date and Time in ISO format (
+    YYYY-MM-DDTHH:MM:SSZ) when upgrade jobs should start.
+    :param end_datetime <str> Date and Time in ISO format (
+    YYYY-MM-DDTHH:MM:SSZ) before which upgrade job should end.
+    :param cluster_ids <list> List of cluster Ids. For columnar cluster pass
+    cluster ID and not instance ID. If not passed, then all clusters with AMI 
+    version present in current_images will be upgraded.
+    :param provider <str> Cloud provider. Accepted value hostedAWS,
+    hostedGCP, hostedAzure
+    """
+    def schedule_cluster_upgrade(
+            self, current_images, new_image, start_datetime, end_datetime,
+            provider, cluster_ids=[]):
+
+        payload = {
+            "serviceType": "clusters",
+            "config": {
+                "type": "upgradeClusterImage",
+                "images": {
+                    "currentImages": current_images,
+                    "newImage": new_image,
+                    "provider": provider
+                },
+                "optional": false,
+                "visibility": "visible",
+                "title": f"Cluster Upgrade",
+                "priority": "Upgrade",
+                "description": f"Cluster Upgrade to {new_image}",
+                "renewClusterCert": true
+            },
+            "window": {
+                "startDate": start_datetime,
+                "endDate": end_datetime
+            },
+            "scope": "all"
+        }
+        if cluster_ids:
+            payload["clusterIds"] = cluster_ids
+
+        return self.schedule_cluster_maintainance(payload)
