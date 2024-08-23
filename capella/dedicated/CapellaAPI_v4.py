@@ -336,6 +336,7 @@ class ClusterOperationsAPIs(APIRequests):
             appServiceId,
             streamingEnabled,
             disabledAppEndpoints,
+            outputType,
             credentials,
             headers=None,
             **kwargs):
@@ -351,8 +352,8 @@ class ClusterOperationsAPIs(APIRequests):
             clusterId: ID of the cluster which has the linked App Service. (UUID)
             appServiceId: ID of the App Service for which streaming has to be configured. (UUID)
             streamingEnabled: Param to stop / start the streaming. (bool)
-            disabledAppEndpoints: The App Endpoints inside the App Service
-            which have to be ignored while streaming logs. (list (of strings))
+            disabledAppEndpoints: The App Endpoints inside the App Service which have to be ignored while streaming logs. (list (of strings))
+            outputType: The expected audit log output config.
             credentials: The required creds related to the service provider
             to which the Audit Logs are being streamed to. (obj)
             headers: Headers to be sent with the API call. (dict)
@@ -369,13 +370,14 @@ class ClusterOperationsAPIs(APIRequests):
         params = {
             "streamingEnabled": streamingEnabled,
             "disabledAppEndpoints": disabledAppEndpoints,
+            "outputType": outputType,
             "credentials": credentials
         }
         for k, v in kwargs.items():
             params[k] = v
 
         resp = self.api_put(self.app_svc_audit_log_streaming_endpoint.format(
-                organizationId, projectId, clusterId, appServiceId),
+            organizationId, projectId, clusterId, appServiceId),
             params, headers)
         return resp
 
