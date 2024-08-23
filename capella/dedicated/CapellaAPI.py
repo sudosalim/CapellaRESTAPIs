@@ -1103,7 +1103,7 @@ class CapellaAPI(CommonCapellaAPI):
 
     def sgw_get_audit_logging_config(self, tenant_id, project_id, cluster_id, backend_id, db_name):
         "Get audit logging config"
-        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/audit-logging{}/config' \
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/audit-logging/{}/config' \
               .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id, db_name)
         resp = self.do_internal_request(url, method="GET")
         return resp
