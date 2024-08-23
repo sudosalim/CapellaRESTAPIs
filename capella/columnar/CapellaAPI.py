@@ -609,3 +609,31 @@ class CapellaAPI(CommonCapellaAPI):
             self.internal_url, tenant_id, project_id, instance_id, page, perPage)
         resp = self.do_internal_request(url, method="GET")
         return resp
+
+    """
+    Method fetches all the maintenance jobs for a columnar cluster.
+    :param page <int> Page number to be fetched.
+    :param per_page <int> Number of jobs per page.
+    """
+    def get_maintenance_jobs(self, tenant_id, project_id, instance_id,
+                             page=1, per_page=100):
+        url = "{}/v2/organizations/{}/projects/{}/instance/{}/maintenances".format(
+            self.internal_url, tenant_id, project_id, instance_id)
+        payload = {
+            "page": page,
+            "perPage": per_page
+        }
+        resp = self.do_internal_request(
+            url, method="GET", params=json.dumps(payload))
+        return resp
+
+    """
+    Method fetches info for a maintenance job for a columnar cluster.
+    :param job_id <int> Id of the maintenance job.
+    """
+    def get_maintenance_job_status(self, job_id):
+        url = "{}/v2/organizations/{}/projects/{}/instance/{}/maintenances/" \
+              "{}".format(
+            self.internal_url, tenant_id, project_id, instance_id, job_id)
+        resp = self.do_internal_request(url, method="GET")
+        return resp

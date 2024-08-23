@@ -930,7 +930,7 @@ class CommonCapellaAPI(APIRequests):
     """
     Method to schedule maintenance jobs.
     """
-    def schedule_cluster_maintainance(self, payload):
+    def schedule_cluster_maintenance(self, payload):
         url = "{}/internal/support/maintenance/schedules".format(
             self.internal_url)
         resp = self._urllib_request(url, "POST", params=json.dumps(payload),
@@ -966,12 +966,12 @@ class CommonCapellaAPI(APIRequests):
                     "newImage": new_image,
                     "provider": provider
                 },
-                "optional": false,
+                "optional": False,
                 "visibility": "visible",
-                "title": f"Cluster Upgrade",
+                "title": "Cluster Upgrade",
                 "priority": "Upgrade",
-                "description": f"Cluster Upgrade to {new_image}",
-                "renewClusterCert": true
+                "description": "Cluster Upgrade to {}".format(new_image),
+                "renewClusterCert": True
             },
             "window": {
                 "startDate": start_datetime,
@@ -982,4 +982,5 @@ class CommonCapellaAPI(APIRequests):
         if cluster_ids:
             payload["clusterIds"] = cluster_ids
 
-        return self.schedule_cluster_maintainance(payload)
+        return self.schedule_cluster_maintenance(payload)
+
