@@ -110,7 +110,7 @@ class CapellaAPI(CommonCapellaAPI):
         """
         url = (
             '{}/v2/organizations/{}/instance/deployment-options?provider={}'
-        ).format(self.internal_url, tenant_id, provider, region, free_tier)
+        ).format(self.internal_url, tenant_id, provider)
         if region:
             url += "&region={}".format(region)
         if free_tier:
@@ -631,7 +631,7 @@ class CapellaAPI(CommonCapellaAPI):
     Method fetches info for a maintenance job for a columnar cluster.
     :param job_id <int> Id of the maintenance job.
     """
-    def get_maintenance_job_status(self, job_id):
+    def get_maintenance_job_status(self, tenant_id, project_id, instance_id, job_id):
         url = "{}/v2/organizations/{}/projects/{}/instance/{}/maintenances/" \
               "{}".format(
             self.internal_url, tenant_id, project_id, instance_id, job_id)
