@@ -338,6 +338,8 @@ class CommonCapellaAPI(APIRequests):
     YYYY-MM-DDTHH:MM:SSZ) when upgrade jobs should start.
     :param end_datetime <str> Date and Time in ISO format (
     YYYY-MM-DDTHH:MM:SSZ) before which upgrade job should end.
+    :param queue_datetime <str> Date and Time in ISO format (
+    YYYY-MM-DDTHH:MM:SSZ) when the upgrade job will be queued.
     :param cluster_ids <list> List of cluster Ids. For columnar cluster pass
     cluster ID and not instance ID. If not passed, then all clusters with AMI
     version present in current_images will be upgraded.
@@ -346,7 +348,7 @@ class CommonCapellaAPI(APIRequests):
     """
     def schedule_cluster_upgrade(
             self, current_images, new_image, start_datetime, end_datetime,
-            provider, cluster_ids=[]):
+            queue_datetime, provider, cluster_ids=[]):
 
         payload = {
             "serviceType": "clusters",
@@ -367,6 +369,9 @@ class CommonCapellaAPI(APIRequests):
             "window": {
                 "startDate": start_datetime,
                 "endDate": end_datetime
+            },
+            "schedule": {
+                "queueAt": queue_datetime
             },
             "scope": "all"
         }
