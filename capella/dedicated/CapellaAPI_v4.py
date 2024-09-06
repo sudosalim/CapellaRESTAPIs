@@ -590,7 +590,7 @@ class ClusterOperationsAPIs(APIRequests):
         else:
             params = None
 
-        resp = self.api_post(self.flush_buckets_endpoint.format(
+        resp = self.api_put(self.flush_buckets_endpoint.format(
             organizationId, projectId, clusterId, bucketId), params, headers)
         return resp
 
