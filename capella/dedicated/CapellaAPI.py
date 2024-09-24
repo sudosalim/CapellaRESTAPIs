@@ -1230,3 +1230,23 @@ class CapellaAPI(CommonCapellaAPI):
         url = '{}/v2/organizations/{}/clusters/v2'.format(self.internal_url, tenant_id)
         resp = self.do_internal_request(url, method="POST", params=json.dumps(payload))
         return resp
+
+    def list_global_feature_flags(self):
+        url = '{}/v2/features/flags'.format(self.internal_url)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def list_global_feature_flags_specific(self, flag_name):
+        url = '{}/v2/features/flags?flags={}'.format(self.internal_url, flag_name)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def list_tenant_feature_flags(self, tenant_id):
+        url = '{}/v2/features/{}/flags'.format(self.internal_url, tenant_id)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def list_tenant_feature_flags_specific(self, tenant_id, flag_name):
+        url = '{}/v2/features/{}/flags?flags={}'.format(self.internal_url, tenant_id, flag_name)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
