@@ -68,6 +68,136 @@ class ClusterOperationsAPIs(APIRequests):
         self.app_svc_audit_log_config_endpoint = self.cluster_appservice_api + "/{}/appEndpoints/{}/auditLog"
         self.app_svc_audit_log_events_endpoint = self.app_svc_audit_log_config_endpoint + "Events"
 
+        self.index_endpoint = self.cluster_endpoint + "/{}/queryService/indexes"
+        self.index_build_status_endpoint = self.index_endpoint + "/{}/indexBuildStatus"
+
+    def fetch_index_props(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            indexName,
+            headers=None,
+            **kwargs):
+        """
+        Get the index properties of a specified index in a keyspace.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster which has the app service inside it. (UUID)
+            indexName: The name of the index for which the definition has to be fetched. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code ONLY.
+            Error : message, hint, code, HttpStatusCode
+        """
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_get(self.index_endpoint.format(
+            organizationId, projectId, clusterId, indexName), params, headers)
+        return resp
+
+    def index_build_status(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            indexName,
+            headers=None,
+            **kwargs):
+        """
+        Monitor the build status of an index.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster which has the app service inside it. (UUID)
+            indexName: The name of the index for which the definition has to be fetched. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code ONLY.
+            Error : message, hint, code, HttpStatusCode
+        """
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_get(self.index_build_status_endpoint.format(
+            organizationId, projectId, clusterId, indexName), params, headers)
+        return resp
+
+    def list_index_definitions(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            headers=None,
+            **kwargs):
+        """
+        Get definitions for all indices in a keyspace.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster which has the app service inside it. (UUID)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code ONLY.
+            Error : message, hint, code, HttpStatusCode
+        """
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_get(self.index_endpoint.format(
+            organizationId, projectId, clusterId), params, headers)
+        return resp
+
+    def manage_query_indices(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            definition,
+            headers=None,
+            **kwargs):
+        """
+        CREATE/DROP/ALTER/BUILD primary and secondary indexes.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster which has the app service inside it. (UUID)
+            definition: The query statement for the index to be defined with. (DDL)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code ONLY.
+            Error : message, hint, code, HttpStatusCode
+        """
+        params = {
+            "definition": definition,
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_post(self.index_endpoint.format(
+            organizationId, projectId, clusterId, definition), params, headers)
+        return resp
+
     def update_app_svc_audit_log_state(
             self,
             organizationId,
