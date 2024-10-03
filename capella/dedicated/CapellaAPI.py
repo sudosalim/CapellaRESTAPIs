@@ -1250,3 +1250,58 @@ class CapellaAPI(CommonCapellaAPI):
         url = '{}/v2/features/{}/flags?flags={}'.format(self.internal_url, tenant_id, flag_name)
         resp = self.do_internal_request(url, method="GET")
         return resp
+
+    def list_global_feature_flag(self, flag_name):
+        url = "{}/internal/support/features/flags/{}".format(self.internal_url, flag_name)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def list_global_feature_flag_specific(self, flag_name):
+        url = "{}/internal/support/features/flags/{}".format(self.internal_url, flag_name)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def create_global_feature_flag(self, flag_name, payload):
+        url = "{}/internal/support/features/flags/{}".format(self.internal_url, flag_name)
+        resp = self.do_internal_request(url, method="POST", params=json.dumps(payload))
+        return resp
+
+    def update_global_feature_flag(self, flag_name, payload):
+        url = "{}/internal/support/features/flags/{}".format(self.internal_url, flag_name)
+        resp = self.do_internal_request(url, method="PUT", params=json.dumps(payload))
+        return resp
+
+    def delete_global_feature_flag(self, flag_name):
+        url = "{}/internal/support/features/flags/{}".format(self.internal_url, flag_name)
+        resp = self.do_internal_request(url, method="DELETE")
+        return resp
+
+    def list_tenant_feature_flags_internal(self, tenant_id):
+        url = "{}/internal/support/features/{}/flags".format(self.internal_url, tenant_id)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def list_tenant_feature_flags_internal_specific(self, tenant_id, flag_name):
+        url = "{}/internal/support/features/{}/flags?flags={}".format(self.internal_url, tenant_id, flag_name)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def create_tenant_feature_flag(self, tenant_id, flag_name, payload):
+        url = "{}/internal/support/features/{}/flags/{}".format(self.internal_url, tenant_id, flag_name)
+        resp = self.do_internal_request(url, method="POST", params=json.dumps(payload))
+        return resp
+
+    def update_tenant_feature_flag(self, tenant_id, flag_name, payload):
+        url = "{}/internal/support/features/{}/flags/{}".format(self.internal_url, tenant_id, flag_name)
+        resp = self.do_internal_request(url, method="PUT", params=json.dumps(payload))
+        return resp
+
+    def delete_tenant_feature_flag(self, tenant_id, flag_name):
+        url = "{}/internal/support/features/{}/flags/{}".format(self.internal_url, tenant_id, flag_name)
+        resp = self.do_internal_request(url, method="DELETE")
+        return resp
+
+    def initialize_feature_flags_from_launchdarkly(self):
+        url = "{}/internal/support/features/flags/initialize".format(self.internal_url)
+        resp = self.do_internal_request(url, method="POST", params=json.dumps(payload))
+        return resp
