@@ -1251,13 +1251,13 @@ class CapellaAPI(CommonCapellaAPI):
         resp = self.do_internal_request(url, method="GET")
         return resp
 
-    def list_global_feature_flag(self, flag_name):
-        url = "{}/internal/support/features/flags/{}".format(self.internal_url, flag_name)
+    def list_global_feature_flags_internal(self):
+        url = "{}/internal/support/features/flags".format(self.internal_url)
         resp = self.do_internal_request(url, method="GET")
         return resp
 
-    def list_global_feature_flag_specific(self, flag_name):
-        url = "{}/internal/support/features/flags/{}".format(self.internal_url, flag_name)
+    def list_global_feature_flags_internal_specific(self, flag_name):
+        url = "{}/internal/support/features/flags?flags={}".format(self.internal_url, flag_name)
         resp = self.do_internal_request(url, method="GET")
         return resp
 
