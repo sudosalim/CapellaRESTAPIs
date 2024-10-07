@@ -69,7 +69,7 @@ class ClusterOperationsAPIs(APIRequests):
         self.app_svc_audit_log_events_endpoint = self.app_svc_audit_log_config_endpoint + "Events"
 
         self.index_endpoint = self.cluster_endpoint + "/{}/queryService/indexes"
-        self.index_build_status_endpoint = self.index_endpoint + "/{}/indexBuildStatus"
+        self.index_build_status_endpoint = self.cluster_endpoint + "/{}/queryService/indexBuildStatus"
 
     def fetch_index_props(
             self,
@@ -131,8 +131,10 @@ class ClusterOperationsAPIs(APIRequests):
         else:
             params = None
 
-        resp = self.api_get(self.index_build_status_endpoint.format(
-            organizationId, projectId, clusterId, indexName), params, headers)
+        resp = self.api_get("{}/{}".format(
+            self.index_build_status_endpoint.format(
+                organizationId, projectId, clusterId), indexName),
+            params, headers)
         return resp
 
     def list_index_definitions(
