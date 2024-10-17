@@ -99,8 +99,10 @@ class ClusterOperationsAPIs(APIRequests):
         else:
             params = None
 
-        resp = self.api_get(self.index_endpoint.format(
-            organizationId, projectId, clusterId, indexName), params, headers)
+        resp = self.api_get("{}/{}".format(
+            self.index_endpoint.format(
+                organizationId, projectId, clusterId), indexName),
+            params, headers)
         return resp
 
     def index_build_status(
@@ -197,7 +199,7 @@ class ClusterOperationsAPIs(APIRequests):
             params[k] = v
 
         resp = self.api_post(self.index_endpoint.format(
-            organizationId, projectId, clusterId, definition), params, headers)
+            organizationId, projectId, clusterId), params, headers)
         return resp
 
     def update_app_svc_audit_log_state(
