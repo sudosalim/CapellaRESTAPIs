@@ -293,6 +293,22 @@ class CapellaAPI(CommonCapellaAPI):
             url, method="DELETE")
         return resp
 
+    def update_api_key(self, tenant_id, project_id, instance_id, api_key_id, payload=None):
+        """
+            Update a Columnar apikey
+            Parameters:
+                tenant_id (str): The ID of the tenant associated with the project.
+                project_id (str): The ID of the project where the instance is located.
+                instance_id (str): The ID of the Columnar instance to create keys for.
+                api_key_id (str): api key id.
+                payload: The roles and privileges to be assigned
+        """
+        url = "{}/v2/organizations/{}/projects/{}/instance/{}/apikeys/{}".format(
+            self.internal_url, tenant_id, project_id, instance_id, api_key_id)
+        resp = self.do_internal_request(url, method="PATCH",
+                                        params=json.dumps(payload))
+        return resp
+
     def allow_ip(self, tenant_id, project_id, instance_id, cidr, comment="", **kwargs):
         """
             Add a CIDR to the columnar CIDR allowed list.
