@@ -676,6 +676,16 @@ class CommonCapellaAPI(APIRequests):
                                     headers=self.cbc_api_request_headers)
         return resp
 
+    def ff_update(self, ff, value):
+        url = self.internal_url + \
+              "/internal/support/features/flags/{}".format(ff)
+        body = {
+            "value": bool(value)
+        }
+        resp = self._urllib_request(url, "PUT", params=json.dumps(body),
+                                    headers=self.cbc_api_request_headers)
+        return resp
+
     def get_cluster_tasks(self, cluster_id):
         url = self.internal_url + \
             "/internal/support/clusters/{}/pools/default/tasks".format(cluster_id)
