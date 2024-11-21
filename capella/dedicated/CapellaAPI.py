@@ -1318,3 +1318,301 @@ class CapellaAPI(CommonCapellaAPI):
         resp = self._urllib_request(url, method="POST",
                                     headers=self.cbc_api_request_headers)
         return resp
+
+    def create_autovec_integration(self, tenant_id, payload):
+        """
+        Create an S3 or OpenAI integration for creating autovec workflow
+        Args:
+            tenant_id: ID of the organization
+            payload:
+                S3 integration payload:
+                    {
+                        "integrationType": "s3",
+                        "name": "Key-New-72",
+                        "data": {
+                            "accessKeyId": "sample_access_key_id",
+                            "secretAccessKey": "sample_secret_access_key",
+                            "awsRegion": "region",
+                            "bucket": "bucket",
+                            "folderPath": "path"
+                        }
+                    }
+                OpenAI integration payload:
+                    {
+                        "integrationType": "openAI",
+                        "name": "Key-New-73",
+                        "data": {
+                            "key": "sample_secret_key"
+                        }
+                    }
+        Returns:
+            ID of the integration created
+            Example:
+            {
+                "id": "06416e0e-8bdf-4273-bbf0-9ca71ba00536-Key-New-73"
+            }
+        """
+        url = "{}/v2/organizations/{}/integrations".format(self.internal_url, tenant_id)
+        resp = self.do_internal_request(url, method="POST", params=json.dumps(payload))
+        return resp
+
+    def get_autovec_integration(self, tenant_id, integration_id):
+        """
+        Get details of an autovec integration
+        Args:
+            tenant_id: ID of the organization
+            integration_id: ID of the integration
+
+        Returns:
+
+        """
+        url = "{}/v2/organizations/{}/integrations/{}".format(self.internal_url, tenant_id, integration_id)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def update_autovec_integration(self, tenant_id, integration_id, payload):
+        """
+        Update an autovec integration
+        Args:
+            tenant_id: ID of the organization
+            integration_id: ID of the integration
+            payload:
+                S3 integration example:
+                    {
+                        "integrationType": "s3",
+                        "data": {
+                            "accessKeyId": "sample_access_key_id_2",
+                            "secretAccessKey": "sample_secret_access_key_2"
+                        }
+                    }
+                OpenAI integration example:
+                    {
+                       "integrationType": "openAI",
+                       "data": {
+                           "key": "sample_secret_key_2"
+                       }
+                    }
+        Returns:
+            No content
+        """
+        url = "{}/v2/organizations/{}/integrations/{}".format(self.internal_url, tenant_id, integration_id)
+        resp = self.do_internal_request(url, method="PUT", params=json.dumps(payload))
+        return resp
+
+    def list_autovec_integrations(self, tenant_id, integration_type=None, page=1, per_page=25):
+        """
+        Get list of all integrations in the organization
+        Args:
+            tenant_id: ID of the organization
+            integration_type: type of integrations to list (openAI, s3)
+            page: page to view
+            per_page: results per page
+
+        Returns:
+            List of autovec integrations
+            Example:
+                {
+                    "cursor": {
+                        "pages": {
+                            "page": 1,
+                            "last": 1,
+                            "perPage": 10,
+                            "totalItems": 4
+                        },
+                        "hrefs": {}
+                    },
+                    "data": [
+                        {
+                            "data": {
+                                "integrationType": "s3",
+                                "id": "06416e0e-8bdf-4273-bbf0-9ca71ba00536-Key-New-59",
+                                "tenantId": "06416e0e-8bdf-4273-bbf0-9ca71ba00536",
+                                "name": "Key-New-59",
+                                "accessKeyId": "****************y_id",
+                                "secretAccessKey": "****************y_id",
+                                "awsRegion": "region",
+                                "bucket": "bucket",
+                                "folderPath": "path",
+                                "createdByUser": "aniket.kumar",
+                                "createdByUserID": "8fbc47a8-8736-492f-a356-3965bd92c219",
+                                "upsertedByUserID": "",
+                                "createdAt": "2024-10-21T18:00:34.019456588Z",
+                                "upsertedAt": "0001-01-01T00:00:00Z",
+                                "modifiedByUserID": "8fbc47a8-8736-492f-a356-3965bd92c219",
+                                "modifiedAt": "2024-10-21T18:00:34.019456588Z",
+                                "version": 1
+                            },
+                            "permissions": {
+                                "create": {
+                                    "accessible": true
+                                },
+                                "read": {
+                                    "accessible": true
+                                },
+                                "update": {
+                                    "accessible": true
+                                },
+                                "delete": {
+                                    "accessible": true
+                                }
+                            }
+                        }
+                    ]
+                }
+        """
+        if integration_type:
+            url = "{}/v2/organizations/{}/integrations?integrationType={}&page={}&perPage={}".format(self.internal_url,
+                                                                                                     tenant_id, integration_type,
+                                                                                                     page, per_page)
+        else:
+            url = "{}/v2/organizations/{}/integrations?page={}&perPage={}".format(self.internal_url,
+                                                                                  tenant_id, page, per_page)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def delete_autovec_integration(self, tenant_id, integration_id):
+        """
+
+        Args:
+            tenant_id: ID of the organization
+            integration_id: ID of the integration
+
+        Returns:
+            No content
+        """
+        url = "{}/v2/organizations/{}/integrations/{}".format(self.internal_url, tenant_id, integration_id)
+        resp = self.do_internal_request(url, method="DELETE")
+        return resp
+
+    def create_autovec_workflow(self, tenant_id, project_id, cluster_id, payload):
+        """
+        Create an autovec workflow
+        Args:
+            tenant_id: ID of the organization
+            project_id: ID of the project
+            cluster_id: ID of the cluster
+            payload:
+                {
+                    "dataSource": {
+                        "id":"adb4fb4c-1d98-4287-ac33-230742d2cc76-s3-integration-name-25"
+                    },
+                    "type": "structured",
+                    "schemaFields": [
+                        "field1",
+                        "field2"
+                    ],
+                    "embeddingModel": {
+                        "external": {
+                            "name": "open-ai-integration-26",
+                            "modelName": "text-embedding-3-small",
+                            "provider": "openAI",
+                            "apiKey": "asfasd"
+                        }
+                    },
+                    "cbKeyspace": {
+                        "bucket": "bucket-1",
+                        "scope": "_default",
+                        "collection": "_default"
+                    },
+                    "vectorIndexName": "vector-index-name",
+                    "embeddingFieldName": "embedding-field",
+                    "name": "flow2"
+                }
+
+        Returns:
+            ID of the workflow created
+            Example:
+                {
+                    "id": "60621d6c-a92c-4219-95c3-eb213b0745b5"
+                }
+        """
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/ai/workflows".format(self.internal_url, tenant_id,
+                                                                                   project_id, cluster_id)
+        resp = self.do_internal_request(url, method="POST", params=json.dumps(payload))
+        return resp
+
+    def get_autovec_workflow(self, tenant_id, project_id, cluster_id, workflow_id):
+        """
+        Get workflow details
+        Args:
+            tenant_id: ID of the organization
+            project_id: ID of the project
+            cluster_id: ID of the cluster
+            workflow_id: ID of the workflow
+
+        Returns:
+            Workflow details
+        """
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/ai/workflows/{}".format(self.internal_url, tenant_id,
+                                                                                      project_id, cluster_id, workflow_id)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def delete_autovec_workflow(self, tenant_id, project_id, cluster_id, workflow_id):
+        """
+        Delete autovec workflow
+        Args:
+            tenant_id: ID of the organization
+            project_id: ID of the project
+            cluster_id: ID of the cluster
+            workflow_id: ID of the workflow
+
+        Returns:
+            No content
+        """
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/ai/workflows/{}".format(self.internal_url, tenant_id,
+                                                                                      project_id, cluster_id, workflow_id)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def list_autovec_workflows(self, tenant_id, page=1, per_page=10):
+        """
+        Get list of autovec workflows
+        Args:
+            tenant_id: ID of the autovec workflow
+            page: page to view
+            per_page: results per page
+
+        Returns:
+            List of autovec workflows
+        """
+        url = "{}/v2/organizations/{}/ai/workflows?page={}&perPage={}".format(self.internal_url, tenant_id,
+                                                                              page, per_page)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def pause_autovec_workflow(self, tenant_id, project_id, cluster_id, workflow_id):
+        """
+        Pause an autovec workflow
+        Args:
+            tenant_id: ID of the organization
+            project_id: ID of the project
+            cluster_id: ID of the cluster
+            workflow_id: ID of the workflow
+
+        Returns:
+            202 accepted on success
+        """
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/ai/workflows/{}/pause".format(self.internal_url, tenant_id,
+                                                                                      project_id, cluster_id, workflow_id)
+        resp = self.do_internal_request(url, method="POST")
+        return resp
+
+    def resume_autovec_workflow(self, tenant_id, project_id, cluster_id, workflow_id):
+        """
+        Resume an autovec workflow
+        Args:
+            tenant_id: ID of the organization
+            project_id: ID of the project
+            cluster_id: ID of the cluster
+            workflow_id: ID of the workflow
+
+        Returns:
+            202 accepted on success
+        """
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/ai/workflows/{}/resume".format(self.internal_url,
+                                                                                            tenant_id,
+                                                                                            project_id, cluster_id,
+                                                                                            workflow_id)
+        resp = self.do_internal_request(url, method="POST")
+        return resp
