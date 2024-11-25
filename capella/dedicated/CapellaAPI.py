@@ -1616,3 +1616,60 @@ class CapellaAPI(CommonCapellaAPI):
                                                                                             workflow_id)
         resp = self.do_internal_request(url, method="POST")
         return resp
+
+    def list_health_reports(self, tenant_id, project_id, cluster_id):
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/health-advisor'.format(
+            self.internal_url, tenant_id, project_id, cluster_id)
+        url = url + '?page=1&perPage=10&sortBy=createdAt&sortDirection=desc'
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def list_health_reports_check(self, tenant_id, project_id, cluster_id, report_id):
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/health-advisor/{}'.format(
+            self.internal_url, tenant_id, project_id, cluster_id, report_id)
+        url = url + '?page=1&perPage=10&sortBy=severity&sortDirection=desc&category=data&severity=good'
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def generate_health_report(self, tenant_id, project_id, cluster_id):
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/health-advisor'.format(
+            self.internal_url, tenant_id, project_id, cluster_id)
+        resp = self.do_internal_request(url, method="POST")
+        return resp
+
+    def get_health_report_generation_progress(self, tenant_id, project_id, cluster_id):
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/health-advisor/progress'.format(
+            self.internal_url, tenant_id, project_id, cluster_id)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def get_health_advisor_settings(self, tenant_id, project_id, cluster_id):
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/health-advisor/settings'.format(
+            self.internal_url, tenant_id, project_id, cluster_id)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def get_health_report_overall_stats(self, tenant_id, project_id, cluster_id, report_id):
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/health-advisor/{}/stats'.format(
+            self.internal_url, tenant_id, project_id, cluster_id, report_id)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def update_health_advisor_settings(self, tenant_id, project_id, cluster_id, payload=None):
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/health-advisor/settings'.format(
+            self.internal_url, tenant_id, project_id, cluster_id)
+        resp = self.do_internal_request(url, method="PATCH", params=json.loads(payload))
+        return resp
+
+    def get_info_health_report(self, tenant_id, project_id, cluster_id, report_id):
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/health-advisor/{}/info'.format(
+                self.internal_url, tenant_id, project_id, cluster_id, report_id)
+        url = url + '?category=data'
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def get_pdf_health_report(self, tenant_id, project_id, cluster_id, report_id):
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/health-advisor/{}/pdf'.format(
+                self.internal_url, tenant_id, project_id, cluster_id, report_id)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
