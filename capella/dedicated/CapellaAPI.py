@@ -1332,3 +1332,24 @@ class CapellaAPI(CommonCapellaAPI):
         )
         resp = self.do_internal_request(url, method="DELETE")
         return resp
+
+    def get_workflow(self, tenant_id, project_id, cluster_id, workflow_id):
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/ai/workflows/{}".format(
+            self.internal_url, tenant_id, project_id, cluster_id, workflow_id
+        )
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def create_hosted_model(self, tenant_id, project_id, cluster_id, payload):
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/languagemodels".format(
+            self.internal_url, tenant_id, project_id, cluster_id
+        )
+        resp = self.do_internal_request(url, method="POST", params=json.dumps(payload))
+        return resp
+
+    def get_hosted_model(self, tenant_id, project_id, cluster_id, model_id):
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/languagemodels/{}".format(
+            self.internal_url, tenant_id, project_id, cluster_id, model_id
+        )
+        resp = self.do_internal_request(url, method="GET")
+        return resp
