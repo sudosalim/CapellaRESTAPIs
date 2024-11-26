@@ -1673,3 +1673,21 @@ class CapellaAPI(CommonCapellaAPI):
                 self.internal_url, tenant_id, project_id, cluster_id, report_id)
         resp = self.do_internal_request(url, method="GET")
         return resp
+
+    def upload_cert_mtls(self, tenant_id, project_id, cluster_id, payload):
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/mtls'.format(
+            self.internal_url, tenant_id, project_id, cluster_id)
+        resp = self.do_internal_request(url, method="POST", params=json.dumps(payload))
+        return resp
+
+    def upload_mtls_settings(self, tenant_id, project_id, cluster_id, payload):
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/mtls'.format(
+            self.internal_url, tenant_id, project_id, cluster_id)
+        resp = self.do_internal_request(url, method="PUT", params=json.dumps(payload))
+        return resp
+
+    def get_mtls_details(self, tenant_id, project_id, cluster_id):
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/mtls'.format(
+            self.internal_url, tenant_id, project_id, cluster_id)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
