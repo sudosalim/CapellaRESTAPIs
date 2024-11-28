@@ -968,9 +968,9 @@ class CapellaAPI(CommonCapellaAPI):
                                         params=json.dumps(config))
         return resp
 
-    def add_admin_user_sgw(self, tenant_id, project_id, cluster_id, backend_id, db_name, config):
-        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/databases/{}/adminusers' \
-              .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id, db_name)
+    def add_admin_user_sgw(self, tenant_id, project_id, cluster_id, backend_id, config):
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/adminusers' \
+              .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id)
         resp = self.do_internal_request(url, method="POST",
                                         params=json.dumps(config))
         return resp
