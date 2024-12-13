@@ -71,6 +71,332 @@ class ClusterOperationsAPIs(APIRequests):
         self.index_endpoint = self.cluster_endpoint + "/{}/queryService/indexes"
         self.index_build_status_endpoint = self.cluster_endpoint + "/{}/queryService/indexBuildStatus"
 
+        self.app_endpoints_endpoint = self.cluster_appservice_api + "/{}/appEndpoints"
+        self.app_endpoint_on_off_endpoint = self.app_endpoints_endpoint + "/{}/activationStatus"
+
+    def create_app_endpoint(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            name,
+            deltaSync,
+            bucket,
+            scopes,
+            xattr,
+            headers=None,
+            **kwargs):
+        """
+        Creates an App Endpoint.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster which has the app service inside it. (UUID)
+            appServiceId: ID of the App Service to create an Endpoint inside. (UUID)
+            name: Of the App Endpoint to be created. (string)
+            deltaSync: (bool)
+            bucket: Name of the bucket to link the App Endpoint with. (string)
+            scopes: Scopes to be associated inside the given  bucket. (obj)
+            xattr: userXattrKey for configuring the App Endpoint. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Creating an App endpoint inside the App Service: {}, inside the "
+            "Cluster: {}, inside the Project: {}, inside the tenant: {}"
+            .format(appServiceId, clusterId, projectId, organizationId))
+        params = {
+            "name": name,
+            "deltaSync": deltaSync,
+            "bucket": bucket,
+            "scopes": scopes,
+            "userXattrKey": xattr
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_post(self.app_endpoints_endpoint.format(
+                organizationId, projectId, clusterId, appServiceId),
+            params, headers)
+        return resp
+
+    def fetch_app_endpoint_info(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointName,
+            headers=None,
+            **kwargs):
+        """
+        Fetches the details of the given App Endpoint.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster which has the app service inside it. (UUID)
+            appServiceId: ID of the App Service to create an Endpoint inside. (UUID)
+            appEndpointName: Name of the App Endpoint to fetch details. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Fetching details for app Endpoint: {}, linked to App Svc: {}, "
+            "inside Cluster: {}, inside Project: {}, inside tenant: {}".format(
+                appEndpointName, appServiceId, clusterId, projectId,
+                organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_get("{}/{}".format(self.app_endpoints_endpoint.format(
+                organizationId, projectId, clusterId, appServiceId),
+            appEndpointName), params, headers)
+        return resp
+
+    def delete_app_endpoint(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointName,
+            headers=None,
+            **kwargs):
+        """
+        Deletes a given App Endpoint.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster which has the app service inside it. (UUID)
+            appServiceId: ID of the App Service to create an Endpoint inside. (UUID)
+            appEndpointName: Name of the App Endpoint to be deleted. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code (ONLY).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Deleting  app Endpoint: {}, linked to App Svc: {}, inside "
+            "Cluster: {}, inside Project: {}, inside tenant: {}".format(
+                appEndpointName, appServiceId, clusterId, projectId,
+                organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_del("{}/{}".format(self.app_endpoints_endpoint.format(
+                organizationId, projectId, clusterId, appServiceId),
+            appEndpointName), params, headers)
+        return resp
+
+    def list_app_endpoints(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            page=None,
+            perPage=None,
+            sortBy=None,
+            sortDirection=None,
+            headers=None,
+            **kwargs):
+        """
+        Successfully lists all the App Endpoints under a specific App Service.
+
+        Args:
+            organizationId: The ID of the tenant. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster inside the project in which the app service is present. (UUID)
+            appServiceId: ID of the app service for which app endpoint are to be listed. (UUID)
+            page: Sets what page you would like to view. (int)
+            perPage: Sets how many results you would like to have on each page. (int)
+            sortBy: Sets order of how you would like to sort results and also the key you would like to order by ([string])
+                Example: sortBy=name
+            sortDirection: The order on which the items will be sorted. (str)
+                Accepted Values - asc / desc
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and Response Body
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Listing App Endpoints in App Service: {}, inside cluster: {}, "
+            "inside project: {}, inside tenant: {}".format(
+                appServiceId, clusterId, projectId, organizationId))
+        params = {}
+        if page:
+            params["page"] = page
+        if perPage:
+            params["perPage"] = perPage
+        if sortBy:
+            params["sortBy"] = sortBy
+        if sortDirection:
+            params["sortDirection"] = sortDirection
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_get(self.app_endpoints_endpoint.format(
+                organizationId, projectId, clusterId, appServiceId),
+            params, headers)
+        return resp
+
+    def update_app_endpoint(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointName,
+            name,
+            deltaSync,
+            bucket,
+            scopes,
+            xattr,
+            headers=None,
+            **kwargs):
+        """
+        Updates a specified App Endpoint’s configurations such as Access Control function, Import Filter, Delta Sync, or user defined xattr key.
+        All fields are required, the App Endpoint and bucket names cannot be changed.
+
+        Args:
+            organizationId: The ID of the tenant. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster inside the project in which the app service is present. (UUID)
+            appServiceId: ID of the app service for which app endpoint are to be listed. (UUID)
+            appEndpointName: Name of the App Endpoint to be updated. (string)
+            name: Updated name of the App Endpoint. (string)
+            deltaSync: To have the delta sync enabled or disabled for the endpoint. (bool)
+            bucket: Name of the bucket linked to the app endpoint. (string)
+            scopes: Scopes to be included in the app endpoint config inside the bucket. (list)
+            xattr: User X-Attributes Key to be used with the endpoint. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code (ONLY).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Updating App Endpoint: {}, linked to App Service: {}, inside "
+            "cluster: {}, inside project: {}, inside tenant: {}"
+            .format(appEndpointName, appServiceId, clusterId, projectId,
+                    organizationId))
+        params = {
+            "name": name,
+            "deltaSync": deltaSync,
+            "bucket": bucket,
+            "scopes": scopes,
+            "userXattrKey": xattr
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_put("{}/{}".format(self.app_endpoints_endpoint.format(
+                organizationId, projectId, clusterId, appServiceId),
+            appEndpointName), params, headers)
+        return resp
+
+    def resume_app_endpoint(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointName,
+            headers=None,
+            **kwargs):
+        """
+        Brings an App Endpoint online to close and reopen the connection to the backing Cluster bucket, re-establish access from the Public REST API and accept all incoming Admin API requests.
+
+        Args:
+            organizationId: The ID of the tenant. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster inside the project in which the app service is present. (UUID)
+            appServiceId: ID of the app service for which app endpoint are to be listed. (UUID)
+            appEndpointName: Name of the App Endpoint to be resumed. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code (ONLY).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Turning on appEndpoint: {}, linked to appService: {}, inside "
+            "cluster: {}, inside project: {}, inside tenant: {}".format(
+                appEndpointName, appServiceId, clusterId, projectId,
+                organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.api_post(self.app_endpoint_on_off_endpoint.format(
+            organizationId, projectId, clusterId, appServiceId,
+            appEndpointName), params, headers)
+        return resp
+
+    def pause_app_endpoint(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointName,
+            headers=None,
+            **kwargs):
+        """
+        Take the database offline to run resync or to make changes without disrupting current App Endpoint operations.
+        Clients currently connected to the App Endpoint will not be able to sync data with the Cluster while the App Endpoint is paused.
+        This will not take the backing Cluster bucket offline.
+        Pausing an App Endpoint that is in the progress of coming online will pause the App Endpoint after it comes online.
+
+        Args:
+            organizationId: The ID of the tenant. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster inside the project in which the app service is present. (UUID)
+            appServiceId: ID of the app service for which app endpoint are to be listed. (UUID)
+            appEndpointName: Name of the App Endpoint to be paused. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Turning off appEndpoint: {}, linked to appService: {}, inside "
+            "cluster: {}, inside project: {}, inside tenant: {}".format(
+                appEndpointName, appServiceId, clusterId, projectId,
+                organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.api_del(self.app_endpoint_on_off_endpoint.format(
+            organizationId, projectId, clusterId, appServiceId,
+            appEndpointName), params, headers)
+        return resp
+
     def fetch_index_props(
             self,
             organizationId,
