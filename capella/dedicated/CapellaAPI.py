@@ -1691,3 +1691,87 @@ class CapellaAPI(CommonCapellaAPI):
             self.internal_url, tenant_id, project_id, cluster_id)
         resp = self.do_internal_request(url, method="GET")
         return resp
+
+    def deploy_model(self, tenant_id, project_id, cluster_id, payload):
+
+        """
+        Deploys a LLM or embedding model
+        tenant_id: ID of the organization
+        project_id: ID of the project
+        cluster_id: ID of the cluster
+        payload:
+            Embedding:
+            {
+              "compute": "g6.xlarge",
+              "configuration": {
+                "name": "intfloat/e5-mistral-7b-instruct",
+                "kind": "embedding-generation",
+                "parameters": {}
+              }
+            }
+            LLM:
+
+        Returns:
+            ID of the model deployed
+            Example:
+                {
+                    "id": "60621d6c-a92c-4219-95c3-eb213b0745b5"
+                }
+        """
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/languagemodels".format(self.internal_url, tenant_id,
+                                                                                     project_id, cluster_id)
+        resp = self.do_internal_request(url, method="POST", params=json.dumps(payload))
+        return resp
+
+    def delete_model(self, tenant_id, project_id, cluster_id, model_id):
+        """
+        Deletes a model
+        Args:
+            tenant_id: ID of the organization
+            project_id: ID of the project
+            cluster_id: ID of the cluster
+            model_id: ID of the model
+
+        Returns:
+            204 No Content on success
+        """
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/languagemodels/{}".format(self.internal_url, tenant_id,
+                                                                                        project_id, cluster_id,
+                                                                                        model_id)
+        resp = self.do_internal_request(url, method="DELETE")
+        return resp
+
+    def get_model_details(self, tenant_id, project_id, cluster_id, model_id):
+        """
+        Get details of a model
+        Args:
+            tenant_id: ID of the organization
+            project_id: ID of the project
+            cluster_id: ID of the cluster
+            model_id: ID of the model
+
+        Returns:
+            200 on success and model details:
+        """
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/languagemodels/{}".format(self.internal_url, tenant_id,
+                                                                                        project_id, cluster_id,
+                                                                                        model_id)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def list_models(self, tenant_id, page=1, per_page=10):
+        """
+        List all the deployed models in an organization
+        Args:
+            tenant_id: ID of the organization
+            page: page to view
+            per_page: results per page
+
+        Returns:
+            200 on success
+            Lists all models deployed
+        """
+        url = "{}/v2/organizations/{}/languagemodels?page={}&perPage={}".format(self.internal_url, tenant_id,
+                                                                                page, per_page)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
