@@ -487,7 +487,7 @@ class ClusterOperationsAPIs(APIRequests):
 
         resp = self.api_put(self.access_control_function_endpoint.format(
             organizationId, projectId, clusterId, appServiceId,
-            appEndpointKeyspace), params, headers)
+            appEndpointKeyspace), None, headers, params)
         return resp
 
     def fetch_access_function_info(
