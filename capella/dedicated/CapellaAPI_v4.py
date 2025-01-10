@@ -76,6 +76,7 @@ class ClusterOperationsAPIs(APIRequests):
         self.app_endpoint_on_off_endpoint = self.app_endpoints_endpoint + "/{}/activationStatus"
         self.app_endpoint_resync_endpoint = self.app_endpoints_endpoint + "/{}/resync"
         self.import_filter_endpoint = self.app_endpoints_endpoint + "/{}/importFilter"
+        self.access_control_function_endpoint = self.app_endpoints_endpoint + "/{}/accessControlFunction"
 
     def create_app_endpoint(
             self,
@@ -400,6 +401,136 @@ class ClusterOperationsAPIs(APIRequests):
             appEndpointName), params, headers)
         return resp
 
+    def delete_access_function(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointKeyspace,
+            headers=None,
+            **kwargs):
+        """
+        Deletes the Access Control and Validation function for the given keyspace.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster which has the app service inside it. (UUID)
+            appServiceId: ID of the app service linked to the cluster. (UUID)
+            appEndpointKeyspace: The name of the App Endpoint and the scope and collection separated by period (.) .
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Deleting the accessFunction in appEndpointKeyspa {} in "
+            "appService {} in cluster {} in project {} in organization {}".format(
+                appEndpointKeyspace, appServiceId, clusterId, projectId,
+                organizationId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_del(self.access_control_function_endpoint.format(
+            organizationId, projectId, clusterId, appServiceId,
+            appEndpointKeyspace), params, headers)
+        return resp
+
+    def update_access_control_function(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointKeyspace,
+            payload,
+            headers=None,
+            **kwargs):
+        """
+        Used to upsert a custom Access Control and Validation function for the given keyspace.
+        This is a Javascript function specified at a keyspace, where a user’s read/write access is defined for documents in that particular keyspace.
+        Every document mutation is processed by this function.
+        If an Access Control function is not explicitly defined, a default is applied.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster which has the app service inside it. (UUID)
+            appServiceId: ID of the app service linked to the cluster. (UUID)
+            appEndpointKeyspace: The name of the App Endpoint and the scope and collection separated by period (.) .
+            payload: The new import filter function to be added in the request. (string)
+            payload: Payload string coming into `params`. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Updating the access control function in appEndpointKeyspace {} "
+            "in appService: {} in cluster: {} in project: {} in "
+            "organization: {}".format(
+                appEndpointKeyspace, appServiceId, clusterId, projectId,
+                organizationId))
+        params = {
+            "payload": payload,
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_put(self.access_control_function_endpoint.format(
+            organizationId, projectId, clusterId, appServiceId,
+            appEndpointKeyspace), params, headers)
+        return resp
+
+    def fetch_access_function_info(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointKeyspace,
+            headers=None,
+            **kwargs):
+        """
+        Retrieves the Access Control and Validation function for the given keyspace.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster which has the app service inside it. (UUID)
+            appServiceId: ID of the app service linked to the cluster. (UUID)
+            appEndpointKeyspace: The name of the App Endpoint and the scope and collection separated by period (.) .
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Fetching access control function info for appEndpointKeyspace: {}"
+            " in appService: {} in cluster {} in project {} in organization {}"
+            .format(appEndpointKeyspace, appServiceId, clusterId, projectId,
+                    organizationId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_get(self.access_control_function_endpoint.format(
+            organizationId, projectId, clusterId, appServiceId,
+            appEndpointKeyspace), params, headers)
+        return resp
+
     def fetch_app_endpoint_resync_info(
             self,
             organizationId,
@@ -615,6 +746,7 @@ class ClusterOperationsAPIs(APIRequests):
             clusterId,
             appServiceId,
             appEndpointKeyspace,
+            payload,
             headers=None,
             **kwargs):
         """
@@ -629,7 +761,8 @@ class ClusterOperationsAPIs(APIRequests):
             projectId: ID of the project inside the tenant. (UUID)
             clusterId: ID of the cluster which has the app service inside it. (UUID)
             appServiceId: ID of the app service linked to the cluster. (UUID)
-            appEndpointKeyspace:
+            appEndpointKeyspace: The name of the App Endpoint and the scope and collection separated by period (.) .
+            payload: The new import filter function to be added in the request. (string)
             headers: Headers to be sent with the API call. (dict)
             **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
 
@@ -643,10 +776,9 @@ class ClusterOperationsAPIs(APIRequests):
             .format(appEndpointKeyspace, appServiceId, clusterId, projectId,
                     organizationId))
 
-        if kwargs:
-            params = kwargs
-        else:
-            params = None
+        params = payload
+        for k, v in kwargs.items():
+            params[k] = v
 
         resp = self.api_put(self.import_filter_endpoint.format(
             organizationId, projectId, clusterId, appServiceId,
