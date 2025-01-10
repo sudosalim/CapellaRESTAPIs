@@ -70,9 +70,12 @@ class ClusterOperationsAPIs(APIRequests):
 
         self.index_endpoint = self.cluster_endpoint + "/{}/queryService/indexes"
         self.index_build_status_endpoint = self.cluster_endpoint + "/{}/queryService/indexBuildStatus"
+        self.bulk_index_check_endpoint = self.cluster_endpoint + "/{}/queryService/bulkIndexCheck"
 
         self.app_endpoints_endpoint = self.cluster_appservice_api + "/{}/appEndpoints"
         self.app_endpoint_on_off_endpoint = self.app_endpoints_endpoint + "/{}/activationStatus"
+        self.app_endpoint_resync_endpoint = self.app_endpoints_endpoint + "/{}/resync"
+        self.import_filter_endpoint = self.app_endpoints_endpoint + "/{}/importFilter"
 
     def create_app_endpoint(
             self,
@@ -395,6 +398,300 @@ class ClusterOperationsAPIs(APIRequests):
         resp = self.api_del(self.app_endpoint_on_off_endpoint.format(
             organizationId, projectId, clusterId, appServiceId,
             appEndpointName), params, headers)
+        return resp
+
+    def fetch_app_endpoint_resync_info(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointName,
+            headers=None,
+            **kwargs):
+        """
+        Fetches the Resync status of the given App Endpoint.
+        If no resync operation was triggered, the response will say the status is completed with 0 values for other properties.
+
+        Args:
+            organizationId: The ID of the tenant. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster inside the project in which the app service is present. (UUID)
+            appServiceId: ID of the app service for which app endpoint are to be listed. (UUID)
+            appEndpointName: Name of the App Endpoint to be paused. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Fetching resync status for appEndpoint: {}, inside appService: "
+            "{}, linked to cluster: {}, inside project: {}, inside tenant: {}"
+            .format(appEndpointName, appServiceId, clusterId, projectId,
+                    organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_get(self.app_endpoint_resync_endpoint.format(
+            organizationId, projectId, clusterId, appServiceId,
+            appEndpointName), params, headers)
+        return resp
+
+    def start_resync(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointName,
+            scopes,
+            headers=None,
+            **kwargs):
+        """
+        Initialises the Resync operation for the given collections.
+        By default, all collections that require resync will be resynced unless they are specified in the scopes property, in which case only the specified collections that require resync will be resynced.
+
+        Args:
+            organizationId: The ID of the tenant. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster inside the project in which the app service is present. (UUID)
+            appServiceId: ID of the app service for which app endpoint are to be listed. (UUID)
+            appEndpointName: Name of the App Endpoint to be paused. (string)
+            scopes: The scopes that need to be included in the resync operation. (obj: map[string]{}interface)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Starting resync for appEndpoint: {}, inside appService: {}, "
+            "linked to cluster: {}, inside project: {}, inside tenant: {}"
+            .format(appEndpointName, appServiceId, clusterId, projectId,
+                    organizationId))
+        params = {
+            "scopes": scopes,
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_post(self.app_endpoint_resync_endpoint.format(
+            organizationId, projectId, clusterId, appServiceId,
+            appEndpointName), params, headers)
+        return resp
+
+    def stop_resync(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointName,
+            headers=None,
+            **kwargs):
+        """
+        Stops the Resync operation. When stopping resync, it will be stopped for all collections being processed.
+
+        Args:
+            organizationId: The ID of the tenant. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster inside the project in which the app service is present. (UUID)
+            appServiceId: ID of the app service for which app endpoint are to be listed. (UUID)
+            appEndpointName: Name of the App Endpoint to be paused. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Stopping resync for appEndpoint: {}, inside appService: {}, "
+            "linked to cluster: {}, inside project: {}, inside tenant: {}"
+            .format(appEndpointName, appServiceId, clusterId, projectId,
+                    organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_del(self.app_endpoint_resync_endpoint.format(
+            organizationId, projectId, clusterId, appServiceId,
+            appEndpointName), params, headers)
+        return resp
+
+    def fetch_import_filter_info(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointKeyspace,
+            headers=None,
+            **kwargs):
+        """
+        Retrieves the Import Filter for the given keyspace.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster which has the app service inside it. (UUID)
+            appServiceId: ID of the app service linked to the cluster. (UUID)
+            appEndpointKeyspace:
+            headers:
+            **kwargs:
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Fetching the importFilter info in appEndpointKeyspace: {} in "
+            "appService: {} in cluster: {} in project: {} in tenant: {}"
+            .format(appEndpointKeyspace, appServiceId, clusterId, projectId,
+                    organizationId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_get(self.import_filter_endpoint.format(
+            organizationId, projectId, clusterId, appServiceId,
+            appEndpointKeyspace), params, headers)
+        return resp
+
+    def delete_import_filter(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointKeyspace,
+            headers=None,
+            **kwargs):
+        """
+        Retrieves the Import Filter for the given keyspace.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster which has the app service inside it. (UUID)
+            appServiceId: ID of the app service linked to the cluster. (UUID)
+            appEndpointKeyspace:
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+
+        self.cluster_ops_API_log.info(
+            "Deleting the importFilter for appEndpointKeyspace: {} in "
+            "appService: {} in cluster:{} in project: {} in tenant: {}"
+            .format(appEndpointKeyspace, appServiceId, clusterId, projectId,
+                    organizationId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_del(self.import_filter_endpoint.format(
+            organizationId, projectId, clusterId, appServiceId,
+            appEndpointKeyspace), params, headers)
+        return resp
+
+    def update_import_filter(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointKeyspace,
+            headers=None,
+            **kwargs):
+        """
+        Updates the Import Filter for the given keyspace.
+        By default, there is no import filter and all documents are imported.
+        Import Filters identify the subset of documents eligible to be replicated by App services based on user-defined requirements.
+        This subset is applied to all future mutations.
+        Once the document has been imported and processed by the App Endpoint, changing the Import Filter will not remove it, even if the updated import filters would prevent newer mutations or iterations of the document from getting imported.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster which has the app service inside it. (UUID)
+            appServiceId: ID of the app service linked to the cluster. (UUID)
+            appEndpointKeyspace:
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Updating the importFilter in appEndpointKeyspace: {} in "
+            "appService: {} in cluster: {} in project: {} in tenant: {}"
+            .format(appEndpointKeyspace, appServiceId, clusterId, projectId,
+                    organizationId))
+
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_put(self.import_filter_endpoint.format(
+            organizationId, projectId, clusterId, appServiceId,
+            appEndpointKeyspace), None, headers, params)
+        return resp
+
+    def bulk_index_check(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            state,
+            indexes,
+            headers=None,
+            **kwargs):
+        """
+        Monitor the build status of a list of indexes. It returns the number of indexes in the desired state.
+
+        Args:
+            organizationId: The ID of the tenant. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster inside the project in which the app service is present. (UUID)
+            state: The desired state which the  indexes are expected to be in. (string)
+            indexes: The list of indexes to be matched against that state. (list)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Fetching bulk index status for indices: {}, in the cluster: {}, "
+            "in the project: {}, in the tenant: {}"
+            .format(indexes, clusterId, projectId, organizationId))
+
+        params = {
+            "state": state,
+            "indexes": indexes
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_post(self.bulk_index_check_endpoint.format(
+            organizationId, projectId, clusterId), params, headers)
         return resp
 
     def fetch_index_props(

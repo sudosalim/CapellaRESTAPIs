@@ -151,22 +151,27 @@ class APIRequests(object):
 
         return (cbc_api_response)
 
-    def api_put(self, api_endpoint, request_body, headers=None):
+    def api_put(self, api_endpoint, json_request_body=None, headers=None,
+                data_request_body=None):
         cbc_api_response = None
 
         self._log.info(api_endpoint)
-        self._log.debug("Request body: " + str(request_body))
-
+        if json_request_body:
+            self._log.debug("Request body: " + str(json_request_body))
+        if data_request_body:
+            self._log.debug("Request body: " + str(data_request_body))
         try:
             if headers and "Authorization" in headers:
                 cbc_api_response = self.network_session.put(
                     self.API_BASE_URL + api_endpoint,
-                    json=request_body,
+                    json=json_request_body,
+                    data=data_request_body,
                     verify=False, headers=headers)
             else:
                 cbc_api_response = self.network_session.put(
                     self.API_BASE_URL + api_endpoint,
-                    json=request_body,
+                    json=json_request_body,
+                    data=data_request_body,
                     auth=APIAuth(
                         self.SECRET, self.ACCESS, self.bearer_token),
                     verify=False, headers=headers)
