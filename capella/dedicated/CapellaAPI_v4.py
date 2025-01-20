@@ -431,7 +431,6 @@ class ClusterOperationsAPIs(APIRequests):
             "appService {} in cluster {} in project {} in organization {}".format(
                 appEndpointKeyspace, appServiceId, clusterId, projectId,
                 organizationId))
-
         if kwargs:
             params = kwargs
         else:
@@ -479,9 +478,7 @@ class ClusterOperationsAPIs(APIRequests):
             "organization: {}".format(
                 appEndpointKeyspace, appServiceId, clusterId, projectId,
                 organizationId))
-        params = {
-            "payload": payload,
-        }
+        params = payload
         for k, v in kwargs.items():
             params[k] = v
 
@@ -520,7 +517,6 @@ class ClusterOperationsAPIs(APIRequests):
             " in appService: {} in cluster {} in project {} in organization {}"
             .format(appEndpointKeyspace, appServiceId, clusterId, projectId,
                     organizationId))
-
         if kwargs:
             params = kwargs
         else:
