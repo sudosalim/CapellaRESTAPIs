@@ -85,7 +85,7 @@ class ClusterOperationsAPIs(APIRequests):
             clusterId,
             appServiceId,
             name,
-            deltaSync,
+            deltaSyncEnabled,
             bucket,
             scopes,
             xattr,
@@ -100,7 +100,7 @@ class ClusterOperationsAPIs(APIRequests):
             clusterId: ID of the cluster which has the app service inside it. (UUID)
             appServiceId: ID of the App Service to create an Endpoint inside. (UUID)
             name: Of the App Endpoint to be created. (string)
-            deltaSync: (bool)
+            deltaSyncEnabled: (bool)
             bucket: Name of the bucket to link the App Endpoint with. (string)
             scopes: Scopes to be associated inside the given  bucket. (obj)
             xattr: userXattrKey for configuring the App Endpoint. (string)
@@ -117,7 +117,7 @@ class ClusterOperationsAPIs(APIRequests):
             .format(appServiceId, clusterId, projectId, organizationId))
         params = {
             "name": name,
-            "deltaSync": deltaSync,
+            "deltaSyncEnabled": deltaSyncEnabled,
             "bucket": bucket,
             "scopes": scopes,
             "userXattrKey": xattr
@@ -272,7 +272,7 @@ class ClusterOperationsAPIs(APIRequests):
             appServiceId,
             appEndpointName,
             name,
-            deltaSync,
+            deltaSyncEnabled,
             bucket,
             scopes,
             xattr,
@@ -289,7 +289,7 @@ class ClusterOperationsAPIs(APIRequests):
             appServiceId: ID of the app service for which app endpoint are to be listed. (UUID)
             appEndpointName: Name of the App Endpoint to be updated. (string)
             name: Updated name of the App Endpoint. (string)
-            deltaSync: To have the delta sync enabled or disabled for the endpoint. (bool)
+            deltaSyncEnabled: To have the delta sync enabled or disabled for the endpoint. (bool)
             bucket: Name of the bucket linked to the app endpoint. (string)
             scopes: Scopes to be included in the app endpoint config inside the bucket. (list)
             xattr: User X-Attributes Key to be used with the endpoint. (string)
@@ -307,7 +307,7 @@ class ClusterOperationsAPIs(APIRequests):
                     organizationId))
         params = {
             "name": name,
-            "deltaSync": deltaSync,
+            "deltaSyncEnabled": deltaSyncEnabled,
             "bucket": bucket,
             "scopes": scopes,
             "userXattrKey": xattr
