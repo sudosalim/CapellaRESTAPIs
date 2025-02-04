@@ -1354,9 +1354,9 @@ class CapellaAPI(CommonCapellaAPI):
         resp = self.do_internal_request(url, method="GET")
         return resp
 
-    def delete_hosted_model(self, tenant_id, model_id):
-        url = "{}/v2/organizations/{}/languagemodels/{}".format(
-            self.internal_url, tenant_id, model_id
+    def delete_hosted_model(self, tenant_id, project_id, cluster_id, model_id):
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/languagemodels/{}".format(
+            self.internal_url, tenant_id, project_id, cluster_id, model_id
         )
         resp = self.do_internal_request(url, method="DELETE")
         return resp
