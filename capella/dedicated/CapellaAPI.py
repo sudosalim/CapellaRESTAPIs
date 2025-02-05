@@ -1326,9 +1326,9 @@ class CapellaAPI(CommonCapellaAPI):
         resp = self.do_internal_request(url, method="POST", params=json.dumps(payload))
         return resp
 
-    def delete_workflow(self, tenant_id, workflow_id):
-        url = "{}/v2/organizations/{}/ai/workflows/{}".format(
-            self.internal_url, tenant_id, workflow_id
+    def delete_workflow(self, tenant_id, project_id, cluster_id, workflow_id):
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/ai/workflows/{}".format(
+            self.internal_url, tenant_id, project_id, cluster_id, workflow_id
         )
         resp = self.do_internal_request(url, method="DELETE")
         return resp
