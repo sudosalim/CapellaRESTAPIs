@@ -16,28 +16,18 @@ class ClusterOperationsAPIs(APIRequests):
             url, secret, access, bearer_token)
         self.cluster_ops_API_log = logging.getLogger(__name__)
         organization_endpoint = "/v4/organizations"
-        self.cluster_endpoint = organization_endpoint + \
-            "/{}/projects/{}/clusters"
-        self.allowedCIDR_endpoint = organization_endpoint + \
-            "/{}/projects/{}/clusters/{}/allowedcidrs"
-        self.db_user_endpoint = organization_endpoint + \
-            "/{}/projects/{}/clusters/{}/users"
-        self.bucket_endpoint = organization_endpoint + \
-            "/{}/projects/{}/clusters/{}/buckets"
-        self.scope_endpoint = organization_endpoint + \
-            "/{}/projects/{}/clusters/{}/buckets/{}/scopes"
-        self.collection_endpoint = organization_endpoint + \
-            "/{}/projects/{}/clusters/{}/buckets/{}/scopes/{}/collections"
-        self.backups_endpoint = organization_endpoint + \
-            "/{}/projects/{}/clusters/{}/backups"
-        self.backup_schedule_endpoint = organization_endpoint + \
-            "/{}/projects/{}/clusters/{}/buckets/{}/backup/schedules"
-        self.sample_bucket_endpoint = organization_endpoint + \
-            "/{}/projects/{}/clusters/{}/sampleBuckets"
+        self.cluster_endpoint = organization_endpoint + "/{}/projects/{}/clusters"
+        self.allowedCIDR_endpoint = organization_endpoint + "/{}/projects/{}/clusters/{}/allowedcidrs"
+        self.db_user_endpoint = organization_endpoint + "/{}/projects/{}/clusters/{}/users"
+        self.bucket_endpoint = organization_endpoint + "/{}/projects/{}/clusters/{}/buckets"
+        self.scope_endpoint = organization_endpoint + "/{}/projects/{}/clusters/{}/buckets/{}/scopes"
+        self.collection_endpoint = organization_endpoint + "/{}/projects/{}/clusters/{}/buckets/{}/scopes/{}/collections"
+        self.backups_endpoint = organization_endpoint + "/{}/projects/{}/clusters/{}/backups"
+        self.backup_schedule_endpoint = organization_endpoint + "/{}/projects/{}/clusters/{}/buckets/{}/backup/schedules"
+        self.sample_bucket_endpoint = organization_endpoint + "/{}/projects/{}/clusters/{}/sampleBuckets"
         self.org_appservice_api = organization_endpoint + "/{}/appservices"
         self.cluster_appservice_api = self.cluster_endpoint + "/{}/appservices"
-        self.cluster_on_off_schedule_endpoint = self.cluster_endpoint + \
-            "/{}/onOffSchedule"
+        self.cluster_on_off_schedule_endpoint = self.cluster_endpoint + "/{}/onOffSchedule"
         self.cluster_on_off_endpoint = self.cluster_endpoint + "/{}/activationState"
         self.appservice_on_off_endpoint = self.cluster_appservice_api + "/{}/activationState"
 
@@ -77,6 +67,583 @@ class ClusterOperationsAPIs(APIRequests):
         self.app_endpoint_resync_endpoint = self.app_endpoints_endpoint + "/{}/resync"
         self.import_filter_endpoint = self.app_endpoints_endpoint + "/{}/importFilter"
         self.access_control_function_endpoint = self.app_endpoints_endpoint + "/{}/accessControlFunction"
+
+        self.free_tier_cluster_endpoint = self.cluster_endpoint + "/freeTier"
+        self.free_tier_cluster_activation_state_endpoint = self.free_tier_cluster_endpoint + "/{}/activationState"
+        self.free_tier_bucket_endpoint = self.cluster_endpoint + "/{}/buckets/freeTier"
+        self.free_tier_app_svc_endpoint = self.cluster_endpoint + "/{}/appservices/freeTier"
+
+    def fetch_free_tier_cluster_info(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            headers=None,
+            **kwargs):
+        """
+        Get details of the free tier cluster.
+        While only cluster name, description, CSP, region and CIDR are configurable, other read only fields are retrieved.
+
+        Args:
+            organizationId: The ID of the tenant in which the cluster is present. (UUID)
+            projectId: ID of the project in which the cluster is present. (UUID)
+            clusterId: ID of the free-tier cluster to fetch the details. (UUID)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Fetching details for free-tier cluster: {}, inside project: {}, "
+            "inside tenant: {}".format(organizationId, projectId, clusterId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_get("{}/{}".format(
+            self.free_tier_cluster_endpoint.format(organizationId, projectId),
+            clusterId), params, headers)
+        return resp
+
+    def create_free_tier_cluster(
+            self,
+            organizationId,
+            projectId,
+            name,
+            cloudProvider,
+            description="",
+            headers=None,
+            **kwargs):
+        """
+        Creates a free tier cluster. This is a 1 node cluster than only runs data, query, index and search services.
+        You can have at most 1 free tier cluster per tenant.
+
+        Args:
+            organizationId: The ID of the tenant in which the cluster is created. (UUID)
+            projectId: ID of the project in which the cluster is created. (UUID)
+            name: Name of the cluster to be created. (string)
+            cloudProvider: The cloud provider related details for the cluster to be created. (JSON)
+            description: Description of the cluster to be created. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Creating cluster inside project: {}, inside tenant: {}".format(
+                projectId, organizationId))
+        params = {
+            "name": name,
+            "cloudProvider": cloudProvider,
+            "description": description
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_post(self.free_tier_cluster_endpoint.format(
+            organizationId, projectId), params, headers)
+        return resp
+
+    def delete_free_tier_cluster(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            headers=None,
+            **kwargs):
+        """
+        Retrieves the free tier cluster in the project, if any.
+
+        Args:
+            organizationId: The ID of the tenant in which the cluster is present. (UUID)
+            projectId: ID of the project in which the cluster is present. (UUID)
+            clusterId: ID of the cluster to be deleted. (UUID)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Deleting free-tier cluster: {}, in project: {}, in tenant: {}"
+            .format(clusterId, projectId, organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_del("{}/{}".format(self.free_tier_cluster_endpoint
+                                           .format(organizationId, projectId),
+                                           clusterId), params, headers)
+        return resp
+
+    def update_free_tier_cluster(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            name,
+            description="",
+            headers=None,
+            **kwargs):
+        """
+        Updates an existing free tier cluster. Only name and description are configurable.
+
+        Args:
+            organizationId: The ID of the tenant in which the cluster is created. (UUID)
+            projectId: ID of the project in which the cluster is created. (UUID)
+            clusterId: ID of the cluster to be updated. (UUID)
+            name: Name of the cluster to be created. (string)
+            description: Description of the cluster to be created. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Creating cluster inside project: {}, inside tenant: {}".format(
+                projectId, organizationId))
+        params = {
+            "name": name,
+            "description": description
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_put("{}/{}".format(
+            self.free_tier_cluster_endpoint.format(
+                organizationId, projectId), clusterId),
+            params, headers)
+        return resp
+
+    def turn_free_tier_cluster_on(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            turnOnLinkedAppService,
+            headers=None,
+            **kwargs):
+        """
+        Turn free tier cluster on.
+
+        Args:
+            organizationId: The ID of the tenant in which the cluster is present. (UUID)
+            projectId: ID of the project in which the cluster is present. (UUID)
+            clusterId: ID of the free-tier cluster inside which the app service is. (UUID)
+            turnOnLinkedAppService: If the linked app service shall be turned on after the cluster is turned on as well. (bool)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Turning on Free Tier Cluster: {}, inside Project: {}, inside Org:"
+            " {}".format(clusterId, projectId, organizationId))
+
+        params = {
+            "turnOnLinkedAppService": turnOnLinkedAppService
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_post(
+            self.free_tier_cluster_activation_state_endpoint.format(
+                organizationId, projectId, clusterId), params, headers)
+        return resp
+
+    def turn_free_tier_cluster_off(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            headers=None,
+            **kwargs):
+        """
+        Turn free tier cluster off.
+
+        Args:
+            organizationId: The ID of the tenant in which the cluster is present. (UUID)
+            projectId: ID of the project in which the cluster is present. (UUID)
+            clusterId: ID of the free-tier cluster inside which the app service is. (UUID)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Turning on Free Tier Cluster: {}, inside Project: {}, inside Org:"
+            " {}".format(clusterId, projectId, organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_del(
+            self.free_tier_cluster_activation_state_endpoint.format(
+                organizationId, projectId, clusterId), params, headers)
+        return resp
+
+    def create_free_tier_app_service(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            name,
+            description="",
+            headers=None,
+            **kwargs):
+        """
+        Creates a free tier app service. Free tier app service can only be turned off/on when the linked free tier cluster is turned off/on.
+
+        Args:
+            organizationId: The ID of the tenant in which the cluster is present. (UUID)
+            projectId: ID of the project in which the cluster is present. (UUID)
+            clusterId: ID of the free-tier cluster inside which the app service is to be created. (UUID)
+            name: The name of the app service to be created. (string)
+            description: Describe the app service in any way. (string)[optional]
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Creating a free tier app service inside cluster: {}, inside "
+            "project: {}, inside org: {}".format(clusterId, projectId,
+                                                 organizationId))
+        params = {
+            "name": name,
+            "description": description
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_post(self.free_tier_app_svc_endpoint.format(
+            organizationId, projectId, clusterId),
+            params, headers)
+        return resp
+
+    def update_free_tier_app_service(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appId,
+            name,
+            description="",
+            headers=None,
+            **kwargs):
+        """
+        Updates an existing free tier app service. Only name and description are configurable.
+
+        Args:
+            organizationId: The ID of the tenant in which the cluster is present. (UUID)
+            projectId: ID of the project in which the cluster is present. (UUID)
+            clusterId: ID of the free-tier cluster inside which the app service is. (UUID)
+            appId: ID of the app service to be updated. (UUID)
+            name: The updated name of the app service. (string)
+            description: Describe the app service in any way. (string)[optional]
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Updating app service: {}, linked to cluster: {}, inside project: "
+            "{}, inside Org: {}".format(appId, clusterId, projectId,
+                                        organizationId))
+        params = {
+            "name": name,
+            "description": description
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_put("{}/{}".format(self.free_tier_app_svc_endpoint
+                                           .format(organizationId, projectId,
+                                                   clusterId),
+                                           appId), params, headers)
+        return resp
+
+    def fetch_free_tier_app_service_info(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appId,
+            headers=None,
+            **kwargs):
+        """
+        Fetches the details of the free tier app service.
+        While only name and description are configurable, other read only fields will be displayed.
+
+        Args:
+            organizationId: The ID of the tenant in which the cluster is present. (UUID)
+            projectId: ID of the project in which the cluster is present. (UUID)
+            clusterId: ID of the free-tier cluster inside which the app service is. (UUID)
+            appId: ID of the app service to be updated. (UUID)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Fetching info for app service: {}, linked to cluster: {}, inside "
+            "project: {}, inside Org: {}".format(appId, clusterId,
+                                                 projectId, organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_get("{}/{}".format(self.free_tier_app_svc_endpoint
+                                           .format(organizationId, projectId,
+                                                   clusterId),
+                                           appId), params, headers)
+        return resp
+
+    def delete_free_tier_app_service(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appId,
+            headers=None,
+            **kwargs):
+        """
+        Deletes an existing free tier app service.
+
+        Args:
+            organizationId: The ID of the tenant in which the cluster is present. (UUID)
+            projectId: ID of the project in which the cluster is present. (UUID)
+            clusterId: ID of the free-tier cluster inside which the app service is. (UUID)
+            appId: ID of the free-tier app service to be deleted. (UUID)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Deleting the AppSvc: {}, inside cluster: {}, inside project: {}, "
+            "inside Org: {}".format(appId, clusterId, projectId,
+                                    organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_del("{}/{}".format(self.free_tier_app_svc_endpoint
+                            .format(organizationId, projectId, clusterId),
+                                appId), params, headers)
+        return resp
+
+    def create_free_tier_bucket(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            name,
+            memoryAllocationInMb,
+            headers=None,
+            ** kwargs):
+        """
+        Creates a new free tier bucket. This is a Couchbase bucket where only the name a memory quota is configurable. Other bucket properties use default values.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the free tier cluster to create bucket inside it. (UUID)
+            name: Name of the bucket to be created, (string)
+            memoryAllocationInMb: Memory to be allocated to the bucket. (int)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Creating a bucket inside free tier cluster: {}, inside "
+            "project: {}, inside tenant: {}".format(clusterId, projectId,
+                                                    organizationId))
+        params = {
+            "name": name,
+            "memoryAllocationInMb": memoryAllocationInMb,
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_post(self.free_tier_bucket_endpoint.format(
+            organizationId, projectId, clusterId), params, headers)
+        return resp
+
+    def delete_free_tier_bucket(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            bucketId,
+            headers=None,
+            **kwargs):
+        """
+        Deletes an existing free tier bucket.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the free tier cluster to delete bucket inside it. (UUID)
+            bucketId: ID of the free tier bucket to be deleted. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Deleting bucket: {}, inside cluster: {}, inside project: {}, "
+            "inside tenant: {}".format(bucketId, clusterId, projectId,
+                                       organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_del("{}/{}".format(self.free_tier_bucket_endpoint
+                            .format(organizationId, projectId, clusterId),
+                                    bucketId), params, headers)
+        return resp
+
+    def fetch_free_tier_bucket_info(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            bucketId,
+            headers=None,
+            **kwargs):
+        """
+        Get bucket. While only name and memory quota are configurable for free tier buckets, the response will show additional read only bucket properties such as replicas, etc.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the free tier cluster to delete bucket inside it. (UUID)
+            bucketId: ID of the free tier bucket to be fetched. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Fetching bucket: {}, inside cluster: {}, inside project: {}, "
+            "inside tenant: {}".format(bucketId, clusterId, projectId,
+                                       organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_get("{}/{}".format(self.free_tier_bucket_endpoint
+                            .format(organizationId, projectId, clusterId),
+                                    bucketId), params, headers)
+        return resp
+
+    def update_free_tier_bucket(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            bucketId,
+            memoryAllocationInMb,
+            headers=None,
+            **kwargs):
+        """
+        Updates an existing free tier bucket. Only bucket memory quota is configurable. Once created bucket name cannot be changed.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the free tier cluster to delete bucket inside it. (UUID)
+            bucketId: ID of the free tier bucket to be fetched. (string)
+            memoryAllocationInMb: The new configured memory for the bucket. (int)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Fetching bucket: {}, inside cluster: {}, inside project: {}, "
+            "inside tenant: {}".format(bucketId, clusterId, projectId,
+                                       organizationId))
+        params = {
+            "memoryAllocationInMb": memoryAllocationInMb
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_put("{}/{}".format(self.free_tier_bucket_endpoint
+                            .format(organizationId, projectId, clusterId),
+                                    bucketId), params, headers)
+        return resp
+
+    def list_free_tier_bucket(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            headers=None,
+            **kwargs):
+        """
+        Lists all buckets in the free tier cluster. While only name and memory quota are configurable for free tier buckets, the response will show additional read only bucket properties such as replicas, etc.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the free tier cluster to create bucket inside it. (UUID)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Creating a bucket inside free tier cluster: {}, inside "
+            "project: {}, inside tenant: {}".format(clusterId, projectId,
+                                                    organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_get(self.free_tier_bucket_endpoint.format(
+            organizationId, projectId, clusterId), params, headers)
+        return resp
 
     def create_app_endpoint(
             self,
@@ -126,7 +693,7 @@ class ClusterOperationsAPIs(APIRequests):
             params[k] = v
 
         resp = self.api_post(self.app_endpoints_endpoint.format(
-                organizationId, projectId, clusterId, appServiceId),
+            organizationId, projectId, clusterId, appServiceId),
             params, headers)
         return resp
 
@@ -166,7 +733,7 @@ class ClusterOperationsAPIs(APIRequests):
             params = None
 
         resp = self.api_get("{}/{}".format(self.app_endpoints_endpoint.format(
-                organizationId, projectId, clusterId, appServiceId),
+            organizationId, projectId, clusterId, appServiceId),
             appEndpointName), params, headers)
         return resp
 
@@ -206,7 +773,7 @@ class ClusterOperationsAPIs(APIRequests):
             params = None
 
         resp = self.api_del("{}/{}".format(self.app_endpoints_endpoint.format(
-                organizationId, projectId, clusterId, appServiceId),
+            organizationId, projectId, clusterId, appServiceId),
             appEndpointName), params, headers)
         return resp
 
@@ -260,7 +827,7 @@ class ClusterOperationsAPIs(APIRequests):
             params[k] = v
 
         resp = self.api_get(self.app_endpoints_endpoint.format(
-                organizationId, projectId, clusterId, appServiceId),
+            organizationId, projectId, clusterId, appServiceId),
             params, headers)
         return resp
 
@@ -316,7 +883,7 @@ class ClusterOperationsAPIs(APIRequests):
             params[k] = v
 
         resp = self.api_put("{}/{}".format(self.app_endpoints_endpoint.format(
-                organizationId, projectId, clusterId, appServiceId),
+            organizationId, projectId, clusterId, appServiceId),
             appEndpointName), params, headers)
         return resp
 
@@ -989,7 +1556,7 @@ class ClusterOperationsAPIs(APIRequests):
             params[k] = v
 
         resp = self.api_put(self.app_svc_audit_log_endpoint.format(
-                organizationId, projectId, clusterId, appServiceId),
+            organizationId, projectId, clusterId, appServiceId),
             params, headers)
         return resp
 
@@ -1026,7 +1593,7 @@ class ClusterOperationsAPIs(APIRequests):
             params = None
 
         resp = self.api_get(self.app_svc_audit_log_endpoint.format(
-                organizationId, projectId, clusterId, appServiceId),
+            organizationId, projectId, clusterId, appServiceId),
             params, headers)
         return resp
 
@@ -1209,7 +1776,7 @@ class ClusterOperationsAPIs(APIRequests):
             params[k] = v
 
         resp = self.api_patch(self.app_svc_audit_log_streaming_endpoint.format(
-                organizationId, projectId, clusterId, appServiceId),
+            organizationId, projectId, clusterId, appServiceId),
             params, headers)
         return resp
 
@@ -1299,7 +1866,7 @@ class ClusterOperationsAPIs(APIRequests):
             params = None
 
         resp = self.api_get(self.app_svc_audit_log_streaming_endpoint.format(
-                organizationId, projectId, clusterId, appServiceId),
+            organizationId, projectId, clusterId, appServiceId),
             params, headers)
         return resp
 
@@ -1342,7 +1909,7 @@ class ClusterOperationsAPIs(APIRequests):
             params[k] = v
 
         resp = self.api_post(self.app_svc_audit_log_exports_endpoint.format(
-                organizationId, projectId, clusterId, appServiceId),
+            organizationId, projectId, clusterId, appServiceId),
             params, headers)
         return resp
 
@@ -1396,7 +1963,7 @@ class ClusterOperationsAPIs(APIRequests):
             params[k] = v
 
         resp = self.api_get(self.app_svc_audit_log_exports_endpoint.format(
-                organizationId, projectId, clusterId, appServiceId),
+            organizationId, projectId, clusterId, appServiceId),
             params, headers)
         return resp
 
@@ -2148,7 +2715,9 @@ class ClusterOperationsAPIs(APIRequests):
 
         resp = self.api_post(
             self.backups_endpoint.format(
-                organizationId, projectId, sourceClusterID) + '/' + backupID + '/restore', params, headers)
+                organizationId, projectId,
+                sourceClusterID) + '/' + backupID + '/restore', params,
+            headers)
         return resp
 
     """
@@ -2180,7 +2749,8 @@ class ClusterOperationsAPIs(APIRequests):
             params[k] = v
         resp = self.api_del(
             self.backups_endpoint.format(
-                organizationId, projectId, clusterId) + '/' + backupId, params, headers)
+                organizationId, projectId, clusterId) + '/' + backupId, params,
+            headers)
         return resp
 
     """
@@ -2212,7 +2782,8 @@ class ClusterOperationsAPIs(APIRequests):
             params[k] = v
         resp = self.api_get(
             self.backups_endpoint.format(
-                organizationId, projectId, clusterId) + '/' + backupId, params, headers)
+                organizationId, projectId, clusterId) + '/' + backupId, params,
+            headers)
         return resp
 
     """
@@ -2274,7 +2845,8 @@ class ClusterOperationsAPIs(APIRequests):
             params[k] = v
         resp = self.api_post(
             self.backups_endpoint.format(
-                organizationId, projectId, "{}/buckets/{}".format(clusterId, bucketId)), params, headers)
+                organizationId, projectId,
+                "{}/buckets/{}".format(clusterId, bucketId)), params, headers)
         return resp
 
     """
@@ -2609,6 +3181,7 @@ class ClusterOperationsAPIs(APIRequests):
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
+
     def switch_cluster_on(self, organizationId, projectId, clusterId,
                           turnOnLinkedAppService, headers=None, **kwargs):
         self.cluster_ops_API_log.info(
@@ -2640,6 +3213,7 @@ class ClusterOperationsAPIs(APIRequests):
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
+
     def switch_cluster_off(self, organizationId, projectId, clusterId,
                            headers=None, **kwargs):
         self.cluster_ops_API_log.info(
@@ -2684,6 +3258,7 @@ class ClusterOperationsAPIs(APIRequests):
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
+
     def create_cluster_on_off_schedule(
             self,
             organizationId,
@@ -2720,6 +3295,7 @@ class ClusterOperationsAPIs(APIRequests):
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
+
     def fetch_cluster_on_off_schedule(
             self,
             organizationId,
@@ -2767,6 +3343,7 @@ class ClusterOperationsAPIs(APIRequests):
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
+
     def update_cluster_on_off_schedule(
             self,
             organizationId,
@@ -2804,6 +3381,7 @@ class ClusterOperationsAPIs(APIRequests):
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
+
     def delete_cluster_on_off_schedule(
             self,
             organizationId,
@@ -2832,6 +3410,7 @@ class ClusterOperationsAPIs(APIRequests):
     :param headers (dict) Headers to be sent with the API call. (NOTE THAT THIS PARAM IS DIFFERENT TO THE HEADER PARAM BEING SENT IN THE BODY OF THE ALERT IN THE CONFIG OBJECT)
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
+
     def update_bucket_storage_migration(
             self,
             organizationId,
@@ -2840,14 +3419,17 @@ class ClusterOperationsAPIs(APIRequests):
             buckets=[],
             headers=None,
             **kwargs):
-        self.cluster_ops_API_log.info("Migrating buckets `{}` in cluster {} in project {} in organization {}.".format(buckets, clusterId, projectId, organizationId))
+        self.cluster_ops_API_log.info(
+            "Migrating buckets `{}` in cluster {} in project {} in organization {}.".format(
+                buckets, clusterId, projectId, organizationId))
         params = {
             "buckets": buckets,
         }
         for k, v in kwargs.items():
             params[k] = v
         resp = self.api_put(
-            self.bucket_migration_endpoint.format(organizationId, projectId, clusterId), params, headers)
+            self.bucket_migration_endpoint.format(organizationId, projectId,
+                                                  clusterId), params, headers)
         return resp
 
     """
@@ -2880,6 +3462,7 @@ class ClusterOperationsAPIs(APIRequests):
     The method can be one of POST or PUT
     The url must be HTTPS
     """
+
     def create_alert(
             self,
             organizationId,
@@ -2889,7 +3472,9 @@ class ClusterOperationsAPIs(APIRequests):
             name=None,
             headers=None,
             **kwargs):
-        self.cluster_ops_API_log.info("Creating an alert inside the project {} inside the organization {}.".format(projectId, organizationId))
+        self.cluster_ops_API_log.info(
+            "Creating an alert inside the project {} inside the organization {}.".format(
+                projectId, organizationId))
 
         params = {
             "kind": kind,
@@ -2900,7 +3485,7 @@ class ClusterOperationsAPIs(APIRequests):
         for k, v in kwargs.items():
             params[k] = v
         resp = self.api_post(self.alerts_endpoint.format(
-                organizationId, projectId),
+            organizationId, projectId),
             params, headers)
         return resp
 
@@ -2912,6 +3497,7 @@ class ClusterOperationsAPIs(APIRequests):
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
+
     def fetch_alert_info(
             self,
             organizationId,
@@ -2919,14 +3505,16 @@ class ClusterOperationsAPIs(APIRequests):
             alertId,
             headers=None,
             **kwargs):
-        self.cluster_ops_API_log.info("Fetching the alert {} inside the project {} inside the organization {}.".format(alertId, projectId, organizationId))
+        self.cluster_ops_API_log.info(
+            "Fetching the alert {} inside the project {} inside the organization {}.".format(
+                alertId, projectId, organizationId))
 
         if kwargs:
             params = kwargs
         else:
             params = None
         resp = self.api_get("{}/{}".format(self.alerts_endpoint.format(
-                organizationId, projectId), alertId),
+            organizationId, projectId), alertId),
             params, headers)
         return resp
 
@@ -2937,20 +3525,23 @@ class ClusterOperationsAPIs(APIRequests):
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
+
     def list_alerts(
             self,
             organizationId,
             projectId,
             headers=None,
             **kwargs):
-        self.cluster_ops_API_log.info("List alert inside project {} the organization {}.".format(projectId, organizationId))
+        self.cluster_ops_API_log.info(
+            "List alert inside project {} the organization {}.".format(
+                projectId, organizationId))
 
         if kwargs:
             params = kwargs
         else:
             params = None
         resp = self.api_get(self.alerts_endpoint.format(
-                organizationId, projectId),
+            organizationId, projectId),
             params, headers)
         return resp
 
@@ -2962,6 +3553,7 @@ class ClusterOperationsAPIs(APIRequests):
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
+
     def delete_alert(
             self,
             organizationId,
@@ -2969,14 +3561,16 @@ class ClusterOperationsAPIs(APIRequests):
             alertId,
             headers=None,
             **kwargs):
-        self.cluster_ops_API_log.info("Deleting an alert inside the project {} inside the organization {}.".format(projectId, organizationId))
+        self.cluster_ops_API_log.info(
+            "Deleting an alert inside the project {} inside the organization {}.".format(
+                projectId, organizationId))
 
         if kwargs:
             params = kwargs
         else:
             params = None
         resp = self.api_del("{}/{}".format(self.alerts_endpoint.format(
-                organizationId, projectId), alertId),
+            organizationId, projectId), alertId),
             params, headers)
         return resp
 
@@ -3011,6 +3605,7 @@ class ClusterOperationsAPIs(APIRequests):
     The method can be one of POST or PUT
     The url must be HTTPS
     """
+
     def update_alert(
             self,
             organizationId,
@@ -3021,7 +3616,9 @@ class ClusterOperationsAPIs(APIRequests):
             name=None,
             headers=None,
             **kwargs):
-        self.cluster_ops_API_log.info("Updating the alert {} inside the project {} inside the organization {}.".format(alert_id, projectId, organizationId))
+        self.cluster_ops_API_log.info(
+            "Updating the alert {} inside the project {} inside the organization {}.".format(
+                alert_id, projectId, organizationId))
 
         params = {
             "kind": kind,
@@ -3032,7 +3629,7 @@ class ClusterOperationsAPIs(APIRequests):
         for k, v in kwargs.items():
             params[k] = v
         resp = self.api_put("{}/{}".format(self.alerts_endpoint.format(
-                organizationId, projectId), alert_id),
+            organizationId, projectId), alert_id),
             params, headers)
         return resp
 
@@ -3043,6 +3640,7 @@ class ClusterOperationsAPIs(APIRequests):
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
+
     def test_alert(
             self,
             organizationId,
@@ -3050,7 +3648,9 @@ class ClusterOperationsAPIs(APIRequests):
             config,
             headers=None,
             **kwargs):
-        self.cluster_ops_API_log.info("Test alert inside project {} the organization {}.".format(projectId, organizationId))
+        self.cluster_ops_API_log.info(
+            "Test alert inside project {} the organization {}.".format(
+                projectId, organizationId))
 
         params = {
             "config": config,
@@ -3058,7 +3658,7 @@ class ClusterOperationsAPIs(APIRequests):
         for k, v in kwargs.items():
             params[k] = v
         resp = self.api_post(self.test_alert_endpoint.format(
-                organizationId, projectId),
+            organizationId, projectId),
             params, headers)
         return resp
 
@@ -3082,6 +3682,7 @@ class ClusterOperationsAPIs(APIRequests):
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
+
     def update_audit_log(
             self,
             organizationId,
@@ -3092,7 +3693,9 @@ class ClusterOperationsAPIs(APIRequests):
             enabledEventIDs,
             headers=None,
             **kwargs):
-        self.cluster_ops_API_log.info("Creating Audit Log inside cluster {} inside project {} inside organization {}".format(clusterId, projectId, organizationId))
+        self.cluster_ops_API_log.info(
+            "Creating Audit Log inside cluster {} inside project {} inside organization {}".format(
+                clusterId, projectId, organizationId))
 
         params = {
             "auditEnabled": auditEnabled,
@@ -3123,6 +3726,7 @@ class ClusterOperationsAPIs(APIRequests):
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
+
     def fetch_audit_log_info(
             self,
             organizationId,
@@ -3130,14 +3734,16 @@ class ClusterOperationsAPIs(APIRequests):
             clusterId,
             headers=None,
             **kwargs):
-        self.cluster_ops_API_log.info("Fetching Audit Logging inside cluster {} inside project {} inside organization {}".format(clusterId, projectId, organizationId))
+        self.cluster_ops_API_log.info(
+            "Fetching Audit Logging inside cluster {} inside project {} inside organization {}".format(
+                clusterId, projectId, organizationId))
 
         if kwargs:
             params = kwargs
         else:
             params = None
         resp = self.api_get(self.audit_log_endpoint.format(
-                organizationId, projectId, clusterId),
+            organizationId, projectId, clusterId),
             params, headers)
         return resp
 
@@ -3157,6 +3763,7 @@ class ClusterOperationsAPIs(APIRequests):
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
+
     def fetch_audit_log_event_info(
             self,
             organizationId,
@@ -3164,14 +3771,16 @@ class ClusterOperationsAPIs(APIRequests):
             clusterId,
             headers=None,
             **kwargs):
-        self.cluster_ops_API_log.info("Fetching Audit Log Events info inside cluster {} inside project {} inside organization {}".format(clusterId, projectId, organizationId))
+        self.cluster_ops_API_log.info(
+            "Fetching Audit Log Events info inside cluster {} inside project {} inside organization {}".format(
+                clusterId, projectId, organizationId))
 
         if kwargs:
             params = kwargs
         else:
             params = None
         resp = self.api_get(self.audit_log_events_endpoint.format(
-                organizationId, projectId, clusterId),
+            organizationId, projectId, clusterId),
             params, headers)
         return resp
 
@@ -3189,6 +3798,7 @@ class ClusterOperationsAPIs(APIRequests):
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
+
     def create_audit_log_export(
             self,
             organizationId,
@@ -3198,7 +3808,9 @@ class ClusterOperationsAPIs(APIRequests):
             end,
             headers=None,
             **kwargs):
-        self.cluster_ops_API_log.info("Creating Audit Log inside cluster {} inside project {} inside organization {}".format(clusterId, projectId, organizationId))
+        self.cluster_ops_API_log.info(
+            "Creating Audit Log inside cluster {} inside project {} inside organization {}".format(
+                clusterId, projectId, organizationId))
 
         params = {
             "start": start,
@@ -3229,6 +3841,7 @@ class ClusterOperationsAPIs(APIRequests):
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
+
     def fetch_audit_log_export_info(
             self,
             organizationId,
@@ -3237,13 +3850,16 @@ class ClusterOperationsAPIs(APIRequests):
             auditLogId,
             headers=None,
             **kwargs):
-        self.cluster_ops_API_log.info("Fetching Audit Log {} inside cluster {} inside project {} inside organization {}".format(auditLogId, clusterId, projectId, organizationId))
+        self.cluster_ops_API_log.info(
+            "Fetching Audit Log {} inside cluster {} inside project {} inside organization {}".format(
+                auditLogId, clusterId, projectId, organizationId))
 
         if kwargs:
             params = kwargs
         else:
             params = None
-        resp = self.api_get("{}/{}".format(self.audit_log_exports_endpoint.format(
+        resp = self.api_get(
+            "{}/{}".format(self.audit_log_exports_endpoint.format(
                 organizationId, projectId, clusterId), auditLogId),
             params, headers)
         return resp
@@ -3265,6 +3881,7 @@ class ClusterOperationsAPIs(APIRequests):
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
+
     def list_audit_log_exports(
             self,
             organizationId,
@@ -3272,14 +3889,16 @@ class ClusterOperationsAPIs(APIRequests):
             clusterId,
             headers=None,
             **kwargs):
-        self.cluster_ops_API_log.info("Listing Audit Logs inside cluster {} inside project {} inside organization {}".format(clusterId, projectId, organizationId))
+        self.cluster_ops_API_log.info(
+            "Listing Audit Logs inside cluster {} inside project {} inside organization {}".format(
+                clusterId, projectId, organizationId))
 
         if kwargs:
             params = kwargs
         else:
             params = None
         resp = self.api_get(self.audit_log_exports_endpoint.format(
-                organizationId, projectId, clusterId),
+            organizationId, projectId, clusterId),
             params, headers)
         return resp
 
@@ -3301,7 +3920,9 @@ class ClusterOperationsAPIs(APIRequests):
     :param projectId (str) Project ID under which the cluster is present.
     :param clusterId (str) Cluster ID of the cluster which has to be deleted.
     """
-    def get_cluster_certificate(self, organization_id, project_id, cluster_id, headers=None,
+
+    def get_cluster_certificate(self, organization_id, project_id, cluster_id,
+                                headers=None,
                                 **kwargs):
         self.cluster_ops_API_log.info(
             "Downloading certificate for cluster {} in project {} in organization {}".format(
@@ -3311,7 +3932,8 @@ class ClusterOperationsAPIs(APIRequests):
         else:
             params = None
         api_response = self.api_get('{}/{}/certificates'.format(
-            self.cluster_endpoint.format(organization_id, project_id), cluster_id),
+            self.cluster_endpoint.format(organization_id, project_id),
+            cluster_id),
             params=params, headers=headers)
         return api_response
 
@@ -3758,6 +4380,7 @@ class ClusterOperationsAPIs(APIRequests):
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
+
     def create_sample_bucket(
             self,
             organizationId,
@@ -3777,7 +4400,7 @@ class ClusterOperationsAPIs(APIRequests):
             params[k] = v
 
         resp = self.api_post(self.sample_bucket_endpoint.format(
-                organizationId, projectId, clusterId),
+            organizationId, projectId, clusterId),
             params, headers)
         return resp
 
@@ -3796,6 +4419,7 @@ class ClusterOperationsAPIs(APIRequests):
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
+
     def list_sample_buckets(
             self,
             organizationId,
@@ -3844,6 +4468,7 @@ class ClusterOperationsAPIs(APIRequests):
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
+
     def fetch_sample_bucket(
             self,
             organizationId,
@@ -3878,6 +4503,7 @@ class ClusterOperationsAPIs(APIRequests):
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
+
     def delete_sample_bucket(
             self,
             organizationId,
@@ -4486,6 +5112,7 @@ class ClusterOperationsAPIs(APIRequests):
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
+
     def update_collection(
             self,
             organizationId,
@@ -4564,19 +5191,21 @@ class ClusterOperationsAPIs(APIRequests):
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
 
-    def create_backup_schedule(self, organizationId, projectId, clusterId, bucketId,
+    def create_backup_schedule(self, organizationId, projectId, clusterId,
+                               bucketId,
                                type, dayOfWeek, startAt, incrementalEvery,
-                               retentionTime, costOptimizedRetention, headers=None,
+                               retentionTime, costOptimizedRetention,
+                               headers=None,
                                **kwargs):
 
         params = {
-            "type":  type,
+            "type": type,
             "weeklySchedule": {
-            "dayOfWeek": dayOfWeek,
-            "startAt": startAt,
-            "incrementalEvery": incrementalEvery,
-            "retentionTime": retentionTime,
-            "costOptimizedRetention": costOptimizedRetention
+                "dayOfWeek": dayOfWeek,
+                "startAt": startAt,
+                "incrementalEvery": incrementalEvery,
+                "retentionTime": retentionTime,
+                "costOptimizedRetention": costOptimizedRetention
             }
         }
 
@@ -4605,7 +5234,8 @@ class ClusterOperationsAPIs(APIRequests):
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
 
-    def get_backup_schedule(self, organizationId, projectId, clusterId, bucketId,
+    def get_backup_schedule(self, organizationId, projectId, clusterId,
+                            bucketId,
                             headers=None, **kwargs):
         if kwargs:
             params = kwargs
@@ -4642,18 +5272,20 @@ class ClusterOperationsAPIs(APIRequests):
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
 
-    def update_backup_schedule(self, organizationId, projectId, clusterId, bucketId,
+    def update_backup_schedule(self, organizationId, projectId, clusterId,
+                               bucketId,
                                type, dayOfWeek, startAt, incrementalEvery,
-                               retentionTime, costOptimizedRetention, headers=None,
+                               retentionTime, costOptimizedRetention,
+                               headers=None,
                                **kwargs):
         params = {
-            "type":  type,
+            "type": type,
             "weeklySchedule": {
-            "dayOfWeek": dayOfWeek,
-            "startAt": startAt,
-            "incrementalEvery": incrementalEvery,
-            "retentionTime": retentionTime,
-            "costOptimizedRetention": costOptimizedRetention
+                "dayOfWeek": dayOfWeek,
+                "startAt": startAt,
+                "incrementalEvery": incrementalEvery,
+                "retentionTime": retentionTime,
+                "costOptimizedRetention": costOptimizedRetention
             }
         }
 
@@ -4682,7 +5314,8 @@ class ClusterOperationsAPIs(APIRequests):
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
 
-    def delete_backup_schedule(self, organizationId, projectId, clusterId, bucketId,
+    def delete_backup_schedule(self, organizationId, projectId, clusterId,
+                               bucketId,
                                headers=None, **kwargs):
         if kwargs:
             params = kwargs
@@ -4701,7 +5334,9 @@ class ClusterOperationsAPIs(APIRequests):
 
         return resp
 
-    def list_appservices(self, tenant_id, page=None, perPage=None, sortBy=None, sortDirection=None, projectId=None, headers=None, **kwargs):
+    def list_appservices(self, tenant_id, page=None, perPage=None, sortBy=None,
+                         sortDirection=None, projectId=None, headers=None,
+                         **kwargs):
         """
         Lists all the clusters under the organization.
         In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
@@ -4736,7 +5371,9 @@ class ClusterOperationsAPIs(APIRequests):
         resp = self.api_get(url, params=params, headers=headers)
         return resp
 
-    def create_appservice(self, tenant_id, project_id, cluster_id, appservice_name, compute, nodes=None, version=None, description="", headers=None, **kwargs):
+    def create_appservice(self, tenant_id, project_id, cluster_id,
+                          appservice_name, compute, nodes=None, version=None,
+                          description="", headers=None, **kwargs):
         """
         Creates a new App Service.
         In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
@@ -4755,7 +5392,8 @@ class ClusterOperationsAPIs(APIRequests):
         :param headers (dict) Headers to be sent with the API call.
         :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
         """
-        url = self.cluster_appservice_api.format(tenant_id, project_id, cluster_id)
+        url = self.cluster_appservice_api.format(tenant_id, project_id,
+                                                 cluster_id)
         params = {
             "name": appservice_name,
             "compute": compute
@@ -4772,7 +5410,8 @@ class ClusterOperationsAPIs(APIRequests):
         resp = self.api_post(url, params, headers)
         return resp
 
-    def delete_appservice(self, tenant_id, project_id, cluster_id, appservice_id, headers=None, **kwargs):
+    def delete_appservice(self, tenant_id, project_id, cluster_id,
+                          appservice_id, headers=None, **kwargs):
         """
         Deletes an existing App Service.
         In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
@@ -4786,7 +5425,10 @@ class ClusterOperationsAPIs(APIRequests):
         :param headers (dict) Headers to be sent with the API call.
         :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
         """
-        url = (self.cluster_appservice_api + "/{}").format(tenant_id, project_id, cluster_id, appservice_id)
+        url = (self.cluster_appservice_api + "/{}").format(tenant_id,
+                                                           project_id,
+                                                           cluster_id,
+                                                           appservice_id)
         if kwargs:
             params = kwargs
         else:
@@ -4794,7 +5436,8 @@ class ClusterOperationsAPIs(APIRequests):
         resp = self.api_del(url, request_body=params, headers=headers)
         return resp
 
-    def get_appservice(self, tenant_id, project_id, cluster_id, appservice_id, headers=None, **kwargs):
+    def get_appservice(self, tenant_id, project_id, cluster_id, appservice_id,
+                       headers=None, **kwargs):
         """
         Fetches the details of the given App Service.
         In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
@@ -4805,7 +5448,10 @@ class ClusterOperationsAPIs(APIRequests):
         -Database Data Reader/Writer
         -Database Data Reader
         """
-        url = (self.cluster_appservice_api + "/{}").format(tenant_id, project_id, cluster_id, appservice_id)
+        url = (self.cluster_appservice_api + "/{}").format(tenant_id,
+                                                           project_id,
+                                                           cluster_id,
+                                                           appservice_id)
         if kwargs:
             params = kwargs
         else:
@@ -4813,7 +5459,8 @@ class ClusterOperationsAPIs(APIRequests):
         resp = self.api_get(url, params=params, headers=headers)
         return resp
 
-    def get_cluster(self, tenant_id, project_id, cluster_id, headers=None, **kwargs):
+    def get_cluster(self, tenant_id, project_id, cluster_id, headers=None,
+                    **kwargs):
         """
         Fetches the details of the given Cluster.
         In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
@@ -4824,7 +5471,8 @@ class ClusterOperationsAPIs(APIRequests):
         -Database Data Reader/Writer
         -Database Data Reader
         """
-        url = (self.cluster_endpoint + "/{}").format(tenant_id, project_id, cluster_id)
+        url = (self.cluster_endpoint + "/{}").format(tenant_id, project_id,
+                                                     cluster_id)
         if kwargs:
             params = kwargs
         else:
@@ -4832,7 +5480,9 @@ class ClusterOperationsAPIs(APIRequests):
         resp = self.api_get(url, params=params, headers=headers)
         return resp
 
-    def update_appservices(self, tenant_id, project_id, cluster_id, appservice_id, nodes, cpu, ram, headers=None, **kwargs):
+    def update_appservices(self, tenant_id, project_id, cluster_id,
+                           appservice_id, nodes, cpu, ram, headers=None,
+                           **kwargs):
         """
         Updates an existing App Service.
         In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
@@ -4848,7 +5498,10 @@ class ClusterOperationsAPIs(APIRequests):
         :param ram: Size of ram
         :param If-Match: A precondition header that specifies the entity tag of a resource.
         """
-        url = (self.cluster_appservice_api + "/{}").format(tenant_id, project_id, cluster_id, appservice_id)
+        url = (self.cluster_appservice_api + "/{}").format(tenant_id,
+                                                           project_id,
+                                                           cluster_id,
+                                                           appservice_id)
         params = {
             "nodes": nodes,
             "compute": {
@@ -4874,6 +5527,7 @@ class ClusterOperationsAPIs(APIRequests):
     :param headers (dict) Headers to be sent with the API call.
     :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
     """
+
     def switch_app_service_on(self, organizationId, projectId, clusterId,
                               appServiceId, headers=None, **kwargs):
         self.cluster_ops_API_log.info(
@@ -4903,6 +5557,7 @@ class ClusterOperationsAPIs(APIRequests):
         :param headers (dict) Headers to be sent with the API call.
         :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
         """
+
     def switch_app_service_off(self, organizationId, projectId, clusterId,
                                appServiceId, headers=None, **kwargs):
         self.cluster_ops_API_log.info(
@@ -5255,7 +5910,7 @@ class CapellaAPI(CommonCapellaAPI):
     """
 
     def allow_my_ip(self, tenant_id, project_id, cluster_id):
-        url = '{}/v2/organizations/{}/projects/{}/clusters/{}'\
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}' \
             .format(self.internal_url, tenant_id, project_id, cluster_id)
         resp = self._urllib_request("https://ifconfig.me", method="GET")
         if resp.status_code != 200:
@@ -5440,8 +6095,9 @@ class CapellaAPI(CommonCapellaAPI):
 
     def get_private_network(self, tenant_id, project_id, cluster_id,
                             private_network_id):
-        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/virtualnetworks/{}" .format(
-            self.internal_url, tenant_id, project_id, cluster_id, private_network_id)
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/virtualnetworks/{}".format(
+            self.internal_url, tenant_id, project_id, cluster_id,
+            private_network_id)
         resp = self.do_internal_request(url, method="GET")
         return resp
 
@@ -5489,7 +6145,8 @@ class CapellaAPI(CommonCapellaAPI):
             cluster_id=cluster_id,
             bucket_name=bucket_name)
         url = r"{}/v2/organizations/{}/projects/{}/clusters/{}/buckets/{}/restore" \
-            .format(self.internal_url, tenant_id, project_id, cluster_id, bucket_id)
+            .format(self.internal_url, tenant_id, project_id, cluster_id,
+                    bucket_id)
         resp = self.do_internal_request(
             url, method="POST", params=json.dumps(payload))
         return resp
@@ -5603,7 +6260,8 @@ class CapellaAPI(CommonCapellaAPI):
         :return: response object
         """
         url = "{}/v2/organizations/{}/projects/{}/clusters/{}/buckets/{}/backups" \
-            .format(self.internal_url, tenant_id, project_id, cluster_id, bucket_id)
+            .format(self.internal_url, tenant_id, project_id, cluster_id,
+                    bucket_id)
         resp = self.do_internal_request(url, method="GET")
         return resp
 
@@ -5617,7 +6275,8 @@ class CapellaAPI(CommonCapellaAPI):
         :return: response object
         """
         url = "{}/v2/organizations/{}/projects/{}/clusters/{}/backups/{}/export" \
-            .format(self.internal_url, tenant_id, project_id, cluster_id, backup_id)
+            .format(self.internal_url, tenant_id, project_id, cluster_id,
+                    backup_id)
         resp = self.do_internal_request(url, method="POST")
         return resp
 
@@ -5631,7 +6290,8 @@ class CapellaAPI(CommonCapellaAPI):
         :return: response object
         """
         url = "{}/v2/organizations/{}/projects/{}/clusters/{}/buckets/{}/exports?page=1&perPage=25" \
-            .format(self.internal_url, tenant_id, project_id, cluster_id, bucket_id)
+            .format(self.internal_url, tenant_id, project_id, cluster_id,
+                    bucket_id)
         resp = self.do_internal_request(url, method="GET")
         return resp
 
@@ -5650,7 +6310,8 @@ class CapellaAPI(CommonCapellaAPI):
         :return: response object
         """
         url = "{}/v2/organizations/{}/projects/{}/clusters/{}/exports/{}/link" \
-            .format(self.internal_url, tenant_id, project_id, cluster_id, export_id)
+            .format(self.internal_url, tenant_id, project_id, cluster_id,
+                    export_id)
         resp = self.do_internal_request(url, method="POST")
         return resp
 
@@ -5783,8 +6444,9 @@ class CapellaAPI(CommonCapellaAPI):
         """
         Get a specific XDCR replication for a cluster
         """
-        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/xdcr/{}" .format(
-            self.internal_url, tenant_id, project_id, cluster_id, replication_id)
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/xdcr/{}".format(
+            self.internal_url, tenant_id, project_id, cluster_id,
+            replication_id)
         resp = self.do_internal_request(url, method="GET")
         return resp
 
@@ -5797,8 +6459,9 @@ class CapellaAPI(CommonCapellaAPI):
         """
         Delete an XDCR replication
         """
-        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/xdcr/{}" .format(
-            self.internal_url, tenant_id, project_id, cluster_id, replication_id)
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/xdcr/{}".format(
+            self.internal_url, tenant_id, project_id, cluster_id,
+            replication_id)
         resp = self.do_internal_request(url, method="DELETE")
         return resp
 
@@ -5811,8 +6474,9 @@ class CapellaAPI(CommonCapellaAPI):
         """
         Pause an XDCR replication
         """
-        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/xdcr/{}/pause" .format(
-            self.internal_url, tenant_id, project_id, cluster_id, replication_id)
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/xdcr/{}/pause".format(
+            self.internal_url, tenant_id, project_id, cluster_id,
+            replication_id)
         resp = self.do_internal_request(url, method="POST")
         return resp
 
@@ -5825,8 +6489,9 @@ class CapellaAPI(CommonCapellaAPI):
         """
         Start an XDCR replication
         """
-        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/xdcr/{}/start" .format(
-            self.internal_url, tenant_id, project_id, cluster_id, replication_id)
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/xdcr/{}/start".format(
+            self.internal_url, tenant_id, project_id, cluster_id,
+            replication_id)
         resp = self.do_internal_request(url, method="POST")
         return resp
 
@@ -5859,7 +6524,7 @@ class CapellaAPI(CommonCapellaAPI):
         """
         Get details about a SyncGateway backend for a cluster
         """
-        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}' .format(
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}'.format(
             self.internal_url, tenant_id, project_id, cluster_id, backend_id)
         resp = self.do_internal_request(url, method="GET")
         return resp
@@ -5873,7 +6538,7 @@ class CapellaAPI(CommonCapellaAPI):
         """
         Delete a SyncGateway backend
         """
-        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}' .format(
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}'.format(
             self.internal_url, tenant_id, project_id, cluster_id, backend_id)
         resp = self.do_internal_request(url, method="DELETE")
         return resp
@@ -5898,7 +6563,8 @@ class CapellaAPI(CommonCapellaAPI):
         }
         """
         url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/databases' \
-            .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id)
+            .format(self.internal_url, tenant_id, project_id, cluster_id,
+                    backend_id)
         resp = self.do_internal_request(url, method="POST",
                                         params=json.dumps(config))
         return resp
@@ -5906,7 +6572,8 @@ class CapellaAPI(CommonCapellaAPI):
     def get_sgw_databases(self, tenant_id, project_id, cluster_id, backend_id):
         "Get a list of all available sgw databases (app endpoints)"
         url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/databases' \
-            .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id)
+            .format(self.internal_url, tenant_id, project_id, cluster_id,
+                    backend_id)
         resp = self.do_internal_request(url, method="GET")
         return resp
 
@@ -5919,7 +6586,8 @@ class CapellaAPI(CommonCapellaAPI):
             db_name):
         "Resume the sgw database (app endpoint)"
         url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/databases/{}/online' \
-            .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id, db_name)
+            .format(self.internal_url, tenant_id, project_id, cluster_id,
+                    backend_id, db_name)
         resp = self.do_internal_request(url, method="POST")
         return resp
 
@@ -5932,13 +6600,15 @@ class CapellaAPI(CommonCapellaAPI):
             db_name):
         "Resume the sgw database (app endpoint)"
         url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/databases/{}/offline' \
-            .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id, db_name)
+            .format(self.internal_url, tenant_id, project_id, cluster_id,
+                    backend_id, db_name)
         resp = self.do_internal_request(url, method="POST")
         return resp
 
     def allow_my_ip_sgw(self, tenant_id, project_id, cluster_id, backend_id):
         url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/allowip' \
-            .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id)
+            .format(self.internal_url, tenant_id, project_id, cluster_id,
+                    backend_id)
         resp = self._urllib_request("https://ifconfig.me", method="GET")
         if resp.status_code != 200:
             raise Exception("Fetch public IP failed!")
@@ -5955,7 +6625,8 @@ class CapellaAPI(CommonCapellaAPI):
             backend_id,
             ip):
         url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/allowip' \
-            .format(self.internal_url, tenant_id, project_id, backend_id, cluster_id)
+            .format(self.internal_url, tenant_id, project_id, backend_id,
+                    cluster_id)
         body = {"cidr": "{}/32".format(ip), "comment": ""}
         resp = self.do_internal_request(url, method="POST",
                                         params=json.dumps(body))
@@ -5970,7 +6641,8 @@ class CapellaAPI(CommonCapellaAPI):
             db_name,
             config):
         url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/databases/{}/sync' \
-            .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id, db_name)
+            .format(self.internal_url, tenant_id, project_id, cluster_id,
+                    backend_id, db_name)
         resp = self.do_internal_request(url, method="POST",
                                         params=json.dumps(config))
         return resp
@@ -5984,7 +6656,8 @@ class CapellaAPI(CommonCapellaAPI):
             db_name,
             config):
         url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/databases/{}/roles' \
-            .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id, db_name)
+            .format(self.internal_url, tenant_id, project_id, cluster_id,
+                    backend_id, db_name)
         resp = self.do_internal_request(url, method="POST",
                                         params=json.dumps(config))
         return resp
@@ -5998,7 +6671,8 @@ class CapellaAPI(CommonCapellaAPI):
             db_name,
             config):
         url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/databases/{}/users' \
-            .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id, db_name)
+            .format(self.internal_url, tenant_id, project_id, cluster_id,
+                    backend_id, db_name)
         resp = self.do_internal_request(url, method="POST",
                                         params=json.dumps(config))
         return resp
@@ -6012,7 +6686,8 @@ class CapellaAPI(CommonCapellaAPI):
             db_name,
             config):
         url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/databases/{}/adminusers' \
-            .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id, db_name)
+            .format(self.internal_url, tenant_id, project_id, cluster_id,
+                    backend_id, db_name)
         resp = self.do_internal_request(url, method="POST",
                                         params=json.dumps(config))
         return resp
@@ -6025,12 +6700,13 @@ class CapellaAPI(CommonCapellaAPI):
             backend_id,
             db_name):
         url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/databases/{}/connect' \
-            .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id, db_name)
+            .format(self.internal_url, tenant_id, project_id, cluster_id,
+                    backend_id, db_name)
         resp = self.do_internal_request(url, method="GET", params='')
         return resp
 
     def get_sgw_info(self, tenant_id, project_id, cluster_id, backend_id):
-        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}' .format(
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}'.format(
             self.internal_url, tenant_id, project_id, cluster_id, backend_id)
         resp = self.do_internal_request(url, method="GET", params='')
         return resp
@@ -6043,7 +6719,8 @@ class CapellaAPI(CommonCapellaAPI):
             backend_id,
             db_name):
         url = '{}/v2/organizations/{}/projects/{}/clusters/{}/backends/{}/databases/{}/publiccert' \
-            .format(self.internal_url, tenant_id, project_id, cluster_id, backend_id, db_name)
+            .format(self.internal_url, tenant_id, project_id, cluster_id,
+                    backend_id, db_name)
         resp = self.do_internal_request(url, method="GET", params='')
         return resp
 
@@ -6057,7 +6734,8 @@ class CapellaAPI(CommonCapellaAPI):
             start,
             end):
         url = '{}/v2/organizations/{}/projects/{}/clusters/{}/metrics/{}/query_range' \
-            .format(self.internal_url, tenant_id, project_id, cluster_id, metrics)
+            .format(self.internal_url, tenant_id, project_id, cluster_id,
+                    metrics)
         payload = {'step': step, 'start': start, 'end': end}
         resp = self.do_internal_request(url, method="GET", params=payload)
         return resp
