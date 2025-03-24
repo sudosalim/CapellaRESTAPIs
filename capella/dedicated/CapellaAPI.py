@@ -16,6 +16,13 @@ class CapellaAPI(CommonCapellaAPI):
         api_response = self.api_get('/v3/clusters', params)
         return (api_response)
 
+    def get_project_clusters(self, tenant_id, project_id, page=1, per_page=100):
+        url = "{}/v2/organizations/{}/projects/{}/clusters?page={}&perPage={}".format(
+            self.internal_url, tenant_id, project_id, page, per_page
+        )
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
     def get_cluster_info(self, cluster_id):
         api_response = self.api_get('/v3/clusters/' + cluster_id)
 
@@ -57,6 +64,13 @@ class CapellaAPI(CommonCapellaAPI):
     def delete_cluster(self, cluster_id):
         api_response = self.api_del('/v3/clusters' + '/' + cluster_id)
         return (api_response)
+
+    def delete_cluster_internal(self, tenant_id, project_id, cluster_id):
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}".format(
+            self.internal_url, tenant_id, project_id, cluster_id
+        )
+        resp = self.do_internal_request(url, method="DELETE")
+        return resp
 
     def get_cluster_users(self, cluster_id):
         api_response = self.api_get('/v3/clusters' + '/' + cluster_id +
