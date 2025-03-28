@@ -67,6 +67,7 @@ class ClusterOperationsAPIs(APIRequests):
         self.app_endpoint_resync_endpoint = self.app_endpoints_endpoint + "/{}/resync"
         self.import_filter_endpoint = self.app_endpoints_endpoint + "/{}/importFilter"
         self.access_control_function_endpoint = self.app_endpoints_endpoint + "/{}/accessControlFunction"
+        self.app_endpoint_collections_endpoint = self.app_endpoints_endpoint + "/{}/collections"
 
         self.free_tier_cluster_endpoint = self.cluster_endpoint + "/freeTier"
         self.free_tier_cluster_activation_state_endpoint = self.free_tier_cluster_endpoint + "/{}/activationState"
@@ -830,6 +831,62 @@ class ClusterOperationsAPIs(APIRequests):
             organizationId, projectId, clusterId, appServiceId),
             params, headers)
         return resp
+
+    def list_app_endpoint_collections(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointName,
+            page=None,
+            perPage=None,
+            sortDirection=None,
+            headers=None,
+            **kwargs):
+        """
+               Lists all the collections under a specific App Endpoint along with their associated configurations such as Access Control function, Import Filter or user defined xattr key.
+
+               Args:
+                   organizationId: The ID of the tenant. (UUID)
+                   projectId: ID of the project inside the tenant. (UUID)
+                   clusterId: ID of the cluster inside the project in which the app service is present. (UUID)
+                   appServiceId: ID of the app service for which app endpoint are to be listed. (UUID)
+                   AppEndpointName: the name of the appservice we are getting the collections from.
+                   page: Sets what page you would like to view. (int)
+                   perPage: Sets how many results you would like to have on each page. (int)
+                   sortDirection: The order on which the items will be sorted. (str)
+                       Accepted Values - asc / desc
+                   headers: Headers to be sent with the API call. (dict)
+                   **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+               Returns:
+                   Success : Status Code and Response Body
+                   Error : message, hint, code, HttpStatusCode
+               """
+        self.cluster_ops_API_log.info(
+            "Listing Collections in App Endpoints {} in App Service: {}, "
+            "inside "
+            "cluster: {}, "
+            "inside project: {}, inside tenant: {}".format(
+                appEndpointName, appServiceId, clusterId, projectId,
+                organizationId))
+        params = {}
+        if page:
+            params["page"] = page
+        if perPage:
+            params["perPage"] = perPage
+        if sortDirection:
+            params["sortDirection"] = sortDirection
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_get(self.app_endpoint_collections_endpoint.format(
+            organizationId, projectId, clusterId, appServiceId,
+            appEndpointName),
+            params, headers)
+        return resp
+
 
     def update_app_endpoint(
             self,
