@@ -69,6 +69,11 @@ class ClusterOperationsAPIs(APIRequests):
         self.access_control_function_endpoint = self.app_endpoints_endpoint + "/{}/accessControlFunction"
         self.app_endpoint_collections_endpoint = self.app_endpoints_endpoint + "/{}/collections"
 
+        self.app_endpoint_OIDC_provider = self.app_endpoints_endpoint + "/{}/oidcProviders"
+        self.app_service_admin_users = self.cluster_appservice_api + "/{}/adminUsers"
+        self.app_endpoint_admin_users = self.app_endpoints_endpoint + "/{}/adminUsers"
+        self.cors_endpoint = self.app_endpoints_endpoint + "/{}/cors"
+
         self.free_tier_cluster_endpoint = self.cluster_endpoint + "/freeTier"
         self.free_tier_cluster_activation_state_endpoint = self.free_tier_cluster_endpoint + "/{}/activationState"
         self.free_tier_bucket_endpoint = self.cluster_endpoint + "/{}/buckets/freeTier"
@@ -1065,6 +1070,98 @@ class ClusterOperationsAPIs(APIRequests):
             appEndpointKeyspace), params, headers)
         return resp
 
+    def fetch_app_endpoint_c_o_r_s_info(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointName,
+            headers=None,
+            **kwargs):
+        """
+        Fetch the App Endpoint Cross-Origin Resource Sharing (CORS) Configuration.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster which has the app service inside it. (UUID)
+            appServiceId: ID of the App Service to create an Endpoint inside. (UUID)
+            appEndpointName: Name of the App Endpoint to fetch details. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Fetching details for app Endpoint CORS : {}, linked to App Svc: {}, "
+            "inside Cluster: {}, inside Project: {}, inside tenant: {}".format(
+                appEndpointName, appServiceId, clusterId, projectId,
+                organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_get(self.cors_endpoint.format(organizationId, projectId, clusterId, appServiceId,
+            appEndpointName), params, headers)
+        return resp
+
+    def update_cors(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointName,
+            cors,
+            headers=None,
+            **kwargs):
+        """
+        Upsert the App Endpoint Cross-Origin Resource Sharing (CORS) Configuration
+
+        Args:
+            organizationId: The ID of the tenant. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster inside the project in which the app service is present. (UUID)
+            appServiceId: ID of the app service for which app endpoint are to be listed. (UUID)
+            appEndpointName: Name of the App Endpoint to be updated. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code (ONLY).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Updating cors for  App Endpoint: {}, linked to App Service: {}, inside "
+            "cluster: {}, inside project: {}, inside tenant: {}"
+            .format(appEndpointName, appServiceId, clusterId, projectId,
+                    organizationId))
+        params = {
+            "origin": [
+                "http://example.com",
+                "http://staging.example.com"
+            ],
+            "loginOrigin": [
+                "http://example.com"
+            ],
+            "headers": [
+                "Content-Type"
+            ],
+            "maxAge": 600,
+            "disabled": False
+        }
+        for k, v in kwargs.items():
+            params[k] = v
+
+        resp = self.api_put(self.cors_endpoint.format(
+            organizationId, projectId, clusterId, appServiceId,
+            appEndpointName), params, headers)
+        return resp
+
     def update_access_control_function(
             self,
             organizationId,
@@ -1403,6 +1500,260 @@ class ClusterOperationsAPIs(APIRequests):
         resp = self.api_put(self.import_filter_endpoint.format(
             organizationId, projectId, clusterId, appServiceId,
             appEndpointKeyspace), None, headers, params)
+        return resp
+
+    def create_app_endpoint_o_i_d_c_provider(self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointName,
+            headers=None,
+            **kwargs):
+        """
+        Creates an OIDC provider for the specified App Endpoint. The
+        OIDC provider is used for OIDC authentication. After you enable OIDC,
+        all client requests will use the default OIDC provider,
+        unless the OIDC provider for the request is explicitly specified on authentication
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster which has the app service inside it. (UUID)
+            appServiceId: ID of the App Service to create an Endpoint inside. (UUID)
+            appEndpointName: the name of the app endpoint. (string)
+
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Creating an OIDC Provider for the App endpoint: {},in the "
+            "appservice: {}, inside the cluster: {}, for the Project: {} and "
+            "Organization: {}".format(appEndpointName, appServiceId,
+                                      clusterId, projectId,
+                                      organizationId))
+        params ={
+            "clientId": "foo_client",
+            "discoveryUrl": "https://accounts.google.com/.well-known/openid-configuration",
+            "issuer": "https://accounts.google.com",
+            "register": True,
+            "rolesClaim": "roles",
+            "userPrefix": "fooOIDC",
+            "usernameClaim": "fooAlt"
+        }
+        for k, v in kwargs.items():
+            if k in params:
+                params[k] = v
+
+        resp = self.api_post(self.app_endpoint_OIDC_provider.format(
+            organizationId, projectId, clusterId, appServiceId, appEndpointName),
+            params, headers)
+        return resp
+
+    def list_app_endpoint_o_i_d_c_providers(self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointName,
+            headers=None,
+            **kwargs):
+        """gets the OIDC providers for a particular app endpoint"""
+        self.cluster_ops_API_log.info(
+            "getting the users for the App endpoint: {},in the "
+            "AppService: {}, inside the cluster: {}, for the Project: {} and "
+            "Organization: {}".format(appEndpointName, appServiceId,
+                                      clusterId, projectId,
+                                      organizationId))
+
+        resp = self.api_get(self.app_endpoint_OIDC_provider.format(
+            organizationId, projectId, clusterId, appServiceId,
+            appEndpointName),headers)
+        return resp
+
+    def fetch_oidc_provider_info(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointName,
+            OIDCProviderID,
+            headers=None,
+            **kwargs):
+        """
+        Fetches the details of the given oidc provider
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster which has the app service inside it. (UUID)
+            appServiceId: ID of the App Service to create an Endpoint inside. (UUID)
+            appEndpointName: Name of the App Endpoint to fetch details. (string)
+            OIDCProviderID: Id of the oidc provider (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Fetching details for the OIDC Provider {} for app Endpoint: {}, "
+            "linked to App Svc: {}, inside Cluster: {}, inside Project: {}, inside tenant: {}".format(
+                appEndpointName, appServiceId, clusterId, projectId,
+                organizationId, OIDCProviderID))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_get("{}/{}".format(
+            self.app_endpoint_OIDC_provider.format(
+            organizationId, projectId, clusterId, appServiceId,
+            appEndpointName), OIDCProviderID), params, headers)
+        return resp
+
+    def update_app_endpoint_o_i_d_c_provider(self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointName,
+            oidcProviderId,
+            headers=None,
+            **kwargs):
+        """
+        Updates the OIDC provider for the specified App Endpoint.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant app service inside
+            it. (UUID)
+            appServiceId: ID of the App Service to create an Endpoint inside. (UUID)
+            appEndpointName: the name of the app endpoint. (string)
+
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Updates the OIDC Provider for the App endpoint: {},in the "
+            "appservice: {}, inside the cluster: {}, for the Project: {} and "
+            "Organization: {}".format(appEndpointName, appServiceId,
+                                      clusterId, projectId,
+                                      organizationId))
+        params = {
+            "clientId": "bar_client",
+            "discoveryUrl": "https://accounts.google.com/.well-known/openid-configuration",
+            "isDefault": False,
+            "issuer": "https://accounts.google.com",
+            "providerId": "ffffffff-aaaa-1414-eeee-000000000000",
+            "register": True,
+            "rolesClaim": "roles",
+            "userPrefix": "barOIDC",
+            "usernameClaim": "barAlt"
+        }
+        for k, v in kwargs.items():
+            if k in params:
+                params[k] = v
+
+        resp = self.api_put("{}/{}".format(
+            self.app_endpoint_OIDC_provider.format(
+            organizationId, projectId, clusterId, appServiceId,
+            appEndpointName),oidcProviderId),params, headers)
+        return resp
+
+    def update_app_endpoint_o_i_d_c_default_provider(self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointName,
+            headers=None,
+            **kwargs):
+        """
+        Updates the default OIDC provider for the specified App Endpoint.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant app service inside
+            it. (UUID)
+            appServiceId: ID of the App Service to create an Endpoint inside. (UUID)
+            appEndpointName: the name of the app endpoint. (string)
+            providerId: The id of the default provider. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code and response (JSON).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "updates the default OIDC Provider for the App endpoint: {},in the "
+            "appservice: {}, inside the cluster: {}, for the Project: {} and "
+            "Organization: {}".format(appEndpointName, appServiceId,
+                                      clusterId, projectId,
+                                      organizationId))
+        params = {}
+        params["providerId"] = kwargs.get("providerId",
+                                          "ffffffff-aaaa-1414-eeee-000000000000")
+        if kwargs.get("param"):
+            params["param"] = kwargs.get("param")
+
+        resp = self.api_put(self.app_endpoint_OIDC_provider.format(
+            organizationId, projectId, clusterId, appServiceId,
+            appEndpointName)+"/defaultProvider",
+            params, headers)
+        return resp
+
+    def delete_app_endpoint_o_i_d_c_provider(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            appServiceId,
+            appEndpointName,
+            oidcProviderId,
+            headers=None,
+            **kwargs):
+        """
+        Deletes a given Oidc provider for the specified App Endpoint.
+
+        Args:
+            organizationId: The tenant ID for the path. (UUID)
+            projectId: ID of the project inside the tenant. (UUID)
+            clusterId: ID of the cluster which has the app service inside it. (UUID)
+            appServiceId: ID of the App Service to create an Endpoint inside. (UUID)
+            appEndpointName: Name of the App Endpoint to be deleted. (string)
+            oidcProviderId: ID of the oidc Provider. (string)
+            headers: Headers to be sent with the API call. (dict)
+            **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
+
+        Returns:
+            Success : Status Code (ONLY).
+            Error : message, hint, code, HttpStatusCode
+        """
+        self.cluster_ops_API_log.info(
+            "Deleting Oidc Provider for app Endpoint: {}, linked to App Svc: "
+            "{}, inside Cluster: {}, inside Project: {}, inside tenant: {}".format(
+                appEndpointName, appServiceId, clusterId, projectId,
+                organizationId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+
+        resp = self.api_del("{}/{}".format(self.app_endpoint_OIDC_provider.format(
+            organizationId, projectId, clusterId, appServiceId,appEndpointName),
+            oidcProviderId), params, headers)
         return resp
 
     def bulk_index_check(
@@ -5514,6 +5865,172 @@ class ClusterOperationsAPIs(APIRequests):
         else:
             params = None
         resp = self.api_get(url, params=params, headers=headers)
+        return resp
+
+    def add_app_service_admin_user(self, tenant_id, project_id, cluster_id,
+                          appservice_name, headers=None, **kwargs):
+        """
+        Creates a new App Service Admin User.
+        In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+        -Organization Owner
+        -Project Owner
+        :param organizationId (str) Organization ID under which the app service is present.
+        :param projectId (str) Project ID under which the app service is present.
+        :param clusterId (str) ID of the cluster under which the app service is present.
+        :param appservice_name: Name of the appservice.
+        :param headers (dict) Headers to be sent with the API call.
+        :param kwargs (dict) the body of the admin users
+        """
+        url = self.app_service_admin_users.format(tenant_id, project_id,
+                                                 cluster_id, appservice_name)
+        params = {
+            "name": "user1",
+            "password": "passwordD,",
+            "access": {
+                "accessAllEndpoints": True
+            }
+        }
+
+        for k, v in kwargs.items():
+            if isinstance(v, dict) and isinstance(params.get(k), dict):
+                params[k].update(v)  # Merge nested dicts like "access"
+            else:
+                params[k] = v
+
+        resp = self.api_post(url, params, headers)
+        return resp
+
+    def fetch_app_service_admin_user_info(self, tenant_id, project_id, cluster_id,
+                                    appservice_id, user_id, headers=None,
+                                          **kwargs):
+        """
+        Fetches the admin users of the given App Service.
+        In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+        -Organization Owner
+        -Project Owner
+        -Project Manager
+        -Project Viewer
+        -Database Data Reader/Writer
+        -Database Data Reader
+        """
+        url = (self.app_service_admin_users + "/{}").format(tenant_id,
+                                                            project_id,
+                                                            cluster_id,
+                                                            appservice_id,
+                                                            user_id)
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.api_get(url, params=params, headers=headers)
+        return resp
+
+    def list_app_service_admin_user(self, tenant_id, project_id, cluster_id,
+                                          appservice_id, headers=None,**kwargs):
+        """
+        Fetches the admin users of the given App Service.
+        In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+        -Organization Owner
+        -Project Owner
+        -Project Manager
+        -Project Viewer
+        -Database Data Reader/Writer
+        -Database Data Reader
+        """
+        url = self.app_service_admin_users.format(tenant_id,
+                                                           project_id,
+                                                           cluster_id,
+                                                           appservice_id)
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.api_get(url, params=params, headers=headers)
+        return resp
+
+    def list_app_endpoint_admin_user(self, tenant_id, project_id, cluster_id,
+                                     appservice_id, appendpointname,
+                                     headers=None,**kwargs):
+        """
+        Lists the Admin Users that have access to the specified App Endpoint.
+        In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+        -Organization Owner
+        -Project Owner
+        -Project Manager
+        -Project Viewer
+        -Database Data Reader/Writer
+        -Database Data Reader
+        """
+        url = self.app_endpoint_admin_users.format(tenant_id, project_id,
+                                                      cluster_id,
+                                                      appservice_id, appendpointname)
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.api_get(url, params=params, headers=headers)
+        return resp
+
+
+    def update_app_service_admin_user(self, tenant_id, project_id, cluster_id,
+                           appservice_id, user_id, headers=None,
+                           **kwargs):
+        """
+        Updates an existing App Service Admin user.
+        In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+        -Organization Owner
+        -Project Owner
+        -Project Manager
+        :param tenant_id:
+        :param project_id:
+        :param cluster_id:
+        :param appservice_id: Name of the appservice
+        :param user_id : Name of the admin user
+        :param If-Match: A precondition header that specifies the entity tag of a resource.
+        """
+        url = (self.app_service_admin_users + "/{}").format(tenant_id,
+                                                            project_id,
+                                                            cluster_id,
+                                                            appservice_id,
+                                                            user_id)
+        if "accessAllEndpoints" in kwargs:
+            params = {
+                "accessAllEndpoints": kwargs["accessAllEndpoints"]
+            }
+        else:
+            params = {
+                "endpoints": kwargs.get("endpoints", ["v4-test-endpoint"])
+            }
+
+        resp = self.api_put(url, params, headers=headers)
+        return resp
+
+    def delete_app_service_admin_user(self, tenant_id, project_id, cluster_id,
+                          appservice_id, user_id, headers=None, **kwargs):
+        """
+        Deletes an existing Admin user for the App Service.
+        In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+        -Organization Owner
+        -Project Owner
+        -Project Manager
+        :param organizationId (str) Organization ID under which the app service is present.
+        :param projectId (str) Project ID under which the app service is present.
+        :param clusterId (str) ID of the cluster under which the app service is present.
+        :param appservice_id: ID of the app service.
+        :param user_id : ID of the user
+        :param headers (dict) Headers to be sent with the API call.
+        :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+        """
+        url = (self.app_service_admin_users + "/{}").format(tenant_id,
+                                                            project_id,
+                                                            cluster_id,
+                                                            appservice_id,
+                                                            user_id)
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.api_del(url, request_body=params, headers=headers)
         return resp
 
     def get_cluster(self, tenant_id, project_id, cluster_id, headers=None,
