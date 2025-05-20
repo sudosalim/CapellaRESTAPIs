@@ -269,6 +269,18 @@ class CapellaAPI(CommonCapellaAPI):
                                     headers=self.cbc_api_request_headers)
         return resp
 
+    def set_dapi_rate_limit(self, cluster_id, rate):
+        """
+        Set rate limit for data API.
+        """
+        url="{}/internal/support/clusters/{}/data-api".format(self.internal_url, cluster_id)
+        data = {
+            "rateLimit": rate
+        }
+        resp = self._urllib_request(url, "PUT", params=json.dumps(data),
+                                    headers=self.cbc_api_request_headers)
+        return resp
+
     def add_allowed_ips(self, tenant_id, project_id, cluster_id, ips):
         url = '{}/v2/organizations/{}/projects/{}/clusters/{}'\
             .format(self.internal_url, tenant_id, project_id, cluster_id)
