@@ -257,24 +257,13 @@ class CapellaAPI(CommonCapellaAPI):
                                     params=json.dumps(body))
         return resp
 
-    def enable_data_api(self, cluster_id):
+    def enable_data_api(self, cluster_id, rate=5000):
         """
         Enable data API for a cluster.
         """
         url="{}/internal/support/clusters/{}/data-api".format(self.internal_url, cluster_id)
         data = {
-            "enabled": True
-        }
-        resp = self._urllib_request(url, "PUT", params=json.dumps(data),
-                                    headers=self.cbc_api_request_headers)
-        return resp
-
-    def set_dapi_rate_limit(self, cluster_id, rate):
-        """
-        Set rate limit for data API.
-        """
-        url="{}/internal/support/clusters/{}/data-api".format(self.internal_url, cluster_id)
-        data = {
+            "enabled": True,
             "rateLimit": rate
         }
         resp = self._urllib_request(url, "PUT", params=json.dumps(data),
