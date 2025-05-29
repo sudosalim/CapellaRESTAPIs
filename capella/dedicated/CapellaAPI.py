@@ -1588,7 +1588,7 @@ class CapellaAPI(CommonCapellaAPI):
         """
         url = "{}/v2/organizations/{}/projects/{}/clusters/{}/ai/workflows/{}".format(self.internal_url, tenant_id,
                                                                                       project_id, cluster_id, workflow_id)
-        resp = self.do_internal_request(url, method="GET")
+        resp = self.do_internal_request(url, method="DELETE")
         return resp
 
     def list_autovec_workflows(self, tenant_id, page=1, per_page=10):
