@@ -662,6 +662,7 @@ class ClusterOperationsAPIs(APIRequests):
             bucket,
             scopes,
             xattr,
+            cors,
             headers=None,
             **kwargs):
         """
@@ -693,7 +694,8 @@ class ClusterOperationsAPIs(APIRequests):
             "deltaSyncEnabled": deltaSyncEnabled,
             "bucket": bucket,
             "scopes": scopes,
-            "userXattrKey": xattr
+            "userXattrKey": xattr,
+            "cors":cors
         }
         for k, v in kwargs.items():
             params[k] = v
@@ -905,6 +907,7 @@ class ClusterOperationsAPIs(APIRequests):
             bucket,
             scopes,
             xattr,
+            cors,
             headers=None,
             **kwargs):
         """
@@ -922,6 +925,7 @@ class ClusterOperationsAPIs(APIRequests):
             bucket: Name of the bucket linked to the app endpoint. (string)
             scopes: Scopes to be included in the app endpoint config inside the bucket. (list)
             xattr: User X-Attributes Key to be used with the endpoint. (string)
+            cors: User's cors data. (dict)
             headers: Headers to be sent with the API call. (dict)
             **kwargs: Do not use this under normal circumstances. This is only to test negative scenarios. (dict)
 
@@ -939,7 +943,8 @@ class ClusterOperationsAPIs(APIRequests):
             "deltaSyncEnabled": deltaSyncEnabled,
             "bucket": bucket,
             "scopes": scopes,
-            "userXattrKey": xattr
+            "userXattrKey": xattr,
+            "cors": cors
         }
         for k, v in kwargs.items():
             params[k] = v
