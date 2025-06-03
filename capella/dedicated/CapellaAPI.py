@@ -423,20 +423,35 @@ class CapellaAPI(CommonCapellaAPI):
                                         params=json.dumps(config))
         return resp
 
-    def get_deployment_options(self, tenant_id, provider='aws'):
+    def get_deployment_options(
+        self, tenant_id, provider="aws", option=None, region=None, plan=None
+    ):
         """
-        Get deployment options, including a suggested CIDR for deploying a
-        cluster.
+        Get deployment options for an operational cluster.
 
-        Example use:
-
-        ```
-        resp = client.get_deployment_options(tenant_id, provider='aws')
-        suggestedCidr = resp.json().get('suggestedCidr')
-        ```
+        Required Parameters:
+            `tenant_id` (str): The ID of the tenant to get options for.
+        Optional Parameters:
+            `provider` (str): Cloud service provider (e.g., AWS, GCP).
+            `option` (str): Cluster type (e.g. single, multi, custom, free-tier).
+            `region` (str): CSP region or location (provider is required if this is specified).
+            `plan` (str): The plan type (e.g., free, Basic, Developer Pro, Enterprise).
         """
-        url = '{}/v2/organizations/{}/clusters/deployment-options?provider={}' \
-              .format(self.internal_url, tenant_id, provider)
+        url = "{}/v2/organizations/{}/clusters/deployment-options/v2".format(
+            self.internal_url, tenant_id
+        )
+        params = {
+            "provider": provider,
+            "option": option,
+            "region": region,
+            "plan": plan,
+        }
+        param_str = "&".join(
+            "{}={}".format(k, v) for k, v in params.items() if v is not None
+        )
+        if param_str:
+            url += "?" + param_str
+
         resp = self.do_internal_request(url, method="GET")
         return resp
 
@@ -1248,12 +1263,6 @@ class CapellaAPI(CommonCapellaAPI):
         payload = {"deletionProtection": deletion_protection}
         resp = self.do_internal_request(url, method="PATCH",
                                         params=json.dumps(payload))
-        return resp
-
-    def get_unique_cidr(self, tenant_id):
-        url = '{}/v2/organizations/{}/clusters/deployment-options/v2'.format(self.internal_url,
-                                                                         tenant_id)
-        resp = self.do_internal_request(url, method='GET')
         return resp
 
     def deploy_v2_cluster(self, tenant_id, payload):

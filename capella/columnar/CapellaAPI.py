@@ -92,8 +92,7 @@ class CapellaAPI(CommonCapellaAPI):
         resp = self.do_internal_request(url, "GET")
         return resp
 
-    def get_deployment_options(self, tenant_id, provider="aws", region=None,
-                               free_tier=False):
+    def get_deployment_options(self, tenant_id, provider="aws", region=None):
         """
         Get deployment options for a Columnar instance.
 
@@ -102,19 +101,19 @@ class CapellaAPI(CommonCapellaAPI):
         count.
 
         Required Parameters:
-            tenant_id (str): The ID of the tenant to get options for.
-            provider (str): The provider or cloud platform (e.g., AWS, Azure) to get options for.
+            `tenant_id` (str): The ID of the tenant to get options for.
         Optional Parameters:
-            region (str): The region or location to get options for.
-            free_tier (bool): Whether to look for free- or paid-tier deployment options.
+            `provider` (str): The provider or cloud platform (e.g., AWS, GCP) to get options for.
+            `region` (str): The region or location to get options for (provider is required if this
+                          is specified).
         """
-        url = (
-            '{}/v2/organizations/{}/instance/deployment-options?provider={}'
-        ).format(self.internal_url, tenant_id, provider)
-        if region:
-            url += "&region={}".format(region)
-        if free_tier:
-            url += "&freeTier=True"
+        url = "{}/v2/organizations/{}/instance/deployment-options/v2".format(
+            self.internal_url, tenant_id
+        )
+        if provider:
+            url += "?provider={}".format(provider)
+            if region:
+                url += "&region={}".format(region)
         resp = self.do_internal_request(url, "GET")
         return resp
 
