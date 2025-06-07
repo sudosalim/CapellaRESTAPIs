@@ -17,8 +17,11 @@ class CapellaAPI(CommonCapellaAPI):
         return (api_response)
 
     def get_cluster_info(self, tenant_id, project_id, cluster_id):
-        url = f'{self.internal_url}/v2/organizations/{tenant_id}/projects/{project_id}/clusters/{cluster_id}'
-        api_response = self.do_internal_request(url, method="GET")
+        url = '{}/v2/organizations/{}/projects/{}/clusters/{}'.format(
+            self.internal_url, tenant_id, project_id, cluster_id
+        )
+        resp = self.do_internal_request(url, method="GET")
+        return resp
 
     def get_project_clusters(self, tenant_id, project_id, page=1, per_page=100):
         url = "{}/v2/organizations/{}/projects/{}/clusters?page={}&perPage={}".format(
