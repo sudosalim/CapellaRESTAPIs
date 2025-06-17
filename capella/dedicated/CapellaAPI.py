@@ -1823,7 +1823,7 @@ class CapellaAPI(CommonCapellaAPI):
         return resp
 
     def get_index_status(self, cluster_id):
-        url = "{}/v2/databases/{}/index-status".format(self.internal_url, cluster_id)
+        url = "{}/v2/databases/{}/proxy/indexStatus".format(self.internal_url, cluster_id)
         resp = self.do_internal_request(url, method="GET")
         return resp
 
