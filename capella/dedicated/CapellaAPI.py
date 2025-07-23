@@ -1842,7 +1842,8 @@ class CapellaAPI(CommonCapellaAPI):
 
     def get_model_catalog(self):
         url = "{}/internal/support/modelcatalog".format(self.internal_url)
-        resp = self.do_internal_request(url, method="GET")
+        resp = self._urllib_request(url, "GET",
+                                    headers=self.cbc_api_request_headers)
         return resp
 
     def get_model_api_key(self, tenant_id, model_names, key_name, allowed_ips):
