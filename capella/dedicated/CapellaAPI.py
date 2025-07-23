@@ -1839,3 +1839,21 @@ class CapellaAPI(CommonCapellaAPI):
         url = "{}?page=1&perPage=25&sortBy=serviceTime&sortDirection=desc&lessThan=false".format(url)
         resp = self.do_internal_request(url, method="GET")
         return resp
+
+    def get_model_catalog(self):
+        url = "{}/internal/support/modelcatalog".format(self.internal_url)
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def get_model_api_key(self, tenant_id, model_names, key_name, allowed_ips):
+        url = "{}/v2/organizations/{}/apiKeys".format(self.internal_url, tenant_id)
+        payload = {
+            "name": key_name,
+            "description": key_name,
+            "accessPolicy": {
+                "allowedModels": model_names,
+                "allowedIPs": allowed_ips
+            }
+        }
+        resp = self.do_internal_request(url, method="POST", params=json.dumps(payload))
+        return resp
