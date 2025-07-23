@@ -1731,13 +1731,11 @@ class CapellaAPI(CommonCapellaAPI):
         resp = self.do_internal_request(url, method="GET")
         return resp
 
-    def deploy_model(self, tenant_id, project_id, cluster_id, payload):
+    def deploy_model(self, tenant_id, payload):
 
         """
         Deploys a LLM or embedding model
         tenant_id: ID of the organization
-        project_id: ID of the project
-        cluster_id: ID of the cluster
         payload:
             Embedding:
             {
@@ -1757,43 +1755,36 @@ class CapellaAPI(CommonCapellaAPI):
                     "id": "60621d6c-a92c-4219-95c3-eb213b0745b5"
                 }
         """
-        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/languagemodels".format(self.internal_url, tenant_id,
-                                                                                     project_id, cluster_id)
+        url = "{}/v2/organizations/{}/languagemodels".format(self.internal_url, tenant_id)
         resp = self.do_internal_request(url, method="POST", params=json.dumps(payload))
         return resp
 
-    def delete_model(self, tenant_id, project_id, cluster_id, model_id):
+    def delete_model(self, tenant_id, model_id):
         """
         Deletes a model
         Args:
             tenant_id: ID of the organization
-            project_id: ID of the project
-            cluster_id: ID of the cluster
             model_id: ID of the model
 
         Returns:
             204 No Content on success
         """
-        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/languagemodels/{}".format(self.internal_url, tenant_id,
-                                                                                        project_id, cluster_id,
+        url = "{}/v2/organizations/{}/languagemodels/{}".format(self.internal_url, tenant_id,
                                                                                         model_id)
         resp = self.do_internal_request(url, method="DELETE")
         return resp
 
-    def get_model_details(self, tenant_id, project_id, cluster_id, model_id):
+    def get_model_details(self, tenant_id, model_id):
         """
         Get details of a model
         Args:
             tenant_id: ID of the organization
-            project_id: ID of the project
-            cluster_id: ID of the cluster
             model_id: ID of the model
 
         Returns:
             200 on success and model details:
         """
-        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/languagemodels/{}".format(self.internal_url, tenant_id,
-                                                                                        project_id, cluster_id,
+        url = "{}/v2/organizations/{}/languagemodels/{}".format(self.internal_url, tenant_id,
                                                                                         model_id)
         resp = self.do_internal_request(url, method="GET")
         return resp
