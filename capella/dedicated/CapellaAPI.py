@@ -1837,15 +1837,7 @@ class CapellaAPI(CommonCapellaAPI):
                                     headers=self.cbc_api_request_headers)
         return resp
 
-    def get_model_api_key(self, tenant_id, model_names, key_name, allowed_ips):
+    def create_model_api_key(self, tenant_id, payload):
         url = "{}/v2/organizations/{}/apiKeys".format(self.internal_url, tenant_id)
-        payload = {
-            "name": key_name,
-            "description": key_name,
-            "accessPolicy": {
-                "allowedModels": model_names,
-                "allowedIPs": allowed_ips
-            }
-        }
         resp = self.do_internal_request(url, method="POST", params=json.dumps(payload))
         return resp
