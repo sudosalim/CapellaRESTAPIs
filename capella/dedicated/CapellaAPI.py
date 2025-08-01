@@ -1841,3 +1841,18 @@ class CapellaAPI(CommonCapellaAPI):
         url = "{}/v2/organizations/{}/languageModelAPIKeys".format(self.internal_url, tenant_id)
         resp = self.do_internal_request(url, method="POST", params=json.dumps(payload))
         return resp
+
+    def create_ai_functions(self, tenant_id, project_id, cluster_id, payload):
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/aifunctions".format(
+            self.internal_url, tenant_id, project_id, cluster_id
+        )
+        resp = self.do_internal_request(url, method="POST", params=json.dumps(payload))
+        return resp
+
+    def get_ai_functions(self, tenant_id, project_id, cluster_id, page=1, per_page=20):
+        "Get a list of all available AI functions"
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/aifunctions?page={}&perPage={}".format(
+            self.internal_url, tenant_id, project_id, cluster_id, page, per_page
+        )
+        resp = self.do_internal_request(url, method="GET")
+        return resp
