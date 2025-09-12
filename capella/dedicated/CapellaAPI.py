@@ -1856,3 +1856,19 @@ class CapellaAPI(CommonCapellaAPI):
         )
         resp = self.do_internal_request(url, method="GET")
         return resp
+
+    def get_allowed_ips_list(self, tenant_id, project_id, cluster_id, page=1, per_page=20):
+        "Get a list of all allowed IPs for a cluster"
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/allowlists?page={}&perPage={}".format(
+            self.internal_url, tenant_id, project_id, cluster_id, page, per_page
+        )
+        resp = self.do_internal_request(url, method="GET")
+        return resp
+
+    def delete_allowed_ip(self, tenant_id, project_id, cluster_id, allowed_ip_id):
+        "Delete an allowed IP for a cluster"
+        url = "{}/v2/organizations/{}/projects/{}/clusters/{}/allowlists/{}".format(
+            self.internal_url, tenant_id, project_id, cluster_id, allowed_ip_id
+        )
+        resp = self.do_internal_request(url, method="DELETE")
+        return resp
