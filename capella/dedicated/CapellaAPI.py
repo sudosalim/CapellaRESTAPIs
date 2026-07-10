@@ -2331,6 +2331,32 @@ class CapellaAPI(CommonCapellaAPI):
         resp = self._urllib_request(url, method="GET", headers=self.cbc_api_request_headers)
         return resp
 
+    def get_fusion_config(self, resource_id):
+        url = "{}/internal/support/configs/{}/fusion".format(
+            self.internal_url, resource_id)
+        resp = self._urllib_request(url, method="GET", headers=self.cbc_api_request_headers)
+        return resp
+
+    def set_fusion_config(self, resource_id, config):
+        url = "{}/internal/support/configs/{}/fusion".format(
+            self.internal_url, resource_id)
+        resp = self._urllib_request(url, method="PUT", headers=self.cbc_api_request_headers,
+                                    params=json.dumps({"value": config}))
+        return resp
+
+    def patch_fusion_config(self, resource_id, config):
+        url = "{}/internal/support/configs/{}/fusion".format(
+            self.internal_url, resource_id)
+        resp = self._urllib_request(url, method="PATCH", headers=self.cbc_api_request_headers,
+                                    params=json.dumps({"value": config}))
+        return resp
+
+    def delete_fusion_config(self, resource_id):
+        url = "{}/internal/support/configs/{}/fusion".format(
+            self.internal_url, resource_id)
+        resp = self._urllib_request(url, method="DELETE", headers=self.cbc_api_request_headers)
+        return resp
+
     # -----------------------------------------------------------------------
     # Cloud snapshot backup / restore  (v2 internal API)
     # -----------------------------------------------------------------------
