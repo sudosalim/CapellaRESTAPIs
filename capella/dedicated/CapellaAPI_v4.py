@@ -19,6 +19,8 @@ class ClusterOperationsAPIs(APIRequests):
         self.cluster_endpoint = organization_endpoint + "/{}/projects/{}/clusters"
         self.allowedCIDR_endpoint = organization_endpoint + "/{}/projects/{}/clusters/{}/allowedcidrs"
         self.db_user_endpoint = organization_endpoint + "/{}/projects/{}/clusters/{}/users"
+        self.db_role_endpoint = organization_endpoint + "/{}/projects/{}/clusters/{}/roles"
+        self.db_privileges_endpoint = organization_endpoint + "/{}/projects/{}/clusters/{}/privileges"
         self.bucket_endpoint = organization_endpoint + "/{}/projects/{}/clusters/{}/buckets"
         self.scope_endpoint = organization_endpoint + "/{}/projects/{}/clusters/{}/buckets/{}/scopes"
         self.collection_endpoint = organization_endpoint + "/{}/projects/{}/clusters/{}/buckets/{}/scopes/{}/collections"
@@ -5102,19 +5104,23 @@ class ClusterOperationsAPIs(APIRequests):
             projectId,
             clusterId,
             name,
-            access,
             password="",
+            credentialType="basic",
+            userRoles=None,
             headers=None,
             **kwargs):
         self.cluster_ops_API_log.info(
             "Creating Database User {} in cluster {}".format(
                 name, clusterId))
         params = {
-            "name": name,
-            "access": access
+            "name": name
         }
         if password:
             params["password"] = password
+        if credentialType and credentialType != "basic":
+            params["credentialType"] = credentialType
+        if userRoles is not None:
+            params["userRoles"] = userRoles
         for k, v in kwargs.items():
             params[k] = v
         resp = self.api_post(self.db_user_endpoint.format(
@@ -5247,16 +5253,21 @@ class ClusterOperationsAPIs(APIRequests):
             projectId,
             clusterId,
             userId,
-            access,
-            ifmatch,
-            headers=None,
-            **kwargs):
+            params,
+            password=None,
+            credentialType=None,
+            userRoles=None,
+            ifmatch=False,
+            headers=None,):
         self.cluster_ops_API_log.info(
             "Updating database user {} in cluster {}".format(
                 userId, clusterId))
-        params = {
-            "access": access
-        }
+        if params["password"]:
+            params["password"] = password
+        if params["credentialType"] and params["credentialType"] != "basic":
+            params["credentialType"] = credentialType
+        if params["userRoles"] is not None:
+            params["userRoles"] = userRoles
         if ifmatch:
             if not headers:
                 headers = {}
@@ -5265,8 +5276,6 @@ class ClusterOperationsAPIs(APIRequests):
             version_id = result.json()["audit"]["version"]
             headers["If-Match"] = "Version: {}".format(version_id)
 
-        for k, v in kwargs.items():
-            params[k] = v
 
         resp = self.api_put(
             "{}/{}".format(
@@ -5316,6 +5325,246 @@ class ClusterOperationsAPIs(APIRequests):
                 userId),
             params,
             headers)
+        return resp
+
+    """
+    Method creates a database role for a given cluster.
+    In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+        Organization Owner
+        Project Owner
+    :param organizationId (str) Organization ID under which the cluster is present.
+    :param projectId (str) Project ID under which the cluster is present.
+    :param clusterId (str) Cluster ID of the cluster for which the database role is to be created.
+    :param name (str) The name of the database role.
+    :param access ([object]) The access configuration for the role.
+    :param description (str) The description of the database role.
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+
+    def create_database_role(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            name,
+            access,
+            description="",
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info(
+            "Creating Database Role {} in cluster {}".format(
+                name, clusterId))
+        params = {
+            "name": name,
+            "access": access
+        }
+        if description:
+            params["description"] = description
+        for k, v in kwargs.items():
+            params[k] = v
+        resp = self.api_post(self.db_role_endpoint.format(
+            organizationId, projectId, clusterId), params, headers)
+        return resp
+
+    """
+    Method fetches all the database roles for a given cluster.
+    In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+        Organization Owner
+        Project Owner
+        Project Viewer
+    :param organizationId (str) Organization ID under which the cluster is present.
+    :param projectId (str) Project ID under which the cluster is present.
+    :param clusterId (str) Cluster ID of the cluster for which the database roles list is to be fetched.
+    :param page (int) Sets what page you would like to view
+    :param perPage (int) Sets how many results you would like to have on each page
+    :param sortBy ([string]) Sets order of how you would like to sort results and also the key you would like to order by
+    :param sortDirection (str) The order on which the items will be sorted. Accepted Values - asc / desc
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+
+    def list_database_roles(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            page=None,
+            perPage=None,
+            sortBy=None,
+            sortDirection=None,
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info(
+            "List all the database roles for cluster {}".format(clusterId))
+        params = {}
+        if page:
+            params["page"] = page
+        if perPage:
+            params["perPage"] = perPage
+        if sortBy:
+            params["sortBy"] = sortBy
+        if sortDirection:
+            params["sortDirection"] = sortDirection
+        for k, v in kwargs.items():
+            params[k] = v
+        resp = self.api_get(self.db_role_endpoint.format(
+            organizationId, projectId, clusterId), params, headers)
+        return resp
+
+    """
+    Method fetches info of the required database role ID.
+    In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+        Organization Owner
+        Project Owner
+        Project Viewer
+    :param organizationId (str) Organization ID under which the cluster is present.
+    :param projectId (str) Project ID under which the cluster is present.
+    :param clusterId (str) Cluster ID of the cluster under which the database role ID is present.
+    :param roleId (str) The GUID4 ID of the database role.
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+
+    def fetch_database_role_info(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            roleId,
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info(
+            "Fetching Database role info for {} present in cluster {}".format(
+                roleId, clusterId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.api_get(
+            "{}/{}".format(
+                self.db_role_endpoint.format(
+                    organizationId,
+                    projectId,
+                    clusterId),
+                roleId),
+            params,
+            headers)
+        return resp
+
+    """
+    Method updates the database role ID.
+    In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+        Organization Owner
+        Project Owner
+    :param organizationId (str) Organization ID under which the cluster is present.
+    :param projectId (str) Project ID under which the cluster is present.
+    :param clusterId (str) Cluster ID of the cluster under which the database role ID is present.
+    :param roleId (str) The GUID4 ID of the database role.
+    :param access ([object]) The access configuration for the role.
+    :param description (str) The description of the database role.
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+
+    def update_database_role(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            roleId,
+            access,
+            description="",
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info(
+            "Updating database role {} in cluster {}".format(
+                roleId, clusterId))
+        params = {
+            "access": access
+        }
+        if description:
+            params["description"] = description
+        for k, v in kwargs.items():
+            params[k] = v
+        resp = self.api_put(
+            "{}/{}".format(
+                self.db_role_endpoint.format(
+                    organizationId,
+                    projectId,
+                    clusterId),
+                roleId),
+            params,
+            headers)
+        return resp
+
+    """
+    Method deletes specified database role ID from the cluster.
+    In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+        Organization Owner
+        Project Owner
+    :param organizationId (str) Organization ID under which the cluster is present.
+    :param projectId (str) Project ID under which the cluster is present.
+    :param clusterId (str) Cluster ID of the cluster under which the database role ID is present.
+    :param roleId (str) The GUID4 ID of the database role which is to be deleted.
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+
+    def delete_database_role(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            roleId,
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info(
+            "Deleting database role {} from cluster {}".format(
+                roleId, clusterId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.api_del(
+            "{}/{}".format(
+                self.db_role_endpoint.format(
+                    organizationId,
+                    projectId,
+                    clusterId),
+                roleId),
+            params,
+            headers)
+        return resp
+
+    """
+    Method lists all capella privileges available for database roles.
+    In order to access this endpoint, the provided API key must have at least one of the roles referenced below:
+        Organization Owner
+        Project Owner
+        Project Viewer
+    :param organizationId (str) Organization ID under which the cluster is present.
+    :param projectId (str) Project ID under which the cluster is present.
+    :param clusterId (str) Cluster ID of the cluster for which the privileges are to be listed.
+    :param headers (dict) Headers to be sent with the API call.
+    :param kwargs (dict) Do not use this under normal circumstances. This is only to test negative scenarios.
+    """
+
+    def list_capella_privileges(
+            self,
+            organizationId,
+            projectId,
+            clusterId,
+            headers=None,
+            **kwargs):
+        self.cluster_ops_API_log.info(
+            "Listing capella privileges for cluster {}".format(clusterId))
+        if kwargs:
+            params = kwargs
+        else:
+            params = None
+        resp = self.api_get(self.db_privileges_endpoint.format(
+            organizationId, projectId, clusterId), params, headers)
         return resp
 
     """
