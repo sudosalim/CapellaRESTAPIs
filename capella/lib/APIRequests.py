@@ -3,8 +3,6 @@
 from threading import Lock
 
 import requests
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
 import logging
 import pprint
 
@@ -33,23 +31,9 @@ class APIRequests(object):
 
         self._log = logging.getLogger(__name__)
 
-        # Shared session with connection pooling to avoid BindException
-        # (Address already in use) under Jython, where each new socket bind
-        # consumes an ephemeral port that may not be released quickly enough.
+        # We will re-use the first session we setup to avoid
+        # the overhead of creating new sessions for each request
         self.network_session = requests.Session()
-        retry_strategy = Retry(
-            total=3,
-            backoff_factor=0.3,
-            status_forcelist=[429, 500, 502, 503, 504],
-        )
-        adapter = HTTPAdapter(
-            pool_connections=20,
-            pool_maxsize=20,
-            max_retries=retry_strategy,
-            pool_block=False,
-        )
-        self.network_session.mount('https://', adapter)
-        self.network_session.mount('http://', adapter)
         self.jwt = None
         self.lock = Lock()
 
@@ -291,11 +275,7 @@ class APIRequests(object):
 
     def _urllib_request(self, api, method='GET', headers=None,
                         params='', timeout=300, verify=False):
-        # Re-use the shared session so connections are pooled/kept-alive
-        # instead of opening (and leaking) a fresh socket per call, which
-        # exhausts ephemeral ports under Jython (BindException: Address
-        # already in use).
-        session = self.network_session
+        session = requests.Session()
         try:
             if method == "GET":
                 resp = session.get(api, params=params, headers=headers,
